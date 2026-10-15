@@ -1,0 +1,34 @@
+# Keep raw datasets, models and private/local files out of GitHub
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.idea/
+.vscode/
+.env
+.env.*
+!.env.example
+.DS_Store
+
+# Datasets & generated manifests (include only deliberately reviewed, non-sensitive manifests)
+data/raw/
+data/processed/
+data/cache/
+data/manifest.csv
+!data/manifest.example.csv
+
+# Experimental outputs and weights
+runs/
+models/
+checkpoints/
+*.pth
+*.pt
+*.onnx
+*.safetensors
+
+# Local configs / credentials
+local_settings.json
+*.key
+*.pem
+/HeT_FoodAI_Starter_v0.1/

@@ -1,0 +1,4 @@
+# Install GPU-matched torch+torchvision FIRST with PyTorch official wheel selector.
+# These small dependencies are safe for model/data preprocessing.
+pillow>=10.2,<13
+numpy>=1.26,<3

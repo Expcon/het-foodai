@@ -1,0 +1,15 @@
+{
+  "version": "0.1",
+  "status": "draft",
+  "notes": "CANDIDATES ONLY. Data owner and team must confirm actual availability, scope and order. Copy to configs/classes.json and set status=frozen only after all three agree.",
+  "classes": [
+    {"id": 0, "key": "corn", "zh": "玉米"},
+    {"id": 1, "key": "potato", "zh": "土豆"},
+    {"id": 2, "key": "broccoli", "zh": "西兰花"},
+    {"id": 3, "key": "pumpkin", "zh": "南瓜"},
+    {"id": 4, "key": "chicken_wing", "zh": "鸡翅"},
+    {"id": 5, "key": "chicken_breast", "zh": "鸡胸肉"},
+    {"id": 6, "key": "sea_bass", "zh": "鲈鱼"},
+    {"id": 7, "key": "shrimp", "zh": "对虾"}
+  ]
+}
