@@ -13,9 +13,14 @@ __pycache__/
 
 # Datasets & generated manifests (include only deliberately reviewed, non-sensitive manifests)
 data/raw/
-data/processed/
+data/processed/*
+!data/processed/selected_dataset_v1/
+data/processed/selected_dataset_v1/*
+!data/processed/selected_dataset_v1/manifest.csv
+!data/processed/selected_dataset_v1/classes.proposed.json
+!data/processed/selected_dataset_v1/summary.json
 data/cache/
-data/manifest.csv
+!data/manifest.csv
 !data/manifest.example.csv
 
 # Experimental outputs and weights
