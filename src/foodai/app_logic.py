@@ -60,7 +60,7 @@ def format_top3(result: PredictionResult) -> list[list]:
 
 def latency_markdown(result: PredictionResult) -> str:
     return (f"**推理时延**：{result.latency_ms:.1f} ms  \n"
-            f"<sub>本机测量，包含预处理 + 前向 + softmax，不含上传与页面渲染。"
+            f"<sub>本机测量，包含预处理、H2D、前向、softmax、Top-3及D2H，CUDA已同步；不含图片解码/校验、首次加载、上传和页面渲染。"
             f"桌面数字不代表板端性能。</sub>")
 
 

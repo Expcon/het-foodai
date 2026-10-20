@@ -1,0 +1,94 @@
+{
+  "date": "2026-10-20",
+  "branch": "integration/mvp-v1",
+  "main_base": "f229bc2127c0b00b8fe4ee30ff1ce3ccc5d96cbd",
+  "heads": {
+    "training": "9c9b60a2bf992883d6a6d815423e908a0bc0b179",
+    "data": "f9481c29185006cc1bcd2d0282f65524c64488e0",
+    "app": "22df32129007cdb15bd44989ddd7c1aa95f3c9cd"
+  },
+  "unit_tests": {
+    "exit_code": 0,
+    "tests": 60,
+    "duration_seconds": 17.183,
+    "failures": 0,
+    "skipped": 0
+  },
+  "data": {
+    "archive_sha256": "7b43bad0351353dfb336ffc1290d31d79eb715006671decfc04053db1629e964",
+    "inventory_sha256": "752090afe84cc3ab0acfb15edfec01eef7ecebf38a2304cc381e6081bfa8053e",
+    "zip_members_crc_and_sha_verified": 4827,
+    "images_verified": 4816,
+    "splits": {
+      "external_test": 0,
+      "test": 482,
+      "train": 3852,
+      "val": 482
+    },
+    "metadata_sha256_unchanged": {
+      "data/manifest.csv": "28920a5704066f747a27abd508658c9ef2e7b5d0f87db597a866945d6f0dee12",
+      "data/processed/selected_dataset_v1/manifest.csv": "28920a5704066f747a27abd508658c9ef2e7b5d0f87db597a866945d6f0dee12",
+      "data/processed/selected_dataset_v1/classes.proposed.json": "6f0b26e10d493974a6e01d609e384e02304ad82e263faf5687875c808c38a96f",
+      "data/processed/selected_dataset_v1/summary.json": "b26f60f5b188713f3bc8ead629b5cd2e115907cc29074fea96f4ab752934c896"
+    },
+    "formal_training": "BLOCKED: draft taxonomy and source label review pending"
+  },
+  "image_audit": {
+    "decoded_images": 4816,
+    "formats": {
+      "JPEG": 4778,
+      "MPO": 38
+    },
+    "short_side_at_least_96": true,
+    "near_pairs_from_released_phash": 1537,
+    "near_pairs_cross_split": 0,
+    "note": "Released pHash values checked; not a new semantic/species review"
+  },
+  "browser": {
+    "browser": "Codex in-app browser",
+    "synthetic_only": true,
+    "normal_png_upload_preview_top3": "PASS",
+    "clear_upload_clears_old_scores_and_latency": "PASS",
+    "corrupt_png_upload_banner": "PASS",
+    "corrupt_png_prediction_no_scores_no_latency": "PASS",
+    "missing_model_not_ready_button_disabled": "PASS",
+    "screenshots": [
+      "foodai-integration-synthetic-top3.png",
+      "foodai-integration-corrupt.png",
+      "foodai-integration-missing-model.png",
+      "foodai-integration-busy.png"
+    ],
+    "controls_locked_during_real_prediction_and_restored": "PASS",
+    "controls_check": "Real predictor paused with test-only barrier; predict disabled and uploader clear removed; both restored after barrier; no synthetic scores injected"
+  },
+  "synthetic_program_chain": "PASS",
+  "formal_food_training": "BLOCKED",
+  "original_metadata_and_contract_sha256_unchanged": {
+    "data/manifest.csv": "28920a5704066f747a27abd508658c9ef2e7b5d0f87db597a866945d6f0dee12",
+    "data/processed/selected_dataset_v1/manifest.csv": "28920a5704066f747a27abd508658c9ef2e7b5d0f87db597a866945d6f0dee12",
+    "data/processed/selected_dataset_v1/classes.proposed.json": "6f0b26e10d493974a6e01d609e384e02304ad82e263faf5687875c808c38a96f",
+    "data/processed/selected_dataset_v1/summary.json": "b26f60f5b188713f3bc8ead629b5cd2e115907cc29074fea96f4ab752934c896",
+    "configs/classes.draft.json": "b1e7e37d06abf7484c28f01a44550808d652e00416943686d4e847a085de8801",
+    "src/foodai/contracts.py": "d630d10288748bc8fb0c7d393f312042fb72e158fb80ddc934f691f54925d22f",
+    "docs/DATA_CONTRACT.md": "5f8e6f221365952c36b2f6f5d3f140376a641d61d6851fd8b9f7df7a28037331",
+    "docs/INFERENCE_CONTRACT.md": "fe3cdf966e54869485722c9581e6c49c67dc4716e9237c04c63746c9b742000f"
+  },
+  "byte_comparison": "Data metadata matches exact Git blobs; contracts/draft match original main and Git-normalized text (native worktree uses CRLF)",
+  "class_list_sha256": {
+    "shared_draft": "83ce0f8da6bad8ef0adcc434ab3ec29dfef78f1f8f83d5ce73d1fd612deffa4a",
+    "data_proposal": "4c4fafdde1b24251d71d319779f8a0614d48920b82f3696dd881808d511800a2"
+  },
+  "class_7_semantics": {
+    "shared_draft": "对虾",
+    "data_proposal": "虾",
+    "decision": "BLOCKED pending three-owner confirmation"
+  },
+  "versions": {
+    "torch": "2.14.1+cu130",
+    "torchvision": "0.29.1+cu130",
+    "gradio": "6.30.0",
+    "gradio_client": "2.7.2",
+    "pillow": "12.3.0",
+    "numpy": "2.5.2"
+  }
+}

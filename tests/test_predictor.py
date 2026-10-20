@@ -1,5 +1,6 @@
-"""Adapter 契约测试：不依赖 torch（只有元数据校验与图片校验）。"""
+"""Adapter 契约测试：非法元数据使用临时合成 payload；ready 必须经过真实权重验证。"""
 import json
+import importlib.util
 import sys
 import tempfile
 import unittest
@@ -47,6 +48,8 @@ class AdapterTestBase(unittest.TestCase):
         }
         (self.run_dir / "run_info.json").write_text(
             json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+        import torch
+        torch.save({"metadata": payload, "model_state": {}}, self.ckpt)
 
     def adapter(self, **kw):
         kw.setdefault("checkpoint", self.ckpt)
@@ -90,13 +93,14 @@ class TestNotReadyStates(AdapterTestBase):
         self.assertIn("DRAFT", info.message)
 
 
+@unittest.skipIf(importlib.util.find_spec("torch") is None, "Checkpoint validation requires project torch")
 class TestContractChecks(AdapterTestBase):
     def test_wrong_class_order_rejected(self):
         swapped = [dict(CLASSES[1]), dict(CLASSES[0])] + CLASSES[2:]
         self.write_run_info(swapped, sha=_hash_of(CLASSES))
         info = self.adapter().status()
         self.assertEqual(info.state, "contract_error")
-        self.assertIn("类别契约不符", info.message)
+        self.assertIn("class mapping", info.message)
 
     def test_wrong_display_name_rejected(self):
         renamed = [dict(c) for c in CLASSES]
@@ -104,22 +108,21 @@ class TestContractChecks(AdapterTestBase):
         self.write_run_info(renamed, sha=_hash_of(CLASSES))
         info = self.adapter().status()
         self.assertEqual(info.state, "contract_error")
-        self.assertIn("类别契约不符", info.message)
+        self.assertIn("class mapping", info.message)
 
     def test_class_list_hash_mismatch_rejected(self):
         self.write_run_info(CLASSES, sha="0" * 64)
         info = self.adapter().status()
         self.assertEqual(info.state, "contract_error")
-        self.assertIn("class_list_sha256 不符", info.message)
+        self.assertIn("class mapping", info.message)
 
-    def test_prefix_of_frozen_list_is_ready(self):
-        """8 类配置下，3 类 checkpoint 属于合法前缀，应就绪。"""
+    def test_unsupported_stage_is_rejected(self):
+        """Formal training produces only 8/12/16-class stages."""
         active = CLASSES[:3]
         self.write_run_info(active, sha=_hash_of(active))
         info = self.adapter().status()
-        self.assertEqual(info.state, "ready", info.message)
-        self.assertEqual(info.num_classes, 3)
-        self.assertEqual(info.input_size, 224)
+        self.assertEqual(info.state, "contract_error", info.message)
+        self.assertIn("stage", info.message)
 
     def test_checkpoint_sha_prefix_mismatch(self):
         self.write_run_info(CLASSES)
@@ -127,11 +130,12 @@ class TestContractChecks(AdapterTestBase):
         self.assertEqual(info.state, "contract_error")
         self.assertIn("SHA256 前缀不符", info.message)
 
-    def test_checkpoint_sha_prefix_match(self):
+    def test_matching_sha_does_not_bypass_weight_validation(self):
         self.write_run_info(CLASSES)
         prefix = sha256_file(self.ckpt)[:12]
         info = self.adapter(expect_checkpoint_sha256=prefix).status()
-        self.assertEqual(info.state, "ready", info.message)
+        self.assertEqual(info.state, "contract_error", info.message)
+        self.assertIn("weights", info.message)
 
     def test_missing_metadata_is_contract_error(self):
         info = self.adapter().status()   # 没有 run_info.json
@@ -161,6 +165,20 @@ class TestImageValidation(unittest.TestCase):
         bad.write_text("x", encoding="utf-8")
         with self.assertRaisesRegex(InvalidImageError, "不支持的格式"):
             validate_image_file(bad)
+
+    def test_gif_renamed_png_is_rejected(self):
+        from PIL import Image
+        path = self.root / "fake.png"
+        Image.new("RGB", (32, 24)).save(path, format="GIF")
+        with self.assertRaisesRegex(InvalidImageError, "图片编码"):
+            validate_image_file(path)
+
+    def test_mpo_jpeg_first_frame_is_accepted(self):
+        from PIL import Image
+        path = self.root / "photo.jpg"
+        Image.new("RGB", (32, 24)).save(path, format="MPO", save_all=True,
+                                      append_images=[Image.new("RGB", (32, 24), "red")])
+        self.assertEqual(validate_image_file(path), path)
 
     def test_real_png_accepted(self):
         from PIL import Image

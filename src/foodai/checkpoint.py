@@ -1,7 +1,6 @@
 """Model-owner checkpoint IO, reusable by evaluation and the future Demo adapter."""
 from __future__ import annotations
 
-import pickle
 from pathlib import Path
 
 from foodai.contracts import ContractError, class_list_hash
@@ -19,8 +18,9 @@ def load_classifier_checkpoint(path, config):
         raise ContractError("Checkpoint loading requires a frozen class configuration")
     try:
         checkpoint = torch.load(path, map_location="cpu", weights_only=True)
-    except (OSError, RuntimeError, ValueError, EOFError, pickle.UnpicklingError) as exc:
-        raise ContractError(f"Cannot safely load checkpoint: {exc}") from exc
+    except Exception as exc:
+        # Corrupt weights-only payloads can raise several parser-specific exception types.
+        raise ContractError(f"Cannot safely load checkpoint ({type(exc).__name__}): {exc}") from exc
     if not isinstance(checkpoint, dict) or not isinstance(checkpoint.get("metadata"), dict):
         raise ContractError("Checkpoint must contain metadata and model_state dictionaries")
     info = checkpoint["metadata"]

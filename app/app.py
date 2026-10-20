@@ -30,15 +30,16 @@ def build_demo(adapter: PredictionAdapter):
 
     initial, enabled = adapter_banner(adapter.status())
 
-    with gr.Blocks(title="HeT FoodAI · 食材识别") as demo:
+    with gr.Blocks(title="HeT FoodAI · 食材识别", analytics_enabled=False) as demo:
         gr.Markdown("# HeT FoodAI · 本地食材识别演示\n"
                     "单张主食材图片分类（JPG / PNG）。本页面不展示任何评测准确率。")
         status_md = gr.Markdown(initial)
 
         with gr.Row():
             with gr.Column(scale=1):
-                image = gr.Image(type="filepath", sources=["upload"],
-                                 label="上传食材图片（JPG / PNG）", height=320)
+                image = gr.File(type="filepath", file_types=[".jpg", ".jpeg", ".png"],
+                                label="上传食材图片（JPG / PNG）")
+                preview = gr.Image(label="图片预览", interactive=False, height=320)
                 upload_note = gr.Markdown()
             with gr.Column(scale=1):
                 predict_btn = gr.Button("开始识别", variant="primary", interactive=enabled)
@@ -52,15 +53,22 @@ def build_demo(adapter: PredictionAdapter):
 
         def on_upload(path):
             text, _ok = image_banner(path)
-            return text
+            return text, "", [], "", path if _ok else None
 
         def on_predict(path):
             if not path:
                 return banner("warn", "请先上传图片", "支持 JPG / JPEG / PNG。"), [], ""
             return run_prediction(adapter, path)
 
-        image.change(on_upload, inputs=image, outputs=upload_note)
-        predict_btn.click(on_predict, inputs=image, outputs=[result_md, table, latency])
+        # Serialize image changes with prediction; lock both controls until the entire event finishes.
+        image.change(on_upload, inputs=image, outputs=[upload_note, result_md, table, latency, preview],
+                     concurrency_id="foodai-image", concurrency_limit=1)
+        predict_btn.click(lambda: (gr.update(interactive=False), gr.update(interactive=False)),
+                          outputs=[image, predict_btn], queue=False, api_name=False).then(
+            on_predict, inputs=image, outputs=[result_md, table, latency], api_name="on_predict",
+            concurrency_id="foodai-image", concurrency_limit=1,
+        ).then(lambda: (gr.update(interactive=True), gr.update(interactive=enabled)),
+               outputs=[image, predict_btn], queue=False, api_name=False)
     return demo
 
 

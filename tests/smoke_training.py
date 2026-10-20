@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 
-def main():
+def main(after_training=None):
     import torch
     from PIL import Image
     from foodai.checkpoint import load_classifier_checkpoint
@@ -124,6 +124,8 @@ def main():
             pass
         else:
             raise AssertionError("Changed class mapping must be rejected")
+        if after_training is not None:
+            after_training(scratch, run_dir, classes)
     print("PASS: synthetic GPU AMP, optimizer update, logs, safe reload, RGB Top-3, held-out CLIs, 8/12/16 heads")
     print("Temporary synthetic configs/images/checkpoints deleted. Real training remains BLOCKED.")
 
