@@ -117,7 +117,7 @@ def stratified_groups(rows, seed=42):
     return assignments
 
 
-def source_index(cache):
+def source_index(cache, include_fish=True):
     index = defaultdict(list)
     old_rows = read_csv(ROOT / 'data/cache/audit_v1/images.csv')
     old_union = UnionFind(r['image_id'] for r in old_rows)
@@ -130,6 +130,8 @@ def source_index(cache):
     for values in index.values():
         for item in values:
             item['origin_group'] = 'prior_' + old_union.find(item['origin_id'])
+    if not include_fish:
+        return index, ''
     fish_zip = next((ROOT / 'data/raw/large_scale_fish').glob('*.zip'))
     digest = hash_file(fish_zip)
     fish_cache = cache / 'fish_source_index.json'
@@ -172,12 +174,21 @@ def deduplicate(rows, keep_duplicate_classes=frozenset()):
     return [r for r in rows if r['status'] == 'candidate']
 
 
-def run(args):
+def selected_classes(args):
     classes = list(CLASSES)
+    if args.classes_proposal:
+        if args.replace_corn_with_carrot or args.replace_wing_with_tomato:
+            raise ValueError('Choose either an explicit class proposal or legacy replacement flags')
+        return [(c.key, c.zh) for c in load_classes(args.classes_proposal).classes]
     if args.replace_corn_with_carrot:
         classes[0] = ('carrot', '胡萝卜')
     if args.replace_wing_with_tomato:
         classes[4] = ('tomato', '西红柿')
+    return classes
+
+
+def run(args):
+    classes = selected_classes(args)
     selected = args.input.resolve()
     expected_folders = {zh for _, zh in classes}
     actual_folders = {p.name for p in selected.iterdir() if p.is_dir()}
@@ -190,7 +201,7 @@ def run(args):
         raise ValueError('A manifest already exists; do not silently replace a previous split')
     cache = ROOT / 'data/cache' / args.version
     cache.mkdir(parents=True, exist_ok=True)
-    index, fish_zip_hash = source_index(cache)
+    index, fish_zip_hash = source_index(cache, include_fish=any(k in {'sea_bass', 'shrimp'} for k, _ in classes))
     rows = []
     reused = {r['input_path']: r for r in read_csv(args.reuse_audit)} if args.reuse_audit else {}
     include_all = {'sea_bass', 'shrimp'} if args.include_all_seafood else set()
@@ -295,8 +306,9 @@ def run(args):
         manifest.append({field: (destination.relative_to(ROOT).as_posix() if field == 'relative_path' else row[field])
                          for field in REQUIRED_FIELDS})
     classes_file = output / 'classes.proposed.json'
-    classes_file.write_text(json.dumps({'version': args.version, 'status': 'draft',
-                                       'notes': ('User requested carrot replacing corn at ID 0. Old corn checkpoints are incompatible. ' if args.replace_corn_with_carrot else '') + ('User requested tomato replacing chicken wing at ID 4. Old wing checkpoints are incompatible. ' if args.replace_wing_with_tomato else '') + 'User approved general shrimp. Team freeze pending.',
+    semantic_version = args.version.removeprefix('selected_dataset_')
+    classes_file.write_text(json.dumps({'version': semantic_version, 'status': 'draft',
+                                       'notes': 'Labels inherited from user-selected folders; old checkpoints with replaced category meanings are incompatible. Team taxonomy freeze pending.',
                                        'classes': [{'id': i, 'key': key, 'zh': zh} for i, (key, zh) in enumerate(classes)]},
                                       ensure_ascii=False, indent=2), encoding='utf-8')
     write_csv(output / 'manifest.csv', manifest, list(REQUIRED_FIELDS))
@@ -322,7 +334,7 @@ def run(args):
     write_csv(cache / 'near_pairs.csv', pairs, ['left', 'right', 'distance'])
     write_csv(output / 'provenance.csv', [{**r} for r in kept])
     class_groups = {key: len({r['group_id'] for r in kept if r['class_key'] == key}) for key, _ in classes}
-    summary = {'version': args.version, 'seed': args.seed, 'target_ratio': [.8, .1, .1],
+    summary = {'version': semantic_version, 'seed': args.seed, 'target_ratio': [.8, .1, .1],
                'include_all_seafood': args.include_all_seafood,
                'validation_folder': args.validation_folder, 'manifest_validation_split': 'val',
                'status': 'split_generated_taxonomy_team_freeze_pending', 'inputs': len(rows),
@@ -357,6 +369,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--input', type=Path, default=ROOT / 'data/raw/人工筛选')
     parser.add_argument('--version', default='selected_dataset_v1')
+    parser.add_argument('--classes-proposal', type=Path, help='Ordered draft class list for this dataset; does not modify shared configs')
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--replace-corn-with-carrot', action='store_true', help='Use carrot at ID 0; retain the other seven IDs')
     parser.add_argument('--replace-wing-with-tomato', action='store_true', help='Use tomato at ID 4')

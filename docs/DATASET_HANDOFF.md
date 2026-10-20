@@ -1,3 +1,15 @@
+# 最新交接：v1.1.0 八类蔬菜
+
+当前默认manifest与图片目录已切换至selected_dataset_v1.1.0，10,662张，train/valid/test为8,527/1,068/1,067。全部10,665个输入保留，3个重复副本只在清单中排除。ID 0～4不变，5白萝卜、6黄瓜、7甜椒；不能复用v1.0.5的鸡胸肉/鲈鱼/虾ID含义。
+
+[工作与QA报告](../DATASET_V1.1.0_REPORT.md)｜[数据库结构](DATASET_V1.1.0_STRUCTURE.md)｜[下载和恢复](PROCESSED_DATA_DOWNLOADS.md)。类别仍draft；有限语义抽查存在待复核项，不等同于全量人工验标。
+
+杨熙珂维护来源、质量与版本；陈谦校验本版图片、SHA和manifest，组织三名成员共同确认类别后开展真实训练；孙璞月同步新ID与后续推理契约。本次没有训练模型或自动合并main。
+
+---
+
+## 以下为旧版交接历史
+
 # 最新交接版本：v1.0.5
 
 用户已批准v1.0.5数据交付和GitHub上传。当前默认`data/manifest.csv`指向`selected_dataset_v1.0.5`，10,234张，train/valid/test为8,186/1,024/1,024。磁盘使用valid、清单使用val；类别仍draft，未正式训练。

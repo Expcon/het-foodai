@@ -1,3 +1,29 @@
+# 当前数据交付：v1.1.0（八类蔬菜）
+
+当前默认版本为 **v1.1.0**，10,662张，train 8,527 / valid 1,068 / test 1,067。类别：胡萝卜、土豆、西兰花、南瓜、西红柿、白萝卜、黄瓜、甜椒；ID 5～7已替代旧鸡胸肉、鲈鱼、虾，旧类别映射不可复用。
+
+- [发布页与附件](https://github.com/Expcon/het-foodai/releases/tag/v1.1.0)
+- [完整图片ZIP](https://github.com/Expcon/het-foodai/releases/download/v1.1.0/het-foodai-selected-dataset-v1.1.0.zip)
+- [SHA256SUMS](https://github.com/Expcon/het-foodai/releases/download/v1.1.0/SHA256SUMS.txt)
+- [工作与质量报告](../DATASET_V1.1.0_REPORT.md)
+- [数据库结构与字段](DATASET_V1.1.0_STRUCTURE.md)
+
+本版目录为`data/processed/selected_dataset_v1.1.0/{train,valid,test}/`；默认`data/manifest.csv`已切换并与版本内清单一致。清单验证集split仍为val，磁盘路径指向valid。类别保持draft；三名成员共同确认后才正式训练。
+
+```powershell
+# 新克隆或确认恢复本版后，在仓库根目录解压；已有其他版本时先核对，避免覆盖不同默认清单
+Expand-Archive -LiteralPath '下载目录\het-foodai-selected-dataset-v1.1.0.zip' -DestinationPath . -Force
+.\.venv\Scripts\python.exe scripts\validate_manifest.py --manifest data\manifest.csv --classes data\processed\selected_dataset_v1.1.0\classes.proposed.json --check-files
+```
+
+ZIP包括真实训练照片、全部元数据、审核台账、语义待复核表、抽查图、来源许可和结构说明，另附同版本data/manifest.csv；GitHub自动Source code ZIP不能替代图片附件。重新打包用`python scripts/package_processed_data.py --selected-version selected_dataset_v1.1.0`（项目.venv）。
+
+本次保留全部10,665个输入文件，3个重复副本仅从划分清单排除。235张来源许可未匹配，保留unknown；黄瓜0225.jpg存在品种/类别歧义，保留标签并列待人工复核。完整边界见本版报告。
+
+---
+
+## 以下为v1.0.5及更早版本历史记录，不代表当前默认数据
+
 # 当前数据交付：v1.0.5
 
 当前使用 **v1.0.5**：10,234张，train 8,186 / valid 1,024 / test 1,024。用户已批准鲈鱼1,051张、虾1,236张全量纳入；本版与本地v5划分一致，正式名称统一为v1.0.5。旧版本继续保留。
