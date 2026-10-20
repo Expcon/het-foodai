@@ -1,0 +1,47 @@
+{
+  "version": "v1.1.0",
+  "status": "draft",
+  "notes": "Labels inherited from user-selected folders; old checkpoints with replaced category meanings are incompatible. Team taxonomy freeze pending.",
+  "classes": [
+    {
+      "id": 0,
+      "key": "carrot",
+      "zh": "胡萝卜"
+    },
+    {
+      "id": 1,
+      "key": "potato",
+      "zh": "土豆"
+    },
+    {
+      "id": 2,
+      "key": "broccoli",
+      "zh": "西兰花"
+    },
+    {
+      "id": 3,
+      "key": "pumpkin",
+      "zh": "南瓜"
+    },
+    {
+      "id": 4,
+      "key": "tomato",
+      "zh": "西红柿"
+    },
+    {
+      "id": 5,
+      "key": "white_radish",
+      "zh": "白萝卜"
+    },
+    {
+      "id": 6,
+      "key": "cucumber",
+      "zh": "黄瓜"
+    },
+    {
+      "id": 7,
+      "key": "bell_pepper",
+      "zh": "甜椒"
+    }
+  ]
+}
