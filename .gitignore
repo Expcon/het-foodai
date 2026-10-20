@@ -19,6 +19,11 @@ data/processed/selected_dataset_v1/*
 !data/processed/selected_dataset_v1/manifest.csv
 !data/processed/selected_dataset_v1/classes.proposed.json
 !data/processed/selected_dataset_v1/summary.json
+!data/processed/selected_dataset_v1.0.5/
+data/processed/selected_dataset_v1.0.5/*
+!data/processed/selected_dataset_v1.0.5/manifest.csv
+!data/processed/selected_dataset_v1.0.5/classes.proposed.json
+!data/processed/selected_dataset_v1.0.5/summary.json
 data/cache/
 !data/manifest.csv
 !data/manifest.example.csv

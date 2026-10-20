@@ -1,7 +1,7 @@
 """Audit human-selected images and materialize a reproducible grouped 80/10/10 dataset.
 
-Originals stay untouched. Known pre-augmented fish photos are kept in the input,
-but excluded from this base split; augmentation belongs to training only.
+Originals stay untouched. Known pre-augmented fish photos are excluded by default;
+an explicit user-selected option includes and groups all seafood copies.
 Taxonomy stays proposed until the team approves the shared configuration.
 """
 from __future__ import annotations
@@ -154,7 +154,7 @@ def source_index(cache):
     return index, digest
 
 
-def deduplicate(rows):
+def deduplicate(rows, keep_duplicate_classes=frozenset()):
     """Quarantine conflicting labels; retain one representative per exact pixel set."""
     buckets = defaultdict(list)
     for row in rows:
@@ -165,23 +165,36 @@ def deduplicate(rows):
             for row in members:
                 row['status'] = 'label_conflict'
         else:
+            if members[0]['class_key'] in keep_duplicate_classes:
+                continue
             for row in sorted(members, key=lambda r: r['input_path'])[1:]:
                 row['status'] = 'exact_duplicate'
     return [r for r in rows if r['status'] == 'candidate']
 
 
 def run(args):
+    classes = list(CLASSES)
+    if args.replace_corn_with_carrot:
+        classes[0] = ('carrot', '胡萝卜')
+    if args.replace_wing_with_tomato:
+        classes[4] = ('tomato', '西红柿')
     selected = args.input.resolve()
+    expected_folders = {zh for _, zh in classes}
+    actual_folders = {p.name for p in selected.iterdir() if p.is_dir()}
+    if actual_folders != expected_folders:
+        raise ValueError(f'Input folders do not match selected classes: missing={expected_folders - actual_folders}, unexpected={actual_folders - expected_folders}')
     output = (ROOT / 'data/processed' / args.version).resolve()
     if not output.is_relative_to(ROOT / 'data/processed') or output.exists():
         raise ValueError('Use a new, project-local dataset output version; existing output will not be overwritten')
-    if (ROOT / 'data/manifest.csv').exists():
+    if (ROOT / 'data/manifest.csv').exists() and not (args.activate_manifest or args.keep_root_manifest):
         raise ValueError('A manifest already exists; do not silently replace a previous split')
     cache = ROOT / 'data/cache' / args.version
     cache.mkdir(parents=True, exist_ok=True)
     index, fish_zip_hash = source_index(cache)
     rows = []
-    for label_id, (key, zh) in enumerate(CLASSES):
+    reused = {r['input_path']: r for r in read_csv(args.reuse_audit)} if args.reuse_audit else {}
+    include_all = {'sea_bass', 'shrimp'} if args.include_all_seafood else set()
+    for label_id, (key, zh) in enumerate(classes):
         print(f'Auditing selected class {key}', flush=True)
         for path in sorted((selected / zh).rglob('*')):
             if not path.is_file():
@@ -204,13 +217,22 @@ def run(args):
             row['license'] = provenance.get('license', 'unknown')
             row['all_source_matches'] = json.dumps(matches, ensure_ascii=False)
             try:
+                previous = reused.get(relative, {})
+                if (previous.get('sha256') == row['sha256'] and previous.get('canonical_phash')
+                        and provenance.get('role') != 'segmentation_mask'
+                        and (provenance.get('role') != 'preaugmented' or key in include_all)):
+                    for field in ['width', 'height', 'pixel_sha256', 'phash', 'gray_std', 'small', 'canonical_phash']:
+                        row[field] = previous[field]
+                    row['warning'] = previous['warning']
+                    rows.append(row)
+                    continue
                 with Image.open(path) as original:
                     original.load()
                     image = ImageOps.exif_transpose(original).convert('RGB')
                 row.update(image_facts(image))
                 if provenance.get('role') == 'segmentation_mask':
                     row['status'] = 'segmentation_mask'
-                elif provenance.get('role') == 'preaugmented':
+                elif provenance.get('role') == 'preaugmented' and key not in include_all:
                     row['status'] = 'preaugmented_held_out_of_base_split'
                 else:
                     variants = [image, image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)]
@@ -224,13 +246,21 @@ def run(args):
                 row['status'] = 'unreadable'
                 row['warning'] = f'{type(error).__name__}: {error}'
             rows.append(row)
-    kept = deduplicate(rows)
-    if any(not any(r['class_key'] == key for r in kept) for key, _ in CLASSES):
+    kept = deduplicate(rows, include_all)
+    if any(r['class_key'] in include_all and r['status'] != 'candidate' for r in rows):
+        write_csv(cache / 'audit.csv', rows)
+        raise ValueError('Cannot include every seafood input safely; see audit.csv for unreadable or conflicting inputs')
+    if any(not any(r['class_key'] == key for r in kept) for key, _ in classes):
         write_csv(cache / 'audit.csv', rows)
         raise ValueError('Some classes have no usable non-augmented images; see audit.csv')
     union = UnionFind(r['image_id'] for r in kept)
     prior = {}
+    pixels = {}
     for row in kept:
+        pixel = row['pixel_sha256']
+        if pixel in pixels:
+            union.join(row['image_id'], pixels[pixel])
+        pixels[pixel] = row['image_id']
         if row['origin_group']:
             if row['origin_group'] in prior:
                 union.join(row['image_id'], prior[row['origin_group']])
@@ -252,12 +282,13 @@ def run(args):
         row['split'] = assignments[row['group_id']]
     output.mkdir(parents=True)
     for split in ['train', 'val', 'test']:
-        for _, zh in CLASSES:
-            (output / split / zh).mkdir(parents=True)
+        for _, zh in classes:
+            (output / (args.validation_folder if split == 'val' else split) / zh).mkdir(parents=True)
     manifest = []
     for row in kept:
         source = ROOT / row['input_path']
-        destination = output / row['split'] / CLASSES[row['label_id']][1] / (row['image_id'] + source.suffix.lower())
+        folder = args.validation_folder if row['split'] == 'val' else row['split']
+        destination = output / folder / classes[row['label_id']][1] / (row['image_id'] + source.suffix.lower())
         shutil.copy2(source, destination)
         if hash_file(destination) != row['sha256']:
             raise ValueError('Copied image hash changed')
@@ -265,8 +296,8 @@ def run(args):
                          for field in REQUIRED_FIELDS})
     classes_file = output / 'classes.proposed.json'
     classes_file.write_text(json.dumps({'version': args.version, 'status': 'draft',
-                                       'notes': 'User approved general shrimp; ordered class IDs unchanged. Team freeze pending.',
-                                       'classes': [{'id': i, 'key': key, 'zh': zh} for i, (key, zh) in enumerate(CLASSES)]},
+                                       'notes': ('User requested carrot replacing corn at ID 0. Old corn checkpoints are incompatible. ' if args.replace_corn_with_carrot else '') + ('User requested tomato replacing chicken wing at ID 4. Old wing checkpoints are incompatible. ' if args.replace_wing_with_tomato else '') + 'User approved general shrimp. Team freeze pending.',
+                                       'classes': [{'id': i, 'key': key, 'zh': zh} for i, (key, zh) in enumerate(classes)]},
                                       ensure_ascii=False, indent=2), encoding='utf-8')
     write_csv(output / 'manifest.csv', manifest, list(REQUIRED_FIELDS))
     _, validation = validate_manifest(output / 'manifest.csv', load_classes(classes_file), repo_root=ROOT, check_files=True)
@@ -279,13 +310,21 @@ def run(args):
             raise ValueError(f'Cross-split leakage: {field}')
     lookup = {r['image_id']: r for r in kept}
     assert all(lookup[p['left']]['split'] == lookup[p['right']]['split'] for p in pairs)
-    shutil.copy2(output / 'manifest.csv', ROOT / 'data/manifest.csv')
+    if not args.keep_root_manifest:
+        current_manifest = ROOT / 'data/manifest.csv'
+        if current_manifest.exists():
+            backup = cache / ('previous_manifest_' + hash_file(current_manifest) + '.csv')
+            if not backup.exists():
+                shutil.copy2(current_manifest, backup)
+        shutil.copy2(output / 'manifest.csv', current_manifest)
     write_csv(cache / 'audit.csv', rows)
     write_csv(cache / 'excluded.csv', [r for r in rows if r['status'] != 'candidate'])
     write_csv(cache / 'near_pairs.csv', pairs, ['left', 'right', 'distance'])
     write_csv(output / 'provenance.csv', [{**r} for r in kept])
-    class_groups = {key: len({r['group_id'] for r in kept if r['class_key'] == key}) for key, _ in CLASSES}
+    class_groups = {key: len({r['group_id'] for r in kept if r['class_key'] == key}) for key, _ in classes}
     summary = {'version': args.version, 'seed': args.seed, 'target_ratio': [.8, .1, .1],
+               'include_all_seafood': args.include_all_seafood,
+               'validation_folder': args.validation_folder, 'manifest_validation_split': 'val',
                'status': 'split_generated_taxonomy_team_freeze_pending', 'inputs': len(rows),
                'input_sha256': hashlib.sha256('\n'.join(sorted(r['input_path'] + ':' + r.get('sha256', '') for r in rows)).encode()).hexdigest(),
                'fish_zip_sha256': fish_zip_hash, 'audit_status': dict(Counter(r['status'] for r in rows)),
@@ -294,12 +333,12 @@ def run(args):
                'source_counts': dict(Counter(r['source_id'] for r in kept)),
                'quality_warnings': sum(bool(r['warning']) for r in kept),
                'limitations': ['Perceptual grouping conservative; unknown capture groups may be missed.',
-                               'Preaugmented images retained in input but excluded from base split.',
+                               ('All seafood inputs included by user request, including preaugmented and duplicate photos. Unknown augmentation ancestry may leave undetected leakage.' if args.include_all_seafood else 'Preaugmented images retained in input but excluded from base split.'),
                                'Manual class labels accepted, not a biological species verification.',
                                'No external-source independent test, no model training or accuracy claim.',
                                'Formal taxonomy freeze requires team approval.']}
     (output / 'summary.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding='utf-8')
-    for key, zh in CLASSES:
+    for key, zh in classes:
         members = sorted((r for r in kept if r['class_key'] == key), key=lambda r: r['image_id'])[:12]
         sheet = Image.new('RGB', (720, 400), 'white')
         draw = ImageDraw.Draw(sheet)
@@ -319,4 +358,12 @@ if __name__ == '__main__':
     parser.add_argument('--input', type=Path, default=ROOT / 'data/raw/人工筛选')
     parser.add_argument('--version', default='selected_dataset_v1')
     parser.add_argument('--seed', type=int, default=42)
+    parser.add_argument('--replace-corn-with-carrot', action='store_true', help='Use carrot at ID 0; retain the other seven IDs')
+    parser.add_argument('--replace-wing-with-tomato', action='store_true', help='Use tomato at ID 4')
+    parser.add_argument('--validation-folder', choices=['val', 'valid'], default='val', help='Disk folder name; manifest validation split stays val for the training contract')
+    parser.add_argument('--include-all-seafood', action='store_true', help='Retain all readable, nonconflicting sea bass/shrimp, including duplicates and preaugmented files; group related copies')
+    parser.add_argument('--reuse-audit', type=Path, help='Reuse image descriptors only when each current input SHA matches the previous audit')
+    activation = parser.add_mutually_exclusive_group()
+    activation.add_argument('--activate-manifest', action='store_true', help='Back up the old root manifest and select the newly validated version')
+    activation.add_argument('--keep-root-manifest', action='store_true', help='Generate an isolated review version without changing the root manifest')
     sys.exit(run(parser.parse_args()))

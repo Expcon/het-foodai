@@ -1,3 +1,29 @@
+# 当前数据交付：v1.0.5
+
+当前使用 **v1.0.5**：10,234张，train 8,186 / valid 1,024 / test 1,024。用户已批准鲈鱼1,051张、虾1,236张全量纳入；本版与本地v5划分一致，正式名称统一为v1.0.5。旧版本继续保留。
+
+- [发布页](https://github.com/Expcon/het-foodai/releases/tag/v1.0.5)
+- [训练图片及全部元数据ZIP](https://github.com/Expcon/het-foodai/releases/download/v1.0.5/het-foodai-selected-dataset-v1.0.5.zip)
+- [SHA256SUMS](https://github.com/Expcon/het-foodai/releases/download/v1.0.5/SHA256SUMS.txt)
+- [逐文件清单](https://github.com/Expcon/het-foodai/releases/download/v1.0.5/processed-file-inventory.json)
+- [v1.0.5核查、数量与交接报告](../DATASET_V1.0.5_REPORT.md)
+
+下载具名ZIP，在仓库根目录解压，保留data/...结构；不要用GitHub自动生成的Source code ZIP替代图片附件。`data/manifest.csv`已切换为本版，与版本内清单一致。图片目录为`data/processed/selected_dataset_v1.0.5/{train,valid,test}/`；manifest验证集split仍为`val`，路径指向`valid`。类别提案仍为draft，不代表三名成员已共同冻结类别。
+
+```powershell
+# 已有不同版本时先核对，不直接覆盖；确认恢复本版后在仓库根目录执行
+Expand-Archive -LiteralPath '下载目录\het-foodai-selected-dataset-v1.0.5.zip' -DestinationPath . -Force
+.\.venv\Scripts\python.exe scripts\validate_manifest.py --manifest data\manifest.csv --classes data\processed\selected_dataset_v1.0.5\classes.proposed.json --check-files
+```
+
+重新打包：`.\.venv\Scripts\python.exe scripts\package_processed_data.py --selected-version selected_dataset_v1.0.5`。
+
+当前仓库经本次API核查为公开仓库；下方关于私有仓库及旧数量的说明是2026-10-19历史记录。来源unknown、海鲜增强与重复、缺少完整增强父图映射的限制见本版报告；不将增强文件数当作独立实拍数。
+
+---
+
+## 历史交付记录：2026-10-19，含玉米和鸡翅的旧版
+
 # 处理后数据下载与训练交接
 
 用户已明确要求上传 `data/processed` 全部内容，供成员获取训练图片。此前PR只上传代码和文档，没有图片，本次补齐实际数据文件。
