@@ -3,7 +3,13 @@ import importlib.util
 from pathlib import Path
 import random
 import sys
+import csv
+import json
+import tempfile
+from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
+from PIL import Image
 
 SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
 sys.path.insert(0, str(SCRIPTS))
@@ -13,6 +19,59 @@ SPEC.loader.exec_module(pipeline)
 
 
 class TestSelectedDataset(unittest.TestCase):
+    def test_explicit_taxonomy_preserves_requested_order_and_rejects_legacy_overrides(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'classes.json'
+            path.write_text(json.dumps({'version': 'synthetic', 'status': 'draft', 'classes': [
+                {'id': 0, 'key': 'white_radish', 'zh': '白萝卜'},
+                {'id': 1, 'key': 'cucumber', 'zh': '黄瓜'}]}, ensure_ascii=False), encoding='utf-8')
+            args = SimpleNamespace(classes_proposal=path, replace_corn_with_carrot=False, replace_wing_with_tomato=False)
+            self.assertEqual(pipeline.selected_classes(args), [('white_radish', '白萝卜'), ('cucumber', '黄瓜')])
+            args.replace_corn_with_carrot = True
+            with self.assertRaisesRegex(ValueError, 'explicit class proposal'):
+                pipeline.selected_classes(args)
+
+    def test_seafood_duplicates_can_be_retained_without_ignoring_label_conflicts(self):
+        rows = [dict(image_id='a', input_path='a', status='candidate', pixel_sha256='x', class_key='shrimp'),
+                dict(image_id='b', input_path='b', status='candidate', pixel_sha256='x', class_key='shrimp'),
+                dict(image_id='c', input_path='c', status='candidate', pixel_sha256='y', class_key='sea_bass'),
+                dict(image_id='d', input_path='d', status='candidate', pixel_sha256='y', class_key='potato')]
+        self.assertEqual([r['image_id'] for r in pipeline.deduplicate(rows, {'sea_bass', 'shrimp'})], ['a', 'b'])
+        self.assertEqual([r['status'] for r in rows[2:]], ['label_conflict', 'label_conflict'])
+
+    def test_review_version_preserves_inputs_and_root_manifest_with_valid_folder(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            selected = root / 'data/raw/synthetic'
+            folder = selected / '合成测试类'
+            folder.mkdir(parents=True)
+            before = {}
+            rng = random.Random(42)
+            for i in range(30):
+                path = folder / f'synthetic_{i}.png'
+                Image.frombytes('RGB', (100, 100), rng.randbytes(30000)).save(path)
+                before[path] = path.read_bytes()
+            current = root / 'data/manifest.csv'
+            current.write_bytes(b'previous approved manifest\r\n')
+            args = SimpleNamespace(input=selected, version='synthetic_review', seed=42,
+                                   replace_corn_with_carrot=False, replace_wing_with_tomato=False,
+                                   activate_manifest=False, keep_root_manifest=True, validation_folder='valid',
+                                   include_all_seafood=False, reuse_audit=None, classes_proposal=None)
+            with patch.multiple(pipeline, ROOT=root, CLASSES=[('synthetic_food', '合成测试类')]), patch.object(pipeline, 'source_index', return_value=({}, 'synthetic')):
+                self.assertEqual(pipeline.run(args), 0)
+                with self.assertRaisesRegex(ValueError, 'existing output'):
+                    pipeline.run(args)
+            self.assertEqual(current.read_bytes(), b'previous approved manifest\r\n')
+            self.assertEqual({p: p.read_bytes() for p in folder.iterdir()}, before)
+            output = root / 'data/processed/synthetic_review'
+            with (output / 'manifest.csv').open(encoding='utf-8-sig', newline='') as stream:
+                rows = list(csv.DictReader(stream))
+            self.assertEqual(len(rows), 30)
+            self.assertEqual(sum(r['split'] == 'val' for r in rows), 3)
+            self.assertTrue(all('/valid/' in r['relative_path'] for r in rows if r['split'] == 'val'))
+            self.assertTrue(all((root / r['relative_path']).read_bytes() in before.values() for r in rows))
+            self.assertFalse((output / 'val').exists())
+
     def test_block_index_matches_brute_force_radius(self):
         rng = random.Random(12)
         values = [rng.getrandbits(64) for _ in range(80)]

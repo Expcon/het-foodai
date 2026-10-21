@@ -1,0 +1,111 @@
+{
+  "version": "v1.0.5",
+  "seed": 42,
+  "target_ratio": [
+    0.8,
+    0.1,
+    0.1
+  ],
+  "include_all_seafood": true,
+  "validation_folder": "valid",
+  "manifest_validation_split": "val",
+  "status": "user_approved_delivery_taxonomy_team_freeze_pending",
+  "inputs": 10236,
+  "input_sha256": "030944d4b44782cdbb05b4a18f4a173d748f1d8e15ba88a1653d5bb24d73772b",
+  "fish_zip_sha256": "ffec025d7f5afdead1898cf6e58a5e3582aa377fee51eadb6c9e3166ab179202",
+  "audit_status": {
+    "candidate": 10234,
+    "exact_duplicate": 2
+  },
+  "counts": {
+    "images": 10234,
+    "splits": {
+      "external_test": 0,
+      "test": 1024,
+      "train": 8186,
+      "val": 1024
+    },
+    "per_class": {
+      "carrot": {
+        "val": 125,
+        "external_test": 0,
+        "test": 125,
+        "train": 999
+      },
+      "potato": {
+        "val": 146,
+        "external_test": 0,
+        "test": 146,
+        "train": 1165
+      },
+      "broccoli": {
+        "val": 148,
+        "external_test": 0,
+        "test": 148,
+        "train": 1185
+      },
+      "pumpkin": {
+        "val": 148,
+        "external_test": 0,
+        "test": 148,
+        "train": 1180
+      },
+      "tomato": {
+        "val": 137,
+        "external_test": 0,
+        "test": 137,
+        "train": 1100
+      },
+      "chicken_breast": {
+        "val": 91,
+        "external_test": 0,
+        "test": 91,
+        "train": 728
+      },
+      "sea_bass": {
+        "val": 105,
+        "external_test": 0,
+        "test": 105,
+        "train": 841
+      },
+      "shrimp": {
+        "val": 124,
+        "external_test": 0,
+        "test": 124,
+        "train": 988
+      }
+    },
+    "distinct_capture_groups": 6378,
+    "missing_sha256": 0,
+    "unverified_license": 1337,
+    "manifest_sha256": "3939dc63c59ac16d0e67a5fec08f6207b2963ace9e237798c52ea92b1a730144"
+  },
+  "class_groups": {
+    "carrot": 511,
+    "potato": 1164,
+    "broccoli": 969,
+    "pumpkin": 1046,
+    "tomato": 1174,
+    "chicken_breast": 660,
+    "sea_bass": 472,
+    "shrimp": 372
+  },
+  "near_pairs": 10682,
+  "global_cross_split_group_leakage": 0,
+  "detected_near_pair_cross_split_leakage": 0,
+  "source_counts": {
+    "kaggle_vegetable_v1": 6593,
+    "manual_source_unresolved": 1337,
+    "roboflow_fridge_genie_v1": 350,
+    "large_scale_fish": 1954
+  },
+  "quality_warnings": 0,
+  "limitations": [
+    "Perceptual grouping conservative; unknown capture groups may be missed.",
+    "All seafood inputs included by user request, including preaugmented and duplicate photos. Unknown augmentation ancestry may leave undetected leakage.",
+    "Manual class labels accepted, not a biological species verification.",
+    "No external-source independent test, no model training or accuracy claim.",
+    "Formal taxonomy freeze requires team approval."
+  ],
+  "previous_local_version": "selected_dataset_v5"
+}

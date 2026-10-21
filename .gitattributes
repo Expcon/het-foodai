@@ -3,3 +3,9 @@
 /data/processed/selected_dataset_v1/manifest.csv -text whitespace=cr-at-eol
 /data/processed/selected_dataset_v1/classes.proposed.json -text whitespace=cr-at-eol
 /data/processed/selected_dataset_v1/summary.json -text whitespace=cr-at-eol
+/data/processed/selected_dataset_v1.0.5/manifest.csv -text whitespace=cr-at-eol
+/data/processed/selected_dataset_v1.0.5/classes.proposed.json -text whitespace=cr-at-eol
+/data/processed/selected_dataset_v1.0.5/summary.json -text whitespace=cr-at-eol
+/data/processed/selected_dataset_v1.1.0/manifest.csv -text whitespace=cr-at-eol
+/data/processed/selected_dataset_v1.1.0/classes.proposed.json -text whitespace=cr-at-eol
+/data/processed/selected_dataset_v1.1.0/summary.json -text whitespace=cr-at-eol
