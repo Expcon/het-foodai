@@ -1,0 +1,260 @@
+{
+  "generated_at": "2026-10-21 20:40:02",
+  "python": "3.12.4",
+  "torch": "2.8.0+cpu",
+  "cuda_available": false,
+  "device": "cpu",
+  "checkpoint": "D:\\天大港理工深圳学院\\AI&Project\\烤箱项目\\codex\\HeT_FoodAI_Remote\\runs\\food-v1.1.0-baseline\\stage8-20261020-164500-40a26d\\best.pt",
+  "checkpoint_sha256": "41056b3ea90d5fa718a18f48cf5182373d1010c5185cb426ba5c949b1ec1f4c5",
+  "model_id": "stage8-20261020-164500-40a26d",
+  "num_classes": 8,
+  "input_size": 224,
+  "class_list_sha256": "afdc69e898ef6067b469b9f90eea3dfed84fbb76e7a5910ee1826a62f02326af",
+  "images": [
+    {
+      "file": "30564166_143402724126_2.jpg",
+      "top3": [
+        {
+          "rank": 1,
+          "class_id": 6,
+          "class_key": "cucumber",
+          "label_zh": "黄瓜",
+          "score": 0.9996916055679321
+        },
+        {
+          "rank": 2,
+          "class_id": 2,
+          "class_key": "broccoli",
+          "label_zh": "西兰花",
+          "score": 0.00014697750157210976
+        },
+        {
+          "rank": 3,
+          "class_id": 7,
+          "class_key": "bell_pepper",
+          "label_zh": "甜椒",
+          "score": 7.42569100111723e-05
+        }
+      ],
+      "latency_ms_internal_median": 53.55,
+      "latency_ms_wall_median": 64.76,
+      "latency_ms_wall_p95": 69.37,
+      "repeats": 5
+    },
+    {
+      "file": "34599220_233837911102_2.jpg",
+      "top3": [
+        {
+          "rank": 1,
+          "class_id": 1,
+          "class_key": "potato",
+          "label_zh": "土豆",
+          "score": 0.9999532699584961
+        },
+        {
+          "rank": 2,
+          "class_id": 3,
+          "class_key": "pumpkin",
+          "label_zh": "南瓜",
+          "score": 3.189705603290349e-05
+        },
+        {
+          "rank": 3,
+          "class_id": 7,
+          "class_key": "bell_pepper",
+          "label_zh": "甜椒",
+          "score": 6.718661552440608e-06
+        }
+      ],
+      "latency_ms_internal_median": 62.43,
+      "latency_ms_wall_median": 67.58,
+      "latency_ms_wall_p95": 74.26,
+      "repeats": 5
+    },
+    {
+      "file": "9448607_092644642000_2.jpg",
+      "top3": [
+        {
+          "rank": 1,
+          "class_id": 7,
+          "class_key": "bell_pepper",
+          "label_zh": "甜椒",
+          "score": 0.9976062774658203
+        },
+        {
+          "rank": 2,
+          "class_id": 4,
+          "class_key": "tomato",
+          "label_zh": "西红柿",
+          "score": 0.00140928546898067
+        },
+        {
+          "rank": 3,
+          "class_id": 5,
+          "class_key": "white_radish",
+          "label_zh": "白萝卜",
+          "score": 0.0004229092155583203
+        }
+      ],
+      "latency_ms_internal_median": 60.5,
+      "latency_ms_wall_median": 74.86,
+      "latency_ms_wall_p95": 77.71,
+      "repeats": 5
+    },
+    {
+      "file": "ScreenShot_2026-10-21_140353_276.png",
+      "top3": [
+        {
+          "rank": 1,
+          "class_id": 5,
+          "class_key": "white_radish",
+          "label_zh": "白萝卜",
+          "score": 0.9866020083427429
+        },
+        {
+          "rank": 2,
+          "class_id": 2,
+          "class_key": "broccoli",
+          "label_zh": "西兰花",
+          "score": 0.008364598266780376
+        },
+        {
+          "rank": 3,
+          "class_id": 1,
+          "class_key": "potato",
+          "label_zh": "土豆",
+          "score": 0.0030311576556414366
+        }
+      ],
+      "latency_ms_internal_median": 70.4,
+      "latency_ms_wall_median": 77.35,
+      "latency_ms_wall_p95": 114.0,
+      "repeats": 5
+    },
+    {
+      "file": "ScreenShot_2026-10-21_140428_716.png",
+      "top3": [
+        {
+          "rank": 1,
+          "class_id": 2,
+          "class_key": "broccoli",
+          "label_zh": "西兰花",
+          "score": 1.0
+        },
+        {
+          "rank": 2,
+          "class_id": 1,
+          "class_key": "potato",
+          "label_zh": "土豆",
+          "score": 2.708849589083684e-09
+        },
+        {
+          "rank": 3,
+          "class_id": 6,
+          "class_key": "cucumber",
+          "label_zh": "黄瓜",
+          "score": 7.949396141349041e-10
+        }
+      ],
+      "latency_ms_internal_median": 71.7,
+      "latency_ms_wall_median": 76.35,
+      "latency_ms_wall_p95": 100.09,
+      "repeats": 5
+    },
+    {
+      "file": "ScreenShot_2026-10-21_140609_497.png",
+      "top3": [
+        {
+          "rank": 1,
+          "class_id": 0,
+          "class_key": "carrot",
+          "label_zh": "胡萝卜",
+          "score": 0.9999998807907104
+        },
+        {
+          "rank": 2,
+          "class_id": 5,
+          "class_key": "white_radish",
+          "label_zh": "白萝卜",
+          "score": 1.7538302188313537e-07
+        },
+        {
+          "rank": 3,
+          "class_id": 1,
+          "class_key": "potato",
+          "label_zh": "土豆",
+          "score": 5.623157939282919e-09
+        }
+      ],
+      "latency_ms_internal_median": 72.72,
+      "latency_ms_wall_median": 84.0,
+      "latency_ms_wall_p95": 113.44,
+      "repeats": 5
+    },
+    {
+      "file": "ScreenShot_2026-10-21_140640_098.png",
+      "top3": [
+        {
+          "rank": 1,
+          "class_id": 3,
+          "class_key": "pumpkin",
+          "label_zh": "南瓜",
+          "score": 0.999976634979248
+        },
+        {
+          "rank": 2,
+          "class_id": 4,
+          "class_key": "tomato",
+          "label_zh": "西红柿",
+          "score": 1.0499385098228231e-05
+        },
+        {
+          "rank": 3,
+          "class_id": 5,
+          "class_key": "white_radish",
+          "label_zh": "白萝卜",
+          "score": 9.320686331193428e-06
+        }
+      ],
+      "latency_ms_internal_median": 84.96,
+      "latency_ms_wall_median": 87.09,
+      "latency_ms_wall_p95": 98.93,
+      "repeats": 5
+    },
+    {
+      "file": "微信图片_20261021140243_327_1.png",
+      "top3": [
+        {
+          "rank": 1,
+          "class_id": 4,
+          "class_key": "tomato",
+          "label_zh": "西红柿",
+          "score": 0.8973941206932068
+        },
+        {
+          "rank": 2,
+          "class_id": 7,
+          "class_key": "bell_pepper",
+          "label_zh": "甜椒",
+          "score": 0.09092008322477341
+        },
+        {
+          "rank": 3,
+          "class_id": 3,
+          "class_key": "pumpkin",
+          "label_zh": "南瓜",
+          "score": 0.010158154182136059
+        }
+      ],
+      "latency_ms_internal_median": 58.28,
+      "latency_ms_wall_median": 79.98,
+      "latency_ms_wall_p95": 88.67,
+      "repeats": 5
+    }
+  ],
+  "error_cases": {
+    "corrupt_image": "PASS: 无法解码为图片：corrupt.jpg（文件可能已损坏）",
+    "missing_checkpoint_state": "not_ready",
+    "missing_checkpoint_predict": "PASS: 模型尚未训练／未加载。此处没有模拟识别分数。"
+  }
+}
