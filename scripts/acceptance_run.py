@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import platform
 import statistics
 import sys
@@ -32,6 +33,11 @@ def list_images(folder: Path):
     return sorted(p for p in folder.iterdir() if p.is_file() and p.suffix.lower() in exts)
 
 
+def percentile95(samples):
+    """Nearest-rank empirical P95, including the one-sample case."""
+    return sorted(samples)[math.ceil(.95 * len(samples)) - 1]
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--checkpoint", required=True)
@@ -41,6 +47,14 @@ def main(argv=None) -> int:
     ap.add_argument("--repeats", type=int, default=5)
     ap.add_argument("--out", default=str(ROOT / "runs" / "acceptance" / "acceptance.json"))
     args = ap.parse_args(argv)
+    if args.repeats < 1:
+        ap.error("--repeats must be a positive integer")
+    folder = Path(args.images_dir)
+    if not folder.is_dir():
+        ap.error("--images-dir must be an existing directory")
+    images = list_images(folder)
+    if not images:
+        ap.error("--images-dir contains no JPG/JPEG/PNG files")
 
     import torch
     adapter = PredictionAdapter(checkpoint=args.checkpoint, classes_path=args.classes,
@@ -51,20 +65,19 @@ def main(argv=None) -> int:
         print("BLOCKED: adapter 不是 ready，无法进行真实预测", file=sys.stderr)
         return 2
 
-    images = list_images(Path(args.images_dir))
     print(f"图片数量：{len(images)}")
 
-    # 预热一次（不计入统计）
     warmup = images[0]
-    adapter.predict(str(warmup))
 
     records = []
     for image in images:
-        latencies, last = [], None
+        adapter.predict(str(image))  # One warm-up per image, excluded from both statistics.
+        latencies, internal_latencies, last = [], [], None
         for _ in range(args.repeats):
             t0 = time.perf_counter()
             last = adapter.predict(str(image))
             latencies.append((time.perf_counter() - t0) * 1000.0)
+            internal_latencies.append(float(last.latency_ms))
         payload = as_contract_dict(last)
         rec = {
             "file": image.name,
@@ -73,9 +86,11 @@ def main(argv=None) -> int:
                  "label_zh": p["label_zh"], "score": p["score"]}
                 for i, p in enumerate(payload["predictions"])
             ],
-            "latency_ms_internal_median": round(last.latency_ms, 2),
+            "latency_ms_internal_median": round(statistics.median(internal_latencies), 2),
             "latency_ms_wall_median": round(statistics.median(latencies), 2),
-            "latency_ms_wall_p95": round(statistics.quantiles(latencies, n=20)[18], 2) if len(latencies) > 1 else round(latencies[0], 2),
+            "latency_ms_wall_p95": round(percentile95(latencies), 2),
+            "latency_ms_internal_samples": internal_latencies,
+            "latency_ms_wall_samples": latencies,
             "repeats": args.repeats,
         }
         records.append(rec)
@@ -114,12 +129,22 @@ def main(argv=None) -> int:
         "torch": torch.__version__,
         "cuda_available": torch.cuda.is_available(),
         "device": str(adapter.status().device),
-        "checkpoint": str(Path(args.checkpoint).resolve()),
+        "checkpoint": Path(args.checkpoint).name,
         "checkpoint_sha256": status.checkpoint_sha256,
         "model_id": status.model_id,
         "num_classes": status.num_classes,
         "input_size": status.input_size,
         "class_list_sha256": status.class_list_sha256,
+        "measurement": {
+            "statistics_version": 2,
+            "warmup_per_image": 1,
+            "repeats_per_image": args.repeats,
+            "median_method": "statistics.median; even N averages the two middle samples",
+            "p95_method": "nearest_rank: sorted_samples[ceil(0.95*N)-1]",
+            "internal_scope": "preprocess, H2D, forward, softmax, Top-3, D2H; CUDA synchronized; excludes decode/validation and initial loading",
+            "wall_scope": "perf_counter around adapter.predict; includes decode/validation, internal scope and Python result assembly; excludes initial loading, warmup, upload/render",
+            "small_sample_note": "Descriptive samples, not a stable performance benchmark; P95 is max when N < 20",
+        },
         "images": records,
         "error_cases": error_cases,
     }
@@ -128,7 +153,10 @@ def main(argv=None) -> int:
     out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\n已写入 {out}")
     print(json.dumps(error_cases, ensure_ascii=False, indent=2))
-    return 0
+    passed = (error_cases["corrupt_image"].startswith("PASS:")
+              and error_cases["missing_checkpoint_state"] == "not_ready"
+              and error_cases["missing_checkpoint_predict"].startswith("PASS:"))
+    return 0 if passed else 1
 
 
 if __name__ == "__main__":

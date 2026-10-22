@@ -1,0 +1,194 @@
+{
+  "split": "test",
+  "stage": 8,
+  "checkpoint": "runs\\delivery-20261021\\held-out\\best.pt",
+  "checkpoint_sha256": "41056b3ea90d5fa718a18f48cf5182373d1010c5185cb426ba5c949b1ec1f4c5",
+  "class_list": [
+    {
+      "id": 0,
+      "key": "carrot",
+      "zh": "胡萝卜"
+    },
+    {
+      "id": 1,
+      "key": "potato",
+      "zh": "土豆"
+    },
+    {
+      "id": 2,
+      "key": "broccoli",
+      "zh": "西兰花"
+    },
+    {
+      "id": 3,
+      "key": "pumpkin",
+      "zh": "南瓜"
+    },
+    {
+      "id": 4,
+      "key": "tomato",
+      "zh": "西红柿"
+    },
+    {
+      "id": 5,
+      "key": "white_radish",
+      "zh": "白萝卜"
+    },
+    {
+      "id": 6,
+      "key": "cucumber",
+      "zh": "黄瓜"
+    },
+    {
+      "id": 7,
+      "key": "bell_pepper",
+      "zh": "甜椒"
+    }
+  ],
+  "class_list_sha256": "afdc69e898ef6067b469b9f90eea3dfed84fbb76e7a5910ee1826a62f02326af",
+  "device": "cuda",
+  "device_name": "NVIDIA GeForce RTX 5080 Laptop GPU",
+  "torch": "2.14.1+cu130",
+  "torchvision": "0.29.1+cu130",
+  "cuda": "13.0",
+  "deterministic_algorithms": true,
+  "training_manifest_sha256": "6bef9776c278d8efac86008a11c47386cb7d95b7164073b9bd07e84cb5cf2821",
+  "evaluation_manifest_sha256": "6bef9776c278d8efac86008a11c47386cb7d95b7164073b9bd07e84cb5cf2821",
+  "correct": 1067,
+  "total": 1067,
+  "top1_accuracy": 1.0,
+  "loss": 0.0005880144692597606,
+  "macro_recall": 1.0,
+  "per_class_recall": [
+    {
+      "id": 0,
+      "class_key": "carrot",
+      "count": 125,
+      "accuracy": 1.0
+    },
+    {
+      "id": 1,
+      "class_key": "potato",
+      "count": 146,
+      "accuracy": 1.0
+    },
+    {
+      "id": 2,
+      "class_key": "broccoli",
+      "count": 150,
+      "accuracy": 1.0
+    },
+    {
+      "id": 3,
+      "class_key": "pumpkin",
+      "count": 148,
+      "accuracy": 1.0
+    },
+    {
+      "id": 4,
+      "class_key": "tomato",
+      "count": 138,
+      "accuracy": 1.0
+    },
+    {
+      "id": 5,
+      "class_key": "white_radish",
+      "count": 120,
+      "accuracy": 1.0
+    },
+    {
+      "id": 6,
+      "class_key": "cucumber",
+      "count": 120,
+      "accuracy": 1.0
+    },
+    {
+      "id": 7,
+      "class_key": "bell_pepper",
+      "count": 120,
+      "accuracy": 1.0
+    }
+  ],
+  "confusion_matrix_rows_true_cols_pred": [
+    [
+      125,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      146,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      150,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      148,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      138,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      120,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      120,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      120
+    ]
+  ]
+}

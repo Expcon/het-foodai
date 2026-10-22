@@ -1,0 +1,158 @@
+{
+  "provenance": "Selected fields of the supplied historical run_info.json; machine paths omitted; no new training",
+  "original_run_info_sha256": "d4c51773a5568d1fc5f2620872b77c7d43116bb416c6e60e1992f3317fc1a571",
+  "record": {
+    "model_id": "stage8-20261020-164500-40a26d",
+    "stage": 8,
+    "model_name": "efficientnet_v2_s",
+    "pretrained": true,
+    "class_list": [
+      {
+        "id": 0,
+        "key": "carrot",
+        "zh": "胡萝卜"
+      },
+      {
+        "id": 1,
+        "key": "potato",
+        "zh": "土豆"
+      },
+      {
+        "id": 2,
+        "key": "broccoli",
+        "zh": "西兰花"
+      },
+      {
+        "id": 3,
+        "key": "pumpkin",
+        "zh": "南瓜"
+      },
+      {
+        "id": 4,
+        "key": "tomato",
+        "zh": "西红柿"
+      },
+      {
+        "id": 5,
+        "key": "white_radish",
+        "zh": "白萝卜"
+      },
+      {
+        "id": 6,
+        "key": "cucumber",
+        "zh": "黄瓜"
+      },
+      {
+        "id": 7,
+        "key": "bell_pepper",
+        "zh": "甜椒"
+      }
+    ],
+    "class_list_sha256": "afdc69e898ef6067b469b9f90eea3dfed84fbb76e7a5910ee1826a62f02326af",
+    "frozen_class_config_sha256": "27d5337826c26a3b743ec0928ea8da050f4ae7bf0ef31e7efb051e4e907e9614",
+    "class_config_version": "v1.1.0",
+    "dataset_manifest_sha256": "6bef9776c278d8efac86008a11c47386cb7d95b7164073b9bd07e84cb5cf2821",
+    "dataset_train_count": 8527,
+    "dataset_val_count": 1068,
+    "per_class_counts": [
+      {
+        "id": 0,
+        "key": "carrot",
+        "zh": "胡萝卜",
+        "train": 999,
+        "val": 125
+      },
+      {
+        "id": 1,
+        "key": "potato",
+        "zh": "土豆",
+        "train": 1165,
+        "val": 146
+      },
+      {
+        "id": 2,
+        "key": "broccoli",
+        "zh": "西兰花",
+        "train": 1196,
+        "val": 150
+      },
+      {
+        "id": 3,
+        "key": "pumpkin",
+        "zh": "南瓜",
+        "train": 1180,
+        "val": 148
+      },
+      {
+        "id": 4,
+        "key": "tomato",
+        "zh": "西红柿",
+        "train": 1108,
+        "val": 139
+      },
+      {
+        "id": 5,
+        "key": "white_radish",
+        "zh": "白萝卜",
+        "train": 960,
+        "val": 120
+      },
+      {
+        "id": 6,
+        "key": "cucumber",
+        "zh": "黄瓜",
+        "train": 960,
+        "val": 120
+      },
+      {
+        "id": 7,
+        "key": "bell_pepper",
+        "zh": "甜椒",
+        "train": 959,
+        "val": 120
+      }
+    ],
+    "command_args": [
+      "--manifest",
+      "data/processed/selected_dataset_v1.1.0/manifest.csv",
+      "--classes",
+      "configs/classes.json",
+      "--num-classes",
+      "8",
+      "--epochs",
+      "10",
+      "--batch-size",
+      "16",
+      "--image-size",
+      "224",
+      "--lr",
+      "0.0003",
+      "--seed",
+      "42",
+      "--num-workers",
+      "4",
+      "--output-dir",
+      "runs/food-v1.1.0-baseline"
+    ],
+    "input_size": 224,
+    "preprocessing": "foodai.vision.get_transforms/v1",
+    "seed": 42,
+    "deterministic_algorithms": true,
+    "batch_size": 16,
+    "num_workers": 4,
+    "optimizer": "AdamW",
+    "lr": 0.0003,
+    "weight_decay": 0.0001,
+    "amp": true,
+    "amp_dtype": "float16",
+    "device_name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "python": "3.12.3",
+    "torch": "2.8.0+cu128",
+    "torchvision": "0.23.0+cu128",
+    "cuda": "12.8",
+    "epochs_requested": 10,
+    "selection_metric": "val_accuracy (first epoch wins ties)",
+    "validation_used_for_selection": true,
+    "test_used_for_selection": false
+  }
+}

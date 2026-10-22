@@ -1,5 +1,7 @@
 # 真实八类模型 × Gradio Demo 端到端验收记录
 
+> 历史时延勘误（2026-10-21）：旧 JSON 的 `latency_ms_internal_median` 实为最后一次内部耗时；旧 P95 使用 exclusive 分位外推；实际只对首图预热一次。以下表格和原 JSON 保留为历史，不代表修正后重测。新算法与本机重新测量见 [交付说明](MVP_V1_DELIVERY.md)。
+
 - 验收日期：2026-10-21
 - 运行环境：Windows · Python 3.12.4 · torch 2.8.0+cpu · CUDA available=False · device=cpu
 - 模型：`stage8-20261020-164500-40a26d` · stage 8 · input 224px
