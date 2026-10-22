@@ -1,0 +1,83 @@
+[
+  {
+    "file": "0-carrot.jpg",
+    "source_path": "data/processed/selected_dataset_v1.1.0/train/胡萝卜/5eece0212011a52d9ccdc4c4.jpg",
+    "source_id": "kaggle_vegetable_v1",
+    "license": "CC-BY-SA-4.0",
+    "source_split": "train",
+    "sha256": "fd912fce06c273a9d39905b3e538a78085dda9c5fa3fec10c6c90db0162eee09",
+    "conversion": null
+  },
+  {
+    "file": "1-potato.jpg",
+    "source_path": "data/processed/selected_dataset_v1.1.0/train/土豆/fe159b69352a01b15f1f9512.jpg",
+    "source_id": "kaggle_vegetable_v1",
+    "license": "CC-BY-SA-4.0",
+    "source_split": "train",
+    "sha256": "f1195b5b4e8002afdc0d1b6f0c14f31ee4fcbcc54cbc716748d2cb5b4e93b000",
+    "conversion": null
+  },
+  {
+    "file": "2-broccoli.jpg",
+    "source_path": "data/processed/selected_dataset_v1.1.0/train/西兰花/a00aab52e542b9e15a599d01.jpg",
+    "source_id": "kaggle_vegetable_v1",
+    "license": "CC-BY-SA-4.0",
+    "source_split": "train",
+    "sha256": "75e8cc4ca89d1d9993715774397f063b961d4f990270e7e8e0d5333fa703370a",
+    "conversion": null
+  },
+  {
+    "file": "3-pumpkin.jpg",
+    "source_path": "data/processed/selected_dataset_v1.1.0/train/南瓜/d24fbf25f1970d5d7255b1b8.jpg",
+    "source_id": "kaggle_vegetable_v1",
+    "license": "CC-BY-SA-4.0",
+    "source_split": "train",
+    "sha256": "513004a9ad2f828cf53adfee6fc943e9f87f8c851adf913ed3dea10e960d2cce",
+    "conversion": null
+  },
+  {
+    "file": "4-tomato.jpg",
+    "source_path": "data/processed/selected_dataset_v1.1.0/train/西红柿/f1e2aaf0c9e4fa1ae6571623.jpg",
+    "source_id": "kaggle_vegetable_v1",
+    "license": "CC-BY-SA-4.0",
+    "source_split": "train",
+    "sha256": "e7f48b39eae3f579bba1b6306e13f9958ffb53131ba8e6022fc3fdc84bf48e20",
+    "conversion": null
+  },
+  {
+    "file": "5-white_radish.jpg",
+    "source_path": "data/processed/selected_dataset_v1.1.0/train/白萝卜/850e8fe28f47d171eb37a557.jpg",
+    "source_id": "kaggle_vegetable_v1",
+    "license": "CC-BY-SA-4.0",
+    "source_split": "train",
+    "sha256": "036a00e43ed4d0f4e2f2460ae24afc82b8359baf2941932cab522f37b3abc9cc",
+    "conversion": null
+  },
+  {
+    "file": "6-cucumber.jpg",
+    "source_path": "data/processed/selected_dataset_v1.1.0/train/黄瓜/11bd645789e60c9bd58722d8.jpg",
+    "source_id": "kaggle_vegetable_v1",
+    "license": "CC-BY-SA-4.0",
+    "source_split": "train",
+    "sha256": "0e215d18ef850113b4ecb62efdd0347a9d37fb39891f06cd6064ad117c48d6fe",
+    "conversion": null
+  },
+  {
+    "file": "7-bell_pepper.jpg",
+    "source_path": "data/processed/selected_dataset_v1.1.0/train/甜椒/f14b7d3812e15ca65492e423.jpg",
+    "source_id": "kaggle_vegetable_v1",
+    "license": "CC-BY-SA-4.0",
+    "source_split": "train",
+    "sha256": "e34318368187c4299e16ddc88eb163e256386329f7c9b637e7ee9e6f5e358b9c",
+    "conversion": null
+  },
+  {
+    "file": "0-carrot-real-converted.png",
+    "source_path": "data/processed/selected_dataset_v1.1.0/train/胡萝卜/5eece0212011a52d9ccdc4c4.jpg",
+    "source_id": "kaggle_vegetable_v1",
+    "license": "CC-BY-SA-4.0",
+    "source_split": "train",
+    "sha256": "e51480863d7064783ef17a6232dbcf7ad526dd4022fe2d4497c6b6e15128b7a3",
+    "conversion": "PNG encoding of decoded real JPEG, no semantic/image synthesis"
+  }
+]

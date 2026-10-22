@@ -1,0 +1,129 @@
+{
+  "version": "v1.1.0",
+  "seed": 42,
+  "target_ratio": [
+    0.8,
+    0.1,
+    0.1
+  ],
+  "include_all_seafood": false,
+  "validation_folder": "valid",
+  "manifest_validation_split": "val",
+  "status": "user_requested_github_delivery_taxonomy_team_freeze_pending",
+  "inputs": 10665,
+  "input_sha256": "8b1340fe4e521d101cb23d055606c1da253eee4cd783e0cf9dbc0e5e76e96697",
+  "fish_zip_sha256": "",
+  "audit_status": {
+    "candidate": 10662,
+    "exact_duplicate": 3
+  },
+  "counts": {
+    "images": 10662,
+    "splits": {
+      "external_test": 0,
+      "test": 1067,
+      "train": 8527,
+      "val": 1068
+    },
+    "per_class": {
+      "carrot": {
+        "test": 125,
+        "external_test": 0,
+        "train": 999,
+        "val": 125
+      },
+      "potato": {
+        "test": 146,
+        "external_test": 0,
+        "train": 1165,
+        "val": 146
+      },
+      "broccoli": {
+        "test": 150,
+        "external_test": 0,
+        "train": 1196,
+        "val": 150
+      },
+      "pumpkin": {
+        "test": 148,
+        "external_test": 0,
+        "train": 1180,
+        "val": 148
+      },
+      "tomato": {
+        "test": 138,
+        "external_test": 0,
+        "train": 1108,
+        "val": 139
+      },
+      "white_radish": {
+        "test": 120,
+        "external_test": 0,
+        "train": 960,
+        "val": 120
+      },
+      "cucumber": {
+        "test": 120,
+        "external_test": 0,
+        "train": 960,
+        "val": 120
+      },
+      "bell_pepper": {
+        "test": 120,
+        "external_test": 0,
+        "train": 959,
+        "val": 120
+      }
+    },
+    "distinct_capture_groups": 7043,
+    "missing_sha256": 0,
+    "unverified_license": 235,
+    "manifest_sha256": "6bef9776c278d8efac86008a11c47386cb7d95b7164073b9bd07e84cb5cf2821"
+  },
+  "class_groups": {
+    "carrot": 511,
+    "potato": 1164,
+    "broccoli": 979,
+    "pumpkin": 1046,
+    "tomato": 1185,
+    "white_radish": 781,
+    "cucumber": 675,
+    "bell_pepper": 699
+  },
+  "near_pairs": 5266,
+  "global_cross_split_group_leakage": 0,
+  "detected_near_pair_cross_split_leakage": 0,
+  "source_counts": {
+    "kaggle_vegetable_v1": 10192,
+    "manual_source_unresolved": 235,
+    "roboflow_fridge_genie_v1": 235
+  },
+  "quality_warnings": 0,
+  "limitations": [
+    "Perceptual grouping conservative; unknown capture groups may be missed.",
+    "Preaugmented images retained in input but excluded from base split.",
+    "Manual class labels accepted, not a biological species verification.",
+    "No external-source independent test, no model training or accuracy claim.",
+    "Formal taxonomy freeze requires team approval."
+  ],
+  "quality_verification": {
+    "sha256_cross_split": 0,
+    "group_id_cross_split": 0,
+    "known_origin_cross_split": 0,
+    "detected_near_pair_cross_split": 0,
+    "verified_image_files": 10662,
+    "raw_files_preserved": 10665,
+    "unique_global_groups": 7035,
+    "actual_folder_counts": {
+      "train": 8527,
+      "valid": 1068,
+      "test": 1067
+    }
+  },
+  "semantic_review": {
+    "contact_images_checked": 96,
+    "full_dataset_semantic_review": false,
+    "pending_items": 1,
+    "pending_file": "audit/visual_review_pending.csv"
+  }
+}

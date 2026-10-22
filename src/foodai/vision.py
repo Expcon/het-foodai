@@ -31,25 +31,25 @@ def get_model(num_classes: int, *, pretrained: bool):
 
 def get_image_dataset(records, root, image_size: int, *, train: bool):
     """Torch Dataset preserving immutable manifest labels (never relabel implicitly)."""
-    from PIL import Image, UnidentifiedImageError
-    from torch.utils.data import Dataset
-    transform = get_transforms(image_size, train=train)
+    return ManifestDataset(records, root, image_size, train=train)
 
-    class ManifestDataset(Dataset):
-        def __init__(self):
-            self.records = list(records)
 
-        def __len__(self):
-            return len(self.records)
+class ManifestDataset:
+    """Module-level, map-style dataset so Windows spawn workers can pickle it."""
+    def __init__(self, records, root, image_size: int, *, train: bool):
+        self.records = list(records)
+        self.root = root
+        self.transform = get_transforms(image_size, train=train)
 
-        def __getitem__(self, index):
-            rec = self.records[index]
-            path = root / rec.relative_path
-            try:
-                with Image.open(path) as img:
-                    image = img.convert("RGB")
-            except (UnidentifiedImageError, OSError) as exc:
-                raise RuntimeError(f"Unreadable image: {rec.relative_path}") from exc
-            return transform(image), rec.label_id
+    def __len__(self):
+        return len(self.records)
 
-    return ManifestDataset()
+    def __getitem__(self, index):
+        from PIL import Image, UnidentifiedImageError
+        rec = self.records[index]
+        try:
+            with Image.open(self.root / rec.relative_path) as img:
+                image = img.convert("RGB")
+        except (UnidentifiedImageError, OSError) as exc:
+            raise RuntimeError(f"Unreadable image: {rec.relative_path}") from exc
+        return self.transform(image), rec.label_id
