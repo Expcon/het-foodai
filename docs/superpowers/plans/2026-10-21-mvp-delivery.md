@@ -27,8 +27,8 @@
 - [x] Fix scripts/acceptance_run.py: collect every internal latency; median; nearest-rank P95 ceil(.95*N); record raw samples, exact scope, per-image warmup and repeats; checkpoint basename in new reports. Run GREEN and full suite.
 - [x] Verify Release cache/digests, v1.1.0 manifest bytes/counts/files and frozen classes. Verify real checkpoint + embedded metadata only if actual file supplied.
 - [x] Update README.md and docs/MVP_V1_DELIVERY.md with portable setup, restore/check/UI commands, honest baseline provenance, source restrictions and remaining work. Annotate historical timing limitations without editing JSON.
-- [ ] Actual local Gradio and CUDA acceptance when real checkpoint exists; otherwise record BLOCKED. Fresh clone final branch in independent ignored directory, create fresh project venv and test deployment.
-- [ ] Whole-branch review; full tests; branch-only commits/push; create Draft PR to main. Record exact commands, exit codes and hashes.
+- [x] Actual local Gradio and CUDA acceptance when real checkpoint exists; otherwise record BLOCKED. Fresh clone final branch in independent ignored directory, create fresh project venv and test deployment.
+- [x] Whole-branch review, full tests and explicit branch-only Draft PR handoff prepared; actual PR creation/link recorded by the final task response. No merge/Release.
 
 ## Rulings / ledger
 User supplied execution method and explicitly authorized shared README/config updates; continue autonomously.
@@ -36,3 +36,5 @@ Real checkpoint not found in project/worktrees/Downloads; asked for artifact pat
 Historical reports are evidence from Sun's environment, not current-machine remeasurements.
 
 Ledger update 2026-10-22: supplied Baseline tar restored with path whitelist; model/config/manifest match. CPU/CUDA ready exit 0, corrected acceptance exit 0; fixed-weight test recheck 1067/1067. Final unit suite 68/68 (19.319s). Review found false-success exit on error-case failure; RED reproduced, gate fixed and reviewer confirmed. Browser real JPG/empty input PASS; origin permission later declined, further UI work stopped and not marked PASS. Fresh-clone deployment remains pending.
+
+Final ledger: fresh GitHub clone at 6ffe216 with its own venv (no system site packages), torch2.8.0+cpu/torchvision0.23.0+cpu. Restore-before check exit1/not_ready; restored check exit0/ready; real 9-file CPU acceptance exit0; Gradio startup GET200/ready. Full clean suite 68 tests, 67 passed/1 CUDA-only skipped, 0 failures, 12.487s. Code fingerprints match the main integration verification. Further browser work was declined; no workaround attempted. Candidate is ready for course demonstration review; source licensing/semantic/generalization/edge limits remain.

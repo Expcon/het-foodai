@@ -134,6 +134,37 @@ Sun 的 [历史验收说明](ACCEPTANCE_REAL_MODEL_2026-10-21.md)与 `docs/accep
 
 本次独立证据、命令退出码、截图和重新克隆部署结果统一见 [交付验证记录](delivery-evidence/20261021/verification.json)。本次功能样本来自 v1.1.0 的已知许可 train 图片，每类一张，另将真实胡萝卜 JPG 编码为 PNG 测试格式；没有合成图，也不是独立泛化评估。原图不进 Git，来源相对路径及 SHA 单独留档。
 
+## 本次集成改动与实测结果
+
+从 Sun 的 `8d6fda0` 建立交付分支，合入 Yang 的 `524879a`，合并提交 `8f613fa`：**零冲突**，保留双方父提交。数据清单/工具/报告、`.gitignore` 与已有 `.gitattributes` 采用 Yang 最新版；Git 对比确认训练、评测、安全 loader、预测适配器及 Gradio 均保持 Sun/PR #4 的实现。旧版 manifest 仅作历史，不进入本版运行入口。
+
+本次必要修改文件：
+
+- `.gitattributes`：为正式 classes.json 加入字节保护；类别语义与顺序没有变化。
+- `scripts/acceptance_run.py`、`tests/test_acceptance.py`：真实内部中位数、nearest-rank P95、逐图预热、原始样本、参数/空目录校验，以及错误路径失败的非零退出码；新增 5 项回归测试。
+- `README.md`、本说明、`docs/ACCEPTANCE_REAL_MODEL_2026-10-21.md`：更新真实模型状态、可执行部署/恢复步骤和历史时延勘误；原历史验收 JSON Git 内容不变。
+- `docs/delivery-evidence/20261021/`：新增真实验收、训练追溯选摘、原始 test 与本机复核、来源记录、两张网页截图、独立环境版本快照及验证索引；不提交权重/原图/虚拟环境。
+- `docs/superpowers/plans/2026-10-21-mvp-delivery.md`：集成计划与验证记录。
+
+下表 `python` 表示所述环境的项目 `.venv` 解释器；完整 stdout/stderr 保留在本地 ignored 日志，机读摘要见 [verification.json](delivery-evidence/20261021/verification.json)。
+
+| 实际命令/操作 | 结果 |
+|---|---|
+| `python -m unittest discover -s tests -v`，主 GPU 环境 | exit 0；68/68，0 失败、0 跳过，19.319s |
+| `python scripts/validate_manifest.py --manifest data/manifest.csv --classes configs/classes.json --check-files` | exit 0；10,662 行/全部文件 SHA 通过；235 张未核实许可 warning 保留 |
+| `python app/app.py --check --checkpoint runs/food-v1.1.0-baseline/stage8-20261020-164500-40a26d/best.pt --classes configs/classes.json --device cpu`，另测 `cuda` | 各 exit 0、ready、8 类、224px；实测还传入完整 `--expect-checkpoint-sha256` |
+| `python scripts/acceptance_run.py --checkpoint runs/food-v1.1.0-baseline/stage8-20261020-164500-40a26d/best.pt --classes configs/classes.json --images-dir runs/delivery-20261021/real-images --device cpu --repeats 5 --out runs/delivery-20261021/acceptance-cpu-final.json`，另测 CUDA/repeats 10/独立输出 | 各 exit 0；9 个真实图片文件产生 Top-3，损坏输入与缺模型检查通过；不是准确率或延迟基准 |
+| `python scripts/evaluate_classifier.py --checkpoint runs/delivery-20261021/held-out/best.pt --manifest data/manifest.csv --classes configs/classes.json --split test --batch-size 16` | exit 0；固定同一 SHA 权重的 1067/1067 复核；权重副本只为将新报告与历史文件隔离，未调参 |
+| 本机 Gradio CPU/CUDA 实际 HTTP 路由 | JPG/PNG 上传、Top-3、无输入、损坏文件、缺模型和禁用按钮断言通过；组合脚本后续等浏览器完成时曾超时 exit 1，不能称整个组合脚本 exit 0 |
+| 本机浏览器 | 真实 CPU JPG 上传、预览、Top-3 和未上传提示有本次截图；之后 origin 权限被拒绝，清除/更多页面复测保持 BLOCKED/NOT_REPEATED；未绕过 |
+| GitHub 新克隆 + 新 `.venv`，torch 2.8.0+cpu / torchvision 0.23.0+cpu | 安装 exit 0；恢复前自检 exit 1/not_ready，恢复后 exit 0/ready；9 个真实文件/每图 3 次 CPU 验收 exit 0；Gradio 实际启动并 GET config HTTP 200/ready |
+| 新克隆 `python -m unittest discover -s tests -v` | exit 0；68 项中 67 通过、1 项 CUDA 专用计时测试跳过、0 失败，12.487s；对应 CUDA 路径已在主环境通过 |
+
+独立克隆完整测试的代码提交为 `6ffe216`；后续只有交付文档与证据更新，模型/应用/验收代码的规范化 SHA 与该副本完全一致。主工作区 main 没有变化；没有自动合并 PR 或创建正式 Release。
+
+新 CPU 环境完整依赖快照为 [environment-cpu.txt](delivery-evidence/20261021/environment-cpu.txt)。需要固定全部解析后的依赖时，可在新 `.venv` 使用 `python -m pip install -r docs/delivery-evidence/20261021/environment-cpu.txt --extra-index-url https://download.pytorch.org/whl/cpu`；日常演示沿用上面的已实测安装命令即可。
+
+
 ## 尚未完成与交付判定
 
 - 独立跨来源/真实烤箱场景正式评估与完整语义复核；external_test 当前为空。
@@ -141,4 +172,4 @@ Sun 的 [历史验收说明](ACCEPTANCE_REAL_MODEL_2026-10-21.md)与 `docs/accep
 - 8→12→16 增量学习、遗忘度量；当前仅预留有序前缀与分类头阶段接口。
 - ONNX 导出验证、真实板端运行、延迟/内存/功耗验收。
 
-满足本次代码、固定权重、数据版本、真实 CPU/GPU Demo 和干净克隆部署验收后，可作为 **mvp-v1.0.0 课程展示候选**。未知许可素材的再分发与真实场景性能不能随此候选自动获准；正式合并和 Release 仍由团队决定。
+本次代码、固定权重、数据版本、真实 CPU/GPU 推理与 Demo、干净克隆部署验收已满足课程展示范围，可作为 **mvp-v1.0.0 课程展示候选**。未知许可素材的再分发与真实场景性能不能随此候选自动获准；正式合并和 Release 仍由团队决定。
