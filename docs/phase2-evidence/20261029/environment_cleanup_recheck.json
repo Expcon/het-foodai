@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-29",
+  "check": "independent read-only global metadata verification after cleanup",
+  "packages_absent": {
+    "pytz": null,
+    "urllib3": null,
+    "tzdata": null,
+    "six": null,
+    "regex": null,
+    "protobuf": null,
+    "lz4": null,
+    "jmespath": null,
+    "charset-normalizer": null,
+    "certifi": null,
+    "tzlocal": null,
+    "requests": null,
+    "python-dateutil": null,
+    "elastic-transport": null,
+    "elasticsearch": null,
+    "dateparser": null,
+    "aliyun-log-python-sdk": null
+  },
+  "retained_dependencies": {
+    "anyio": "4.14.2",
+    "idna": "3.19",
+    "sniffio": "1.3.1",
+    "typing_extensions": "4.16.0"
+  },
+  "limitation": "No complete global package baseline was captured before the unexpected wrapper call. Restoration is supported by collecting/install output and new metadata timestamps, not a full pre/post system snapshot."
+}

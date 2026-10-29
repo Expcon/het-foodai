@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "retrieved_on": "2026-10-29",
+  "project_timezone": "Asia/Shanghai",
+  "purpose": "Official platform references for Phase 2 preparation. No hardware acceptance, training, accuracy or performance result is asserted.",
+  "sources": [
+    {
+      "id": "rockchip-rk3506",
+      "issuer": "Rockchip",
+      "url": "https://www.rock-chips.com/a/en/products/RK35_Series/2025/1208/2126.html",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Family CPU and B/J memory interface; G1 64 MB DDR2; G2 128 MB DDR3L. Does not identify delivered board."
+    },
+    {
+      "id": "arm-a7-architecture",
+      "issuer": "Arm",
+      "url": "https://support.arm.com/tools-and-software/arm-toolchain-for-embedded",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Official table places Cortex-A7 under Armv7-A. Does not establish board ABI or actual runtime features."
+    },
+    {
+      "id": "mnn-releases",
+      "issuer": "Alibaba MNN",
+      "url": "https://github.com/alibaba/MNN/releases",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Live page labels 3.6.1 Latest; observed commit d407447ed56c4121a11ccbd266dc184ca1ead0c2. This is source observation, not installed project version."
+    },
+    {
+      "id": "mnn-converter",
+      "issuer": "Alibaba MNN",
+      "url": "https://mnn-docs.readthedocs.io/en/latest/tools/convert.html",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Converter flags, ONNX conversion, storage-only fp16/weightQuantBits by default, info and correctness comparison. RTD menu also lists 3.6.2; pin actual tools."
+    },
+    {
+      "id": "mnn-compression",
+      "issuer": "Alibaba MNN",
+      "url": "https://mnn-docs.readthedocs.io/en/latest/tools/compress.html",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Weight storage compression versus runtime dynamic quantization (MNN_LOW_MEMORY and Memory_Low), offline quantization calibration config and tools. Generic examples are not YOLO calibration settings."
+    },
+    {
+      "id": "mnn-quant-entry",
+      "issuer": "Alibaba MNN",
+      "url": "https://mnn-docs.readthedocs.io/en/latest/tools/quant.html",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Entry page now points to compression guide; commands quantized.out and mnnquant."
+    },
+    {
+      "id": "mnn-quant-readme",
+      "issuer": "Alibaba MNN",
+      "url": "https://github.com/alibaba/MNN/blob/master/tools/quantization/README_EN.md",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Official repository describes activation calibration and floating-point inputs/outputs for quantized models; older README cross-checked with current compression guide."
+    },
+    {
+      "id": "mnn-engine-build",
+      "issuer": "Alibaba MNN",
+      "url": "https://mnn-docs.readthedocs.io/en/latest/compile/engine.html",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Linux build requirements and generic cross-compilation toolchain process. Android NDK ARMv7 instructions are separate from Linux."
+    },
+    {
+      "id": "mnn-tool-build",
+      "issuer": "Alibaba MNN",
+      "url": "https://mnn-docs.readthedocs.io/en/latest/compile/other.html",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "MNN_BUILD_CONVERTER, MNN_BUILD_QUANTOOLS, MNN_BUILD_BENCHMARK and generated tool names."
+    },
+    {
+      "id": "mnn-python-api",
+      "issuer": "Alibaba MNN",
+      "url": "https://mnn-docs.readthedocs.io/en/latest/inference/python.html",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Python Interpreter/Session input-copy/run/output-copy flow; no claim that ARMv7 Python wheel is present."
+    },
+    {
+      "id": "mnn-cpp-api-3.6.1",
+      "issuer": "Alibaba MNN",
+      "url": "https://github.com/alibaba/MNN/blob/3.6.1/include/MNN/Interpreter.hpp",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Tagged C++ API declarations: createFromFile/createSession/runSession/getSessionInput/getSessionOutput. Retrieved through raw.githubusercontent.com/alibaba/MNN/3.6.1/include/MNN/Interpreter.hpp."
+    },
+    {
+      "id": "mnn-build-flags-3.6.1",
+      "issuer": "Alibaba MNN",
+      "url": "https://github.com/alibaba/MNN/blob/3.6.1/CMakeLists.txt",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Tagged build options include ARM82, ARMv7 FP16 warning and hard-float option. Retrieved through raw.githubusercontent.com/alibaba/MNN/3.6.1/CMakeLists.txt."
+    },
+    {
+      "id": "mnn-benchmark",
+      "issuer": "Alibaba MNN",
+      "url": "https://mnn-docs.readthedocs.io/en/latest/tools/benchmark.html",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Loop/warmup/backend/threads/precision options. Kernel benchmark is not application end-to-end latency."
+    },
+    {
+      "id": "mnn-profile-3.6.1",
+      "issuer": "Alibaba MNN",
+      "url": "https://github.com/alibaba/MNN/blob/3.6.1/tools/cpp/timeProfile.cpp",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Tagged profiling utility source shows per-op callbacks and input/output copies; profiling has overhead. Retrieved through raw.githubusercontent.com/alibaba/MNN/3.6.1/tools/cpp/timeProfile.cpp."
+    },
+    {
+      "id": "ultralytics-classify",
+      "issuer": "Ultralytics",
+      "url": "https://docs.ultralytics.com/tasks/classify/",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Image classification whole-image semantics, probabilities and default CenterCrop behavior. Current examples do not select project YOLO generation."
+    },
+    {
+      "id": "ultralytics-detect",
+      "issuer": "Ultralytics",
+      "url": "https://docs.ultralytics.com/tasks/detect/",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Object detection boxes/class/confidence semantics; high-level results do not specify bare MNN tensor layout."
+    },
+    {
+      "id": "ultralytics-predict",
+      "issuer": "Ultralytics",
+      "url": "https://docs.ultralytics.com/modes/predict/",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Fixed shape versus minimum rectangular padding and generation-dependent NMS behavior. Project generation remains a decision."
+    },
+    {
+      "id": "gnu-time",
+      "issuer": "GNU Project",
+      "url": "https://www.gnu.org/software/time/manual/time.html",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "Elapsed/user/system/CPU percentage and maximum resident set size definitions; -v verbose option. Must verify GNU time exists on target."
+    },
+    {
+      "id": "linux-proc",
+      "issuer": "Linux kernel",
+      "url": "https://www.kernel.org/doc/html/latest/filesystems/proc.html",
+      "retrieved_on": "2026-10-29",
+      "retrieval": "live official source read; Firecrawl maxAge=0",
+      "http_status": 200,
+      "supports": "VmRSS/VmHWM and smaps_rollup accounting, limitations of asynchronous RSS accounting. Target kernel availability must be observed."
+    }
+  ],
+  "local_observations": [
+    {
+      "observed_on": "2026-10-29",
+      "scope": "Read-only Windows executable discovery only",
+      "commands": [
+        "Get-Command wsl.exe -ErrorAction SilentlyContinue | Select-Object Name,Source",
+        "Get-Command bash.exe,ubuntu.exe,docker.exe -ErrorAction SilentlyContinue | Select-Object Name,Source"
+      ],
+      "observed_names": [
+        "wsl.exe",
+        "bash.exe"
+      ],
+      "linux_execution_status": "BLOCKED",
+      "limitations": "Launcher presence does not prove an installed or usable Linux distribution. No WSL/Ubuntu/Docker process was launched or installed; no unknown host was booted."
+    }
+  ],
+  "retrieval_limits": [
+    "Official MNN Session documentation retrieval had a transport failure; C++ claims use the successfully retrieved tagged Interpreter.hpp.",
+    "Guessed project/linux/build_32.sh and GNU Resource-Specifiers.html URLs returned 404 and are not relied on.",
+    "Latest documentation and GitHub release labels differ; converter/runtime versions must be locked from actual command output.",
+    "Source summaries distinguish official facts from project recommendations and do not reproduce raw pages or user-identifying metadata."
+  ]
+}

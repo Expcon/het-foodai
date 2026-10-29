@@ -1,0 +1,184 @@
+=== offline_guard_self_test / exit=0 ===
+{"blocked": ["bare_pip", "network", "shell", "telemetry_import"], "status": "PASS"}
+
+=== yolo11n-cls-prepare / exit=0 ===
+YOLO11n-cls summary (fused): 47 layers, 2,807,024 parameters, 0 gradients, 4.2 GFLOPs
+
+=== yolo11n-cls-torchscript / exit=0 ===
+Ultralytics 8.3.230  Python-3.12.10 torch-2.8.0+cpu CPU (Intel Core Ultra 9 275HX)
+YOLO11n-cls summary (fused): 47 layers, 2,807,024 parameters, 0 gradients, 4.2 GFLOPs
+
+[34m[1mPyTorch:[0m starting from '<workspace>\runs\phase2-edge\export-smoke\yolo11n-cls.pt' with input shape (1, 3, 224, 224) BCHW and output shape(s) (1, 1000) (5.5 MB)
+
+[34m[1mTorchScript:[0m starting export with torch 2.8.0+cpu...
+[34m[1mTorchScript:[0m export success  0.4s, saved as '<workspace>\runs\phase2-edge\export-smoke\yolo11n-cls.torchscript' (10.9 MB)
+
+Export complete (0.4s)
+Results saved to [1m<workspace>\runs\phase2-edge\export-smoke[0m
+Predict:         yolo predict task=classify model=<workspace>\runs\phase2-edge\export-smoke\yolo11n-cls.torchscript imgsz=224
+Validate:        yolo val task=classify model=<workspace>\runs\phase2-edge\export-smoke\yolo11n-cls.torchscript imgsz=224 data=../datasets/imagenet
+Visualize:       https://netron.app
+
+=== yolo11n-cls-direct-TORCH-fp32 / exit=1 ===
+The device supports: i8sdot:0, fp16:0, i8mm: 0, sve2: 0, sme2: 0
+Framework Input ERROR or Not Support This Model Type Now!
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "<workspace>\tools\edge_export\smoke.py", line 280, in <module>
+    worker(args)
+  File "<workspace>\tools\edge_export\smoke.py", line 125, in worker
+    raise RuntimeError("native converter returned without a nonempty output model")
+RuntimeError: native converter returned without a nonempty output model
+
+=== yolo11n-cls-onnx / exit=0 ===
+Ultralytics 8.3.230  Python-3.12.10 torch-2.8.0+cpu CPU (Intel Core Ultra 9 275HX)
+YOLO11n-cls summary (fused): 47 layers, 2,807,024 parameters, 0 gradients, 4.2 GFLOPs
+
+[34m[1mPyTorch:[0m starting from '<workspace>\runs\phase2-edge\export-smoke\yolo11n-cls.pt' with input shape (1, 3, 224, 224) BCHW and output shape(s) (1, 1000) (5.5 MB)
+
+[34m[1mONNX:[0m starting export with onnx 1.19.1 opset 17...
+[34m[1mONNX:[0m export success  0.2s, saved as '<workspace>\runs\phase2-edge\export-smoke\yolo11n-cls.onnx' (10.8 MB)
+
+Export complete (0.3s)
+Results saved to [1m<workspace>\runs\phase2-edge\export-smoke[0m
+Predict:         yolo predict task=classify model=<workspace>\runs\phase2-edge\export-smoke\yolo11n-cls.onnx imgsz=224
+Validate:        yolo val task=classify model=<workspace>\runs\phase2-edge\export-smoke\yolo11n-cls.onnx imgsz=224 data=../datasets/imagenet
+Visualize:       https://netron.app
+
+=== yolo11n-cls-onnx-fp32 / exit=0 ===
+The device supports: i8sdot:0, fp16:0, i8mm: 0, sve2: 0, sme2: 0
+Start to Convert Other Model Format To MNN Model..., target version: 3.2
+[17:33:44] @ 46: ONNX Model ir version: 8
+[17:33:44] @ 47: ONNX Model opset version: 17
+Start to Optimize the MNN Net...
+inputTensors : [ images, ]
+outputTensors: [ output0, ]
+Converted Success!
+
+=== yolo11n-cls-onnx-weight8 / exit=0 ===
+The device supports: i8sdot:0, fp16:0, i8mm: 0, sve2: 0, sme2: 0
+Start to Convert Other Model Format To MNN Model..., target version: 3.2
+[17:33:45] @ 46: ONNX Model ir version: 8
+[17:33:45] @ 47: ONNX Model opset version: 17
+Start to Optimize the MNN Net...
+inputTensors : [ images, ]
+outputTensors: [ output0, ]
+Converted Success!
+
+=== yolo11n-cls-bus-yolo11n-cls-torchscript-output / exit=0 ===
+
+=== yolo11n-cls-bus-yolo11n-cls-onnx-output / exit=0 ===
+
+=== yolo11n-cls-bus-yolo11n-cls-onnx-fp32-mnn-output / exit=0 ===
+The device supports: i8sdot:0, fp16:0, i8mm: 0, sve2: 0, sme2: 0
+MNN use high precision
+
+=== yolo11n-cls-bus-yolo11n-cls-onnx-weight8-mnn-output / exit=0 ===
+The device supports: i8sdot:0, fp16:0, i8mm: 0, sve2: 0, sme2: 0
+MNN use high precision
+
+=== yolo11n-cls-zidane-yolo11n-cls-torchscript-output / exit=0 ===
+
+=== yolo11n-cls-zidane-yolo11n-cls-onnx-output / exit=0 ===
+
+=== yolo11n-cls-zidane-yolo11n-cls-onnx-fp32-mnn-output / exit=0 ===
+The device supports: i8sdot:0, fp16:0, i8mm: 0, sve2: 0, sme2: 0
+MNN use high precision
+
+=== yolo11n-cls-zidane-yolo11n-cls-onnx-weight8-mnn-output / exit=0 ===
+The device supports: i8sdot:0, fp16:0, i8mm: 0, sve2: 0, sme2: 0
+MNN use high precision
+
+=== yolo11n-prepare / exit=0 ===
+YOLO11n summary (fused): 100 layers, 2,616,248 parameters, 0 gradients, 6.5 GFLOPs
+
+=== yolo11n-torchscript / exit=0 ===
+Ultralytics 8.3.230  Python-3.12.10 torch-2.8.0+cpu CPU (Intel Core Ultra 9 275HX)
+YOLO11n summary (fused): 100 layers, 2,616,248 parameters, 0 gradients, 6.5 GFLOPs
+
+[34m[1mPyTorch:[0m starting from '<workspace>\runs\phase2-edge\export-smoke\yolo11n.pt' with input shape (1, 3, 320, 320) BCHW and output shape(s) (1, 84, 2100) (5.4 MB)
+
+[34m[1mTorchScript:[0m starting export with torch 2.8.0+cpu...
+[34m[1mTorchScript:[0m export success  0.8s, saved as '<workspace>\runs\phase2-edge\export-smoke\yolo11n.torchscript' (10.4 MB)
+
+Export complete (0.9s)
+Results saved to [1m<workspace>\runs\phase2-edge\export-smoke[0m
+Predict:         yolo predict task=detect model=<workspace>\runs\phase2-edge\export-smoke\yolo11n.torchscript imgsz=320
+Validate:        yolo val task=detect model=<workspace>\runs\phase2-edge\export-smoke\yolo11n.torchscript imgsz=320 data=/usr/src/ultralytics/ultralytics/cfg/datasets/coco.yaml
+Visualize:       https://netron.app
+
+=== yolo11n-direct-TORCH-fp32 / exit=1 ===
+The device supports: i8sdot:0, fp16:0, i8mm: 0, sve2: 0, sme2: 0
+Framework Input ERROR or Not Support This Model Type Now!
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "<workspace>\tools\edge_export\smoke.py", line 280, in <module>
+    worker(args)
+  File "<workspace>\tools\edge_export\smoke.py", line 125, in worker
+    raise RuntimeError("native converter returned without a nonempty output model")
+RuntimeError: native converter returned without a nonempty output model
+
+=== yolo11n-onnx / exit=0 ===
+Ultralytics 8.3.230  Python-3.12.10 torch-2.8.0+cpu CPU (Intel Core Ultra 9 275HX)
+YOLO11n summary (fused): 100 layers, 2,616,248 parameters, 0 gradients, 6.5 GFLOPs
+
+[34m[1mPyTorch:[0m starting from '<workspace>\runs\phase2-edge\export-smoke\yolo11n.pt' with input shape (1, 3, 320, 320) BCHW and output shape(s) (1, 84, 2100) (5.4 MB)
+
+[34m[1mONNX:[0m starting export with onnx 1.19.1 opset 17...
+[34m[1mONNX:[0m export success  0.4s, saved as '<workspace>\runs\phase2-edge\export-smoke\yolo11n.onnx' (10.1 MB)
+
+Export complete (0.5s)
+Results saved to [1m<workspace>\runs\phase2-edge\export-smoke[0m
+Predict:         yolo predict task=detect model=<workspace>\runs\phase2-edge\export-smoke\yolo11n.onnx imgsz=320
+Validate:        yolo val task=detect model=<workspace>\runs\phase2-edge\export-smoke\yolo11n.onnx imgsz=320 data=/usr/src/ultralytics/ultralytics/cfg/datasets/coco.yaml
+Visualize:       https://netron.app
+
+=== yolo11n-onnx-fp32 / exit=0 ===
+The device supports: i8sdot:0, fp16:0, i8mm: 0, sve2: 0, sme2: 0
+Start to Convert Other Model Format To MNN Model..., target version: 3.2
+[17:33:55] @ 46: ONNX Model ir version: 8
+[17:33:55] @ 47: ONNX Model opset version: 17
+[17:33:55] :148: Check it out ==> /model.11/Resize_output_0 has empty input, the index is 1
+[17:33:55] :148: Check it out ==> /model.14/Resize_output_0 has empty input, the index is 1
+Start to Optimize the MNN Net...
+inputTensors : [ images, ]
+outputTensors: [ output0, ]
+Converted Success!
+
+=== yolo11n-onnx-weight8 / exit=0 ===
+The device supports: i8sdot:0, fp16:0, i8mm: 0, sve2: 0, sme2: 0
+Start to Convert Other Model Format To MNN Model..., target version: 3.2
+[17:33:56] @ 46: ONNX Model ir version: 8
+[17:33:56] @ 47: ONNX Model opset version: 17
+[17:33:56] :148: Check it out ==> /model.11/Resize_output_0 has empty input, the index is 1
+[17:33:56] :148: Check it out ==> /model.14/Resize_output_0 has empty input, the index is 1
+Start to Optimize the MNN Net...
+inputTensors : [ images, ]
+outputTensors: [ output0, ]
+Converted Success!
+
+=== yolo11n-bus-yolo11n-torchscript-output / exit=0 ===
+
+=== yolo11n-bus-yolo11n-onnx-output / exit=0 ===
+
+=== yolo11n-bus-yolo11n-onnx-fp32-mnn-output / exit=0 ===
+The device supports: i8sdot:0, fp16:0, i8mm: 0, sve2: 0, sme2: 0
+MNN use high precision
+
+=== yolo11n-bus-yolo11n-onnx-weight8-mnn-output / exit=0 ===
+The device supports: i8sdot:0, fp16:0, i8mm: 0, sve2: 0, sme2: 0
+MNN use high precision
+
+=== yolo11n-zidane-yolo11n-torchscript-output / exit=0 ===
+
+=== yolo11n-zidane-yolo11n-onnx-output / exit=0 ===
+
+=== yolo11n-zidane-yolo11n-onnx-fp32-mnn-output / exit=0 ===
+The device supports: i8sdot:0, fp16:0, i8mm: 0, sve2: 0, sme2: 0
+MNN use high precision
+
+=== yolo11n-zidane-yolo11n-onnx-weight8-mnn-output / exit=0 ===
+The device supports: i8sdot:0, fp16:0, i8mm: 0, sve2: 0, sme2: 0
+MNN use high precision

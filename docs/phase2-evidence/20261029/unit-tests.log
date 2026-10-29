@@ -1,0 +1,164 @@
+test_empty_and_missing_image_directories_rejected (test_acceptance.TestAcceptance.test_empty_and_missing_image_directories_rejected) ... ok
+test_failed_error_path_returns_nonzero_and_keeps_report (test_acceptance.TestAcceptance.test_failed_error_path_returns_nonzero_and_keeps_report) ... ok
+test_invalid_repeats_rejected_before_model_loading (test_acceptance.TestAcceptance.test_invalid_repeats_rejected_before_model_loading) ... ok
+test_report_uses_all_samples_and_observed_p95 (test_acceptance.TestAcceptance.test_report_uses_all_samples_and_observed_p95) ... ok
+test_single_repeat_p95_is_single_measurement (test_acceptance.TestAcceptance.test_single_repeat_p95_is_single_measurement) ... ok
+test_contract_error_banner_disables_button (test_app_logic.TestBanners.test_contract_error_banner_disables_button) ... ok
+test_empty_upload_is_neutral (test_app_logic.TestBanners.test_empty_upload_is_neutral) ... ok
+test_not_ready_banner_disables_button (test_app_logic.TestBanners.test_not_ready_banner_disables_button) ... ok
+test_ready_banner_enables_button (test_app_logic.TestBanners.test_ready_banner_enables_button) ... ok
+test_failure_returns_no_scores (test_app_logic.TestResults.test_failure_returns_no_scores) ... ok
+test_latency_states_scope (test_app_logic.TestResults.test_latency_states_scope) ... ok
+test_no_accuracy_wording_anywhere (test_app_logic.TestResults.test_no_accuracy_wording_anywhere) ... ok
+test_top3_rows (test_app_logic.TestResults.test_top3_rows) ... ok
+test_class_hash_prefix_stable (test_contracts.TestContracts.test_class_hash_prefix_stable) ... ok
+test_clean_split (test_contracts.TestContracts.test_clean_split) ... ok
+test_draft_blocked (test_contracts.TestContracts.test_draft_blocked) ... ok
+test_exact_duplicate_leakage_rejected (test_contracts.TestContracts.test_exact_duplicate_leakage_rejected) ... ok
+test_group_leakage_rejected (test_contracts.TestContracts.test_group_leakage_rejected) ... ok
+test_missing_model_is_explicit (test_contracts.TestContracts.test_missing_model_is_explicit) ... ok
+test_path_escape_rejected (test_contracts.TestContracts.test_path_escape_rejected) ... ok
+test_wrong_label_mapping_rejected (test_contracts.TestContracts.test_wrong_label_mapping_rejected) ... ok
+test_bktree_matches_bruteforce_with_duplicate_hashes (test_data_audit.TestDataAudit.test_bktree_matches_bruteforce_with_duplicate_hashes) ... ok
+test_box_bounds_and_nan_are_rejected (test_data_audit.TestDataAudit.test_box_bounds_and_nan_are_rejected) ... ok
+test_byte_and_pixel_duplicate_leakage_are_distinguished (test_data_audit.TestDataAudit.test_byte_and_pixel_duplicate_leakage_are_distinguished) ... ok
+test_groups_join_cross_source_duplicates_parents_and_transitive_edges (test_data_audit.TestDataAudit.test_groups_join_cross_source_duplicates_parents_and_transitive_edges) ... ok
+test_phash_survives_lossless_encoding (test_data_audit.TestDataAudit.test_phash_survives_lossless_encoding) ... ok
+test_rejects_zip_traversal_and_windows_absolute_paths (test_data_audit.TestDataAudit.test_rejects_zip_traversal_and_windows_absolute_paths) ... ok
+test_taxonomy_does_not_turn_generic_fish_into_sea_bass (test_data_audit.TestDataAudit.test_taxonomy_does_not_turn_generic_fish_into_sea_bass) ... ok
+test_evidence_redacts_windows_case_and_separator_variants (test_edge_export.EdgeExportGuardTests.test_evidence_redacts_windows_case_and_separator_variants) ... ok
+test_native_converter_and_runtime_imports_allowed (test_edge_export.EdgeExportGuardTests.test_native_converter_and_runtime_imports_allowed) ... ok
+test_output_cannot_escape_the_ignored_sandbox (test_edge_export.EdgeExportGuardTests.test_output_cannot_escape_the_ignored_sandbox) ... ok
+test_telemetry_and_autoinstall_actions_blocked (test_edge_export.EdgeExportGuardTests.test_telemetry_and_autoinstall_actions_blocked) ... ok
+test_ambiguous_or_wrong_model_contract_rejected (test_edge_runtime.EdgeRuntimeTests.test_ambiguous_or_wrong_model_contract_rejected) ... ok
+test_detection_contract_is_model_specific (test_edge_runtime.EdgeRuntimeTests.test_detection_contract_is_model_specific) ... ok
+test_probabilities_cannot_silently_be_logits (test_edge_runtime.EdgeRuntimeTests.test_probabilities_cannot_silently_be_logits) ... ok
+test_wrong_shape_dtype_and_nonfinite_input_rejected (test_edge_runtime.EdgeRuntimeTests.test_wrong_shape_dtype_and_nonfinite_input_rejected) ... ok
+test_cuda_timing_synchronizes_before_and_after (test_integration.TestIntegratedPredictor.test_cuda_timing_synchronizes_before_and_after) ... ok
+test_embedded_metadata_is_authoritative (test_integration.TestIntegratedPredictor.test_embedded_metadata_is_authoritative) ... ok
+test_real_model_ready_and_top3_through_shared_loader (test_integration.TestIntegratedPredictor.test_real_model_ready_and_top3_through_shared_loader) ... ok
+test_short_corrupt_pickle_is_contract_error (test_integration.TestIntegratedPredictor.test_short_corrupt_pickle_is_contract_error) ... ok
+test_sidecar_cannot_make_invalid_weights_ready (test_integration.TestIntegratedPredictor.test_sidecar_cannot_make_invalid_weights_ready) ... ok
+test_valid_metadata_with_missing_weights_is_rejected (test_integration.TestIntegratedPredictor.test_valid_metadata_with_missing_weights_is_rejected) ... ok
+test_absent_license_is_normalized_to_unknown_for_handoff (test_oven_capture.TestOvenCapture.test_absent_license_is_normalized_to_unknown_for_handoff) ... ok
+test_audit_finds_exact_pixel_near_and_missing_metadata (test_oven_capture.TestOvenCapture.test_audit_finds_exact_pixel_near_and_missing_metadata) ... ok
+test_audit_flags_tamper_and_malformed_sidecar (test_oven_capture.TestOvenCapture.test_audit_flags_tamper_and_malformed_sidecar) ... ok
+test_backend_exception_is_not_ready_and_releases_failed_initialization (test_oven_capture.TestOvenCapture.test_backend_exception_is_not_ready_and_releases_failed_initialization) ... ok
+test_cli_output_guard_rejects_protected_dataset_and_source_paths (test_oven_capture.TestOvenCapture.test_cli_output_guard_rejects_protected_dataset_and_source_paths) ... ok
+test_corrupt_input_is_rejected_without_saving (test_oven_capture.TestOvenCapture.test_corrupt_input_is_rejected_without_saving) ... ok
+test_empty_scene_is_recordable_but_never_a_classification_label (test_oven_capture.TestOvenCapture.test_empty_scene_is_recordable_but_never_a_classification_label) ... ok
+test_export_requires_review_and_rejects_cross_split_group (test_oven_capture.TestOvenCapture.test_export_requires_review_and_rejects_cross_split_group) ... ok
+test_finite_frame_source_is_replaceable_and_saves_decoded_png (test_oven_capture.TestOvenCapture.test_finite_frame_source_is_replaceable_and_saves_decoded_png) ... ok
+test_identical_pixels_with_conflicting_confirmed_labels_block_export (test_oven_capture.TestOvenCapture.test_identical_pixels_with_conflicting_confirmed_labels_block_export) ... ok
+test_import_preserves_bytes_size_and_requires_review (test_oven_capture.TestOvenCapture.test_import_preserves_bytes_size_and_requires_review) ... ok
+test_interrupted_images_only_collection_cannot_escape_catalog_audit (test_oven_capture.TestOvenCapture.test_interrupted_images_only_collection_cannot_escape_catalog_audit) ... ok
+test_invalid_cli_frame_count_cannot_open_a_camera (test_oven_capture.TestOvenCapture.test_invalid_cli_frame_count_cannot_open_a_camera) ... ok
+test_joint_export_checks_cross_collection_groups_and_rejects_partial_catalog (test_oven_capture.TestOvenCapture.test_joint_export_checks_cross_collection_groups_and_rejects_partial_catalog) ... ok
+test_missing_naive_or_unknown_identity_metadata_fails_before_write (test_oven_capture.TestOvenCapture.test_missing_naive_or_unknown_identity_metadata_fails_before_write) ... ok
+test_multi_food_record_cannot_be_exported_as_single_class (test_oven_capture.TestOvenCapture.test_multi_food_record_cannot_be_exported_as_single_class) ... ok
+test_review_cannot_confirm_food_without_physical_identity_or_change_record (test_oven_capture.TestOvenCapture.test_review_cannot_confirm_food_without_physical_identity_or_change_record) ... ok
+test_reviewed_export_matches_existing_nine_field_contract (test_oven_capture.TestOvenCapture.test_reviewed_export_matches_existing_nine_field_contract) ... ok
+test_sample_session_connections_are_transitive (test_oven_capture.TestOvenCapture.test_sample_session_connections_are_transitive) ... ok
+test_symlinked_image_directory_cannot_escape_collection (test_oven_capture.TestOvenCapture.test_symlinked_image_directory_cannot_escape_collection) ... skipped 'OS does not permit test-directory symlinks'
+test_traversal_sidecar_cannot_read_or_review_outside_collection (test_oven_capture.TestOvenCapture.test_traversal_sidecar_cannot_read_or_review_outside_collection) ... ok
+test_unreported_camera_properties_remain_unknown_not_requested_resolution (test_oven_capture.TestOvenCapture.test_unreported_camera_properties_remain_unknown_not_requested_resolution) ... ok
+test_wrong_metadata_container_types_fail_as_validation_errors (test_oven_capture.TestOvenCapture.test_wrong_metadata_container_types_fail_as_validation_errors) ... ok
+test_checkpoint_sha_prefix_mismatch (test_predictor.TestContractChecks.test_checkpoint_sha_prefix_mismatch) ... ok
+test_class_list_hash_mismatch_rejected (test_predictor.TestContractChecks.test_class_list_hash_mismatch_rejected) ... ok
+test_matching_sha_does_not_bypass_weight_validation (test_predictor.TestContractChecks.test_matching_sha_does_not_bypass_weight_validation) ... ok
+test_missing_metadata_is_contract_error (test_predictor.TestContractChecks.test_missing_metadata_is_contract_error) ... ok
+test_unsupported_stage_is_rejected (test_predictor.TestContractChecks.test_unsupported_stage_is_rejected)
+Formal training produces only 8/12/16-class stages. ... ok
+test_wrong_class_order_rejected (test_predictor.TestContractChecks.test_wrong_class_order_rejected) ... ok
+test_wrong_display_name_rejected (test_predictor.TestContractChecks.test_wrong_display_name_rejected) ... ok
+test_dict_matches_contract_fields (test_predictor.TestContractShape.test_dict_matches_contract_fields) ... ok
+test_empty_file_rejected (test_predictor.TestImageValidation.test_empty_file_rejected) ... ok
+test_gif_renamed_png_is_rejected (test_predictor.TestImageValidation.test_gif_renamed_png_is_rejected) ... ok
+test_mpo_jpeg_first_frame_is_accepted (test_predictor.TestImageValidation.test_mpo_jpeg_first_frame_is_accepted) ... ok
+test_real_png_accepted (test_predictor.TestImageValidation.test_real_png_accepted) ... ok
+test_text_file_named_jpg_rejected (test_predictor.TestImageValidation.test_text_file_named_jpg_rejected) ... ok
+test_unsupported_suffix_rejected (test_predictor.TestImageValidation.test_unsupported_suffix_rejected) ... ok
+test_draft_classes_are_rejected (test_predictor.TestNotReadyStates.test_draft_classes_are_rejected) ... ok
+test_missing_checkpoint_mentions_path (test_predictor.TestNotReadyStates.test_missing_checkpoint_mentions_path) ... ok
+test_missing_classes_config_is_not_ready (test_predictor.TestNotReadyStates.test_missing_classes_config_is_not_ready) ... ok
+test_unconfigured_message_is_identical_to_contract (test_predictor.TestNotReadyStates.test_unconfigured_message_is_identical_to_contract) ... ok
+test_block_index_matches_brute_force_radius (test_selected_dataset.TestSelectedDataset.test_block_index_matches_brute_force_radius) ... ok
+test_explicit_taxonomy_preserves_requested_order_and_rejects_legacy_overrides (test_selected_dataset.TestSelectedDataset.test_explicit_taxonomy_preserves_requested_order_and_rejects_legacy_overrides) ... ok
+test_grouped_ratio_reproducible_and_covers_every_class (test_selected_dataset.TestSelectedDataset.test_grouped_ratio_reproducible_and_covers_every_class) ... ok
+test_label_conflicts_are_quarantined_and_duplicates_have_one_representative (test_selected_dataset.TestSelectedDataset.test_label_conflicts_are_quarantined_and_duplicates_have_one_representative) ... ok
+Auditing selected class synthetic_food
+Grouping 30 base candidates
+{
+  "version": "synthetic_review",
+  "seed": 42,
+  "target_ratio": [
+    0.8,
+    0.1,
+    0.1
+  ],
+  "include_all_seafood": false,
+  "validation_folder": "valid",
+  "manifest_validation_split": "val",
+  "status": "split_generated_taxonomy_team_freeze_pending",
+  "inputs": 30,
+  "input_sha256": "8ad527d2dc18142f608bc8635af4a82483e34cf0f843d525173b51657e32d19f",
+  "fish_zip_sha256": "synthetic",
+  "audit_status": {
+    "candidate": 30
+  },
+  "counts": {
+    "images": 30,
+    "splits": {
+      "external_test": 0,
+      "test": 3,
+      "train": 24,
+      "val": 3
+    },
+    "per_class": {
+      "synthetic_food": {
+        "test": 3,
+        "external_test": 0,
+        "val": 3,
+        "train": 24
+      }
+    },
+    "distinct_capture_groups": 30,
+    "missing_sha256": 0,
+    "unverified_license": 30,
+    "manifest_sha256": "9027750c2587a7fe23985eaeefc330fa01bdc3f05d1e35d26cf1c69121ec325d"
+  },
+  "class_groups": {
+    "synthetic_food": 30
+  },
+  "near_pairs": 0,
+  "global_cross_split_group_leakage": 0,
+  "detected_near_pair_cross_split_leakage": 0,
+  "source_counts": {
+    "manual_source_unresolved": 30
+  },
+  "quality_warnings": 0,
+  "limitations": [
+    "Perceptual grouping conservative; unknown capture groups may be missed.",
+    "Preaugmented images retained in input but excluded from base split.",
+    "Manual class labels accepted, not a biological species verification.",
+    "No external-source independent test, no model training or accuracy claim.",
+    "Formal taxonomy freeze requires team approval."
+  ]
+}
+test_review_version_preserves_inputs_and_root_manifest_with_valid_folder (test_selected_dataset.TestSelectedDataset.test_review_version_preserves_inputs_and_root_manifest_with_valid_folder) ... ok
+test_seafood_duplicates_can_be_retained_without_ignoring_label_conflicts (test_selected_dataset.TestSelectedDataset.test_seafood_duplicates_can_be_retained_without_ignoring_label_conflicts) ... ok
+test_unsplittable_class_fails_instead_of_leaking_group (test_selected_dataset.TestSelectedDataset.test_unsplittable_class_fails_instead_of_leaking_group) ... ok
+test_changed_manifest_blocks_held_out_evaluation (test_training.TestTraining.test_changed_manifest_blocks_held_out_evaluation) ... ok
+test_checkpoint_metadata_and_weights_are_checked (test_training.TestTraining.test_checkpoint_metadata_and_weights_are_checked) ... ok
+test_draft_blocks_both_entrypoints (test_training.TestTraining.test_draft_blocks_both_entrypoints) ... ok
+test_epoch_logs_include_all_samples_and_validation_confusion (test_training.TestTraining.test_epoch_logs_include_all_samples_and_validation_confusion) ... ok
+test_failed_save_keeps_previous_checkpoint (test_training.TestTraining.test_failed_save_keeps_previous_checkpoint) ... ok
+test_invalid_training_options_rejected (test_training.TestTraining.test_invalid_training_options_rejected) ... ok
+test_missing_hash_blocks_both_entrypoints (test_training.TestTraining.test_missing_hash_blocks_both_entrypoints) ... ok
+test_seed_repeats_augmentation_and_shuffle (test_training.TestTraining.test_seed_repeats_augmentation_and_shuffle) ... ok
+test_windows_spawn_preserves_manifest_ids (test_training.TestTraining.test_windows_spawn_preserves_manifest_ids) ... ok
+
+----------------------------------------------------------------------
+Ran 99 tests in 16.727s
+
+OK (skipped=1)

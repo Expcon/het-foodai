@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-29",
+  "status": "corrected_with_limitations",
+  "trigger": "isolated Python -m MNN.tools.mnnconvert --help",
+  "unexpected_behavior": "MNN3.2.0 Python tools import logging which calls os.system('pip install -U aliyun-log-python-sdk'); bare pip resolved to system Python312",
+  "interrupted": true,
+  "observed_install_window_local": "17:17:51-17:17:56 Asia/Shanghai",
+  "installation_exit_code_after_interrupt": 1,
+  "preserved_tool_output": "export_incident_transcript.txt",
+  "existing_package_uninstall_lines": 0,
+  "new_packages_removed_exactly": {
+    "pytz": "2026.6", "urllib3": "2.8.0", "tzdata": "2026.6", "six": "1.17.0",
+    "regex": "2026.9.29", "protobuf": "5.29.6", "lz4": "4.4.5", "jmespath": "1.1.0",
+    "charset-normalizer": "3.5.2", "certifi": "2026.10.23", "tzlocal": "5.4.5",
+    "requests": "2.34.2", "python-dateutil": "3.0.0", "elastic-transport": "9.4.2",
+    "elasticsearch": "9.5.1", "dateparser": "1.4.3"
+  },
+  "removal_evidence": "All listed packages were Collecting in pip stdout; installation logged no Attempting uninstall; dist-info appeared in the same installation window. Cleanup pip uninstall reported Successfully uninstalled for each, exit0.",
+  "sdk_was_not_installed": "pip show aliyun-log-python-sdk returned not found",
+  "verification": "pip show all 16 removed packages plus aliyun-log-python-sdk returned not found; no remaining python/pip child process observed",
+  "untouched_existing_dependencies": ["anyio", "idna", "sniffio", "typing_extensions"],
+  "cloud_action": "No conversion ran, no logger put_log ran, no credentials were supplied. Interrupted during SDK install before logger initialization.",
+  "limitation": "No complete global package baseline was captured before the unexpected wrapper call. Restoration is supported by collecting/install output and new metadata timestamps, not a full pre/post system snapshot.",
+  "prevention": "All further SDK workers use exact isolated interpreter, block networking, shell/process launch and MNN.tools imports through Python audit hook, and invoke native _tools.mnnconvert only. Guard behavior is tested separately."
+}

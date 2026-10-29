@@ -1,0 +1,138 @@
+2026-10-29; filesystem-observed installation window 17:17:51–17:17:56 Asia/Shanghai.
+The following is the full installation stdout/stderr captured across the two
+tool yields of the unexpectedly invoked bare-pip child, with personal paths
+replaced by <global-python> and <home>. No separate raw stderr stream was exposed
+by the command tool. The parent command was interrupted; tool exit code 1.
+Trigger: <isolated-python> -m MNN.tools.mnnconvert --help
+Unexpected child: pip install -U aliyun-log-python-sdk
+
+Collecting aliyun-log-python-sdk
+  Downloading aliyun_log_python_sdk-0.9.52.tar.gz (171 kB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting six (from aliyun-log-python-sdk)
+  Using cached six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Collecting requests (from aliyun-log-python-sdk)
+  Using cached requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+Collecting python-dateutil (from aliyun-log-python-sdk)
+  Using cached python_dateutil-3.0.0-py2.py3-none-any.whl.metadata (8.2 kB)
+Collecting elasticsearch (from aliyun-log-python-sdk)
+  Downloading elasticsearch-9.5.1-py3-none-any.whl.metadata (9.0 kB)
+Collecting jmespath (from aliyun-log-python-sdk)
+  Downloading jmespath-1.1.0-py3-none-any.whl.metadata (7.6 kB)
+Collecting dateparser (from aliyun-log-python-sdk)
+  Downloading dateparser-1.4.3-py3-none-any.whl.metadata (25 kB)
+Collecting protobuf<6.0.0,>=3.20.3 (from aliyun-log-python-sdk)
+  Downloading protobuf-5.29.6-cp310-abi3-win_amd64.whl.metadata (592 bytes)
+Collecting lz4 (from aliyun-log-python-sdk)
+  Downloading lz4-4.4.5-cp312-cp312-win_amd64.whl.metadata (3.9 kB)
+Collecting pytz>=2024.2 (from dateparser->aliyun-log-python-sdk)
+  Downloading pytz-2026.6-py2.py3-none-any.whl.metadata (22 kB)
+Collecting regex>=2024.9.11 (from dateparser->aliyun-log-python-sdk)
+  Downloading regex-2026.9.29-cp312-cp312-win_amd64.whl.metadata (41 kB)
+Collecting tzlocal>=0.2 (from dateparser->aliyun-log-python-sdk)
+  Downloading tzlocal-5.4.5-py3-none-any.whl.metadata (7.7 kB)
+Collecting tzdata (from python-dateutil->aliyun-log-python-sdk)
+  Using cached tzdata-2026.6-py2.py3-none-any.whl.metadata (1.4 kB)
+Requirement already satisfied: anyio in <global-python>\Lib\site-packages (from elasticsearch->aliyun-log-python-sdk) (4.14.2)
+Collecting elastic-transport<10,>=9.4.1 (from elasticsearch->aliyun-log-python-sdk)
+  Downloading elastic_transport-9.4.2-py3-none-any.whl.metadata (3.9 kB)
+Requirement already satisfied: sniffio in <global-python>\Lib\site-packages (from elasticsearch->aliyun-log-python-sdk) (1.3.1)
+Requirement already satisfied: typing-extensions in <global-python>\Lib\site-packages (from elasticsearch->aliyun-log-python-sdk) (4.16.0)
+Collecting urllib3<3,>=2 (from elastic-transport<10,>=9.4.1->elasticsearch->aliyun-log-python-sdk)
+  Using cached urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
+Collecting certifi (from elastic-transport<10,>=9.4.1->elasticsearch->aliyun-log-python-sdk)
+  Using cached certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
+Requirement already satisfied: idna>=2.8 in <global-python>\Lib\site-packages (from anyio->elasticsearch->aliyun-log-python-sdk) (3.19)
+Collecting charset_normalizer<4,>=2 (from requests->aliyun-log-python-sdk)
+  Using cached charset_normalizer-3.5.2-cp312-cp312-win_amd64.whl.metadata (47 kB)
+Downloading protobuf-5.29.6-cp310-abi3-win_amd64.whl (435 kB)
+Downloading dateparser-1.4.3-py3-none-any.whl (322 kB)
+Using cached python_dateutil-3.0.0-py2.py3-none-any.whl (94 kB)
+Downloading pytz-2026.6-py2.py3-none-any.whl (506 kB)
+Downloading regex-2026.9.29-cp312-cp312-win_amd64.whl (280 kB)
+Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+Downloading tzlocal-5.4.5-py3-none-any.whl (18 kB)
+Downloading elasticsearch-9.5.1-py3-none-any.whl (1.0 MB)
+   ---------------------------------------- 1.0/1.0 MB 6.9 MB/s  0:00:00
+Downloading elastic_transport-9.4.2-py3-none-any.whl (66 kB)
+Using cached urllib3-2.8.0-py3-none-any.whl (135 kB)
+Using cached certifi-2026.10.23-py3-none-any.whl (135 kB)
+Downloading jmespath-1.1.0-py3-none-any.whl (20 kB)
+Downloading lz4-4.4.5-cp312-cp312-win_amd64.whl (99 kB)
+Using cached requests-2.34.2-py3-none-any.whl (73 kB)
+Using cached charset_normalizer-3.5.2-cp312-cp312-win_amd64.whl (207 kB)
+Using cached tzdata-2026.6-py2.py3-none-any.whl (348 kB)
+Building wheels for collected packages: aliyun-log-python-sdk
+  Building wheel for aliyun-log-python-sdk (pyproject.toml): started
+  Building wheel for aliyun-log-python-sdk (pyproject.toml): finished with status 'done'
+  Created wheel for aliyun-log-python-sdk: filename=aliyun_log_python_sdk-0.9.52-py3-none-any.whl size=235449 sha256=f09d0086bbe02e6405facdb8d87a6bc558d875f3f14a97429b09e57892500caa
+  Stored in directory: <home>\appdata\local\pip\cache\wheels\f5\e0\ec\91a313f10f6ebb00a13e824473183602054e82e45687ea4e60
+Successfully built aliyun-log-python-sdk
+Installing collected packages: pytz, urllib3, tzdata, six, regex, protobuf, lz4, jmespath, charset_normalizer, certifi, tzlocal, requests, python-dateutil, elastic-transport, elasticsearch, dateparser, aliyun-log-python-sdk
+
+Cleanup command (actual exit 0):
+python -m pip uninstall -y pytz urllib3 tzdata six regex protobuf lz4 jmespath charset_normalizer certifi tzlocal requests python-dateutil elastic-transport elasticsearch dateparser
+
+Found existing installation: pytz 2026.6
+Uninstalling pytz-2026.6:
+  Successfully uninstalled pytz-2026.6
+Found existing installation: urllib3 2.8.0
+Uninstalling urllib3-2.8.0:
+  Successfully uninstalled urllib3-2.8.0
+Found existing installation: tzdata 2026.6
+Uninstalling tzdata-2026.6:
+  Successfully uninstalled tzdata-2026.6
+Found existing installation: six 1.17.0
+Uninstalling six-1.17.0:
+  Successfully uninstalled six-1.17.0
+Found existing installation: regex 2026.9.29
+Uninstalling regex-2026.9.29:
+  Successfully uninstalled regex-2026.9.29
+Found existing installation: protobuf 5.29.6
+Uninstalling protobuf-5.29.6:
+  Successfully uninstalled protobuf-5.29.6
+Found existing installation: lz4 4.4.5
+Uninstalling lz4-4.4.5:
+  Successfully uninstalled lz4-4.4.5
+Found existing installation: jmespath 1.1.0
+Uninstalling jmespath-1.1.0:
+  Successfully uninstalled jmespath-1.1.0
+Found existing installation: charset-normalizer 3.5.2
+Uninstalling charset-normalizer-3.5.2:
+  Successfully uninstalled charset-normalizer-3.5.2
+Found existing installation: certifi 2026.10.23
+Uninstalling certifi-2026.10.23:
+  Successfully uninstalled certifi-2026.10.23
+Found existing installation: tzlocal 5.4.5
+Uninstalling tzlocal-5.4.5:
+  Successfully uninstalled tzlocal-5.4.5
+Found existing installation: requests 2.34.2
+Uninstalling requests-2.34.2:
+  Successfully uninstalled requests-2.34.2
+Found existing installation: python-dateutil 3.0.0
+Uninstalling python-dateutil-3.0.0:
+  Successfully uninstalled python-dateutil-3.0.0
+Found existing installation: elastic-transport 9.4.2
+Uninstalling elastic-transport-9.4.2:
+  Successfully uninstalled elastic-transport-9.4.2
+Found existing installation: elasticsearch 9.5.1
+Uninstalling elasticsearch-9.5.1:
+  Successfully uninstalled elasticsearch-9.5.1
+Found existing installation: dateparser 1.4.3
+Uninstalling dateparser-1.4.3:
+  Successfully uninstalled dateparser-1.4.3
+
+Final package-presence audit (actual read-only check):
+WARNING: Package(s) not found: aliyun-log-python-sdk, certifi, charset-normalizer, dateparser, elastic-transport, elasticsearch, jmespath, lz4, protobuf, python-dateutil, pytz, regex, requests, six, tzdata, tzlocal, urllib3
+Get-Process python,pip returned no surviving child process at audit.
+bare pip path was <global-python>\Scripts\pip.exe; global sys.prefix==sys.base_prefix.
+Isolated pyvenv.cfg: include-system-site-packages=false.
+
+Pre-incident full global inventory was NOT captured. See incident JSON for
+limits of the restoration claim and post-correction guards. This transcript is
+an explicit preservation of the command-tool output, not a rerun of the wrapper.

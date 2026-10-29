@@ -1,0 +1,2212 @@
+{
+  "timestamp_utc": "2026-10-29T09:33:36.623988+00:00",
+  "purpose": "official public tooling specimens, NOT HeT model choice/training/accuracy",
+  "platform": {
+    "system": "Windows",
+    "machine": "AMD64",
+    "python": "3.12.10"
+  },
+  "versions": {
+    "ultralytics": "8.3.230",
+    "torch": "2.8.0+cpu",
+    "torchvision": "0.23.0+cpu",
+    "MNN": "3.2.0",
+    "onnx": "1.19.1",
+    "onnxruntime": "1.23.2",
+    "numpy": "2.2.6"
+  },
+  "sources": [
+    {
+      "path": "runs/phase2-edge/export-smoke/yolo11n-cls.pt",
+      "bytes": 5790624,
+      "sha256": "c62d41bf9625777760018bf914d2e6cd472420ccd01706d97a61cb6c82502bd7",
+      "source_url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11n-cls.pt",
+      "license_context": "Ultralytics AGPL-3.0 / enterprise licensing; sample photos provided in official repo; original photo rights not independently audited; not redistributed in git"
+    },
+    {
+      "path": "runs/phase2-edge/export-smoke/yolo11n.pt",
+      "bytes": 5613764,
+      "sha256": "0ebbc80d4a7680d14987a577cd21342b65ecfd94632bd9a8da63ae6417644ee1",
+      "source_url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11n.pt",
+      "license_context": "Ultralytics AGPL-3.0 / enterprise licensing; sample photos provided in official repo; original photo rights not independently audited; not redistributed in git"
+    },
+    {
+      "path": "runs/phase2-edge/export-smoke/bus.jpg",
+      "bytes": 137419,
+      "sha256": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63",
+      "source_url": "https://raw.githubusercontent.com/ultralytics/ultralytics/v8.3.230/ultralytics/assets/bus.jpg",
+      "license_context": "Ultralytics AGPL-3.0 / enterprise licensing; sample photos provided in official repo; original photo rights not independently audited; not redistributed in git"
+    },
+    {
+      "path": "runs/phase2-edge/export-smoke/zidane.jpg",
+      "bytes": 50427,
+      "sha256": "16d73869e3267a7d4ed00de8e860833bd1657c1b252e94c0c348277adc7b6edb",
+      "source_url": "https://raw.githubusercontent.com/ultralytics/ultralytics/v8.3.230/ultralytics/assets/zidane.jpg",
+      "license_context": "Ultralytics AGPL-3.0 / enterprise licensing; sample photos provided in official repo; original photo rights not independently audited; not redistributed in git"
+    }
+  ],
+  "stages": [
+    {
+      "name": "offline_guard_self_test",
+      "exit_code": 0,
+      "seconds": 0.157,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "guard"
+      ],
+      "log": "runs/phase2-edge/export-smoke/offline_guard_self_test.log"
+    },
+    {
+      "name": "yolo11n-cls-prepare",
+      "exit_code": 0,
+      "seconds": 2.375,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "prepare",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.pt",
+        "--task",
+        "classify"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-cls-prepare.log"
+    },
+    {
+      "name": "yolo11n-cls-torchscript",
+      "exit_code": 0,
+      "seconds": 2.75,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "torchscript",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.pt",
+        "--task",
+        "classify"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-cls-torchscript.log"
+    },
+    {
+      "name": "yolo11n-cls-direct-TORCH-fp32",
+      "exit_code": 1,
+      "seconds": 0.172,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "convert",
+        "--framework",
+        "TORCH",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.torchscript",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-direct-fp32.mnn"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-cls-direct-TORCH-fp32.log"
+    },
+    {
+      "name": "yolo11n-cls-onnx",
+      "exit_code": 0,
+      "seconds": 2.531,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "onnx",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.pt",
+        "--task",
+        "classify"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-cls-onnx.log"
+    },
+    {
+      "name": "yolo11n-cls-onnx-fp32",
+      "exit_code": 0,
+      "seconds": 0.329,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "convert",
+        "--framework",
+        "ONNX",
+        "--weight-bits",
+        "0",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.onnx",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-onnx-fp32.mnn"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-cls-onnx-fp32.log"
+    },
+    {
+      "name": "yolo11n-cls-onnx-weight8",
+      "exit_code": 0,
+      "seconds": 0.328,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "convert",
+        "--framework",
+        "ONNX",
+        "--weight-bits",
+        "8",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.onnx",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-onnx-weight8.mnn"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-cls-onnx-weight8.log"
+    },
+    {
+      "name": "yolo11n-cls-bus-yolo11n-cls-torchscript-output",
+      "exit_code": 0,
+      "seconds": 1.375,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "infer",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.torchscript",
+        "--tensor",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-bus-input.npy",
+        "--contract",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.contract.json",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-bus-yolo11n-cls-torchscript-output.npy"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-cls-bus-yolo11n-cls-torchscript-output.log"
+    },
+    {
+      "name": "yolo11n-cls-bus-yolo11n-cls-onnx-output",
+      "exit_code": 0,
+      "seconds": 0.313,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "infer",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.onnx",
+        "--tensor",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-bus-input.npy",
+        "--contract",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.contract.json",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-bus-yolo11n-cls-onnx-output.npy"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-cls-bus-yolo11n-cls-onnx-output.log"
+    },
+    {
+      "name": "yolo11n-cls-bus-yolo11n-cls-onnx-fp32-mnn-output",
+      "exit_code": 0,
+      "seconds": 0.219,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "infer",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-onnx-fp32.mnn",
+        "--tensor",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-bus-input.npy",
+        "--contract",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.contract.json",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-bus-yolo11n-cls-onnx-fp32-mnn-output.npy"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-cls-bus-yolo11n-cls-onnx-fp32-mnn-output.log"
+    },
+    {
+      "name": "yolo11n-cls-bus-yolo11n-cls-onnx-weight8-mnn-output",
+      "exit_code": 0,
+      "seconds": 0.203,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "infer",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-onnx-weight8.mnn",
+        "--tensor",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-bus-input.npy",
+        "--contract",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.contract.json",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-bus-yolo11n-cls-onnx-weight8-mnn-output.npy"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-cls-bus-yolo11n-cls-onnx-weight8-mnn-output.log"
+    },
+    {
+      "name": "yolo11n-cls-zidane-yolo11n-cls-torchscript-output",
+      "exit_code": 0,
+      "seconds": 1.344,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "infer",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.torchscript",
+        "--tensor",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-zidane-input.npy",
+        "--contract",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.contract.json",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-zidane-yolo11n-cls-torchscript-output.npy"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-cls-zidane-yolo11n-cls-torchscript-output.log"
+    },
+    {
+      "name": "yolo11n-cls-zidane-yolo11n-cls-onnx-output",
+      "exit_code": 0,
+      "seconds": 0.328,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "infer",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.onnx",
+        "--tensor",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-zidane-input.npy",
+        "--contract",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.contract.json",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-zidane-yolo11n-cls-onnx-output.npy"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-cls-zidane-yolo11n-cls-onnx-output.log"
+    },
+    {
+      "name": "yolo11n-cls-zidane-yolo11n-cls-onnx-fp32-mnn-output",
+      "exit_code": 0,
+      "seconds": 0.218,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "infer",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-onnx-fp32.mnn",
+        "--tensor",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-zidane-input.npy",
+        "--contract",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.contract.json",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-zidane-yolo11n-cls-onnx-fp32-mnn-output.npy"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-cls-zidane-yolo11n-cls-onnx-fp32-mnn-output.log"
+    },
+    {
+      "name": "yolo11n-cls-zidane-yolo11n-cls-onnx-weight8-mnn-output",
+      "exit_code": 0,
+      "seconds": 0.204,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "infer",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-onnx-weight8.mnn",
+        "--tensor",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-zidane-input.npy",
+        "--contract",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls.contract.json",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-cls-zidane-yolo11n-cls-onnx-weight8-mnn-output.npy"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-cls-zidane-yolo11n-cls-onnx-weight8-mnn-output.log"
+    },
+    {
+      "name": "yolo11n-prepare",
+      "exit_code": 0,
+      "seconds": 1.484,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "prepare",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.pt",
+        "--task",
+        "detect"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-prepare.log"
+    },
+    {
+      "name": "yolo11n-torchscript",
+      "exit_code": 0,
+      "seconds": 2.36,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "torchscript",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.pt",
+        "--task",
+        "detect"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-torchscript.log"
+    },
+    {
+      "name": "yolo11n-direct-TORCH-fp32",
+      "exit_code": 1,
+      "seconds": 0.171,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "convert",
+        "--framework",
+        "TORCH",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.torchscript",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-direct-fp32.mnn"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-direct-TORCH-fp32.log"
+    },
+    {
+      "name": "yolo11n-onnx",
+      "exit_code": 0,
+      "seconds": 1.922,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "onnx",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.pt",
+        "--task",
+        "detect"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-onnx.log"
+    },
+    {
+      "name": "yolo11n-onnx-fp32",
+      "exit_code": 0,
+      "seconds": 0.375,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "convert",
+        "--framework",
+        "ONNX",
+        "--weight-bits",
+        "0",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.onnx",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-onnx-fp32.mnn"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-onnx-fp32.log"
+    },
+    {
+      "name": "yolo11n-onnx-weight8",
+      "exit_code": 0,
+      "seconds": 0.391,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "convert",
+        "--framework",
+        "ONNX",
+        "--weight-bits",
+        "8",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.onnx",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-onnx-weight8.mnn"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-onnx-weight8.log"
+    },
+    {
+      "name": "yolo11n-bus-yolo11n-torchscript-output",
+      "exit_code": 0,
+      "seconds": 1.469,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "infer",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.torchscript",
+        "--tensor",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-bus-input.npy",
+        "--contract",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.contract.json",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-bus-yolo11n-torchscript-output.npy"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-bus-yolo11n-torchscript-output.log"
+    },
+    {
+      "name": "yolo11n-bus-yolo11n-onnx-output",
+      "exit_code": 0,
+      "seconds": 0.375,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "infer",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.onnx",
+        "--tensor",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-bus-input.npy",
+        "--contract",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.contract.json",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-bus-yolo11n-onnx-output.npy"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-bus-yolo11n-onnx-output.log"
+    },
+    {
+      "name": "yolo11n-bus-yolo11n-onnx-fp32-mnn-output",
+      "exit_code": 0,
+      "seconds": 0.235,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "infer",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-onnx-fp32.mnn",
+        "--tensor",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-bus-input.npy",
+        "--contract",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.contract.json",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-bus-yolo11n-onnx-fp32-mnn-output.npy"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-bus-yolo11n-onnx-fp32-mnn-output.log"
+    },
+    {
+      "name": "yolo11n-bus-yolo11n-onnx-weight8-mnn-output",
+      "exit_code": 0,
+      "seconds": 0.218,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "infer",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-onnx-weight8.mnn",
+        "--tensor",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-bus-input.npy",
+        "--contract",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.contract.json",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-bus-yolo11n-onnx-weight8-mnn-output.npy"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-bus-yolo11n-onnx-weight8-mnn-output.log"
+    },
+    {
+      "name": "yolo11n-zidane-yolo11n-torchscript-output",
+      "exit_code": 0,
+      "seconds": 1.469,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "infer",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.torchscript",
+        "--tensor",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-zidane-input.npy",
+        "--contract",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.contract.json",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-zidane-yolo11n-torchscript-output.npy"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-zidane-yolo11n-torchscript-output.log"
+    },
+    {
+      "name": "yolo11n-zidane-yolo11n-onnx-output",
+      "exit_code": 0,
+      "seconds": 0.36,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "infer",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.onnx",
+        "--tensor",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-zidane-input.npy",
+        "--contract",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.contract.json",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-zidane-yolo11n-onnx-output.npy"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-zidane-yolo11n-onnx-output.log"
+    },
+    {
+      "name": "yolo11n-zidane-yolo11n-onnx-fp32-mnn-output",
+      "exit_code": 0,
+      "seconds": 0.235,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "infer",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-onnx-fp32.mnn",
+        "--tensor",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-zidane-input.npy",
+        "--contract",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.contract.json",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-zidane-yolo11n-onnx-fp32-mnn-output.npy"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-zidane-yolo11n-onnx-fp32-mnn-output.log"
+    },
+    {
+      "name": "yolo11n-zidane-yolo11n-onnx-weight8-mnn-output",
+      "exit_code": 0,
+      "seconds": 0.219,
+      "command": [
+        "<isolated-python>",
+        "-m",
+        "tools.edge_export.smoke",
+        "--worker",
+        "--action",
+        "infer",
+        "--model",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-onnx-weight8.mnn",
+        "--tensor",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-zidane-input.npy",
+        "--contract",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n.contract.json",
+        "--output",
+        "<workspace>\\runs\\phase2-edge\\export-smoke\\yolo11n-zidane-yolo11n-onnx-weight8-mnn-output.npy"
+      ],
+      "log": "runs/phase2-edge/export-smoke/yolo11n-zidane-yolo11n-onnx-weight8-mnn-output.log"
+    }
+  ],
+  "comparisons": [
+    {
+      "task": "classify",
+      "sample": "bus",
+      "format": "yolo11n-cls.torchscript",
+      "input": {
+        "path": "runs/phase2-edge/export-smoke/yolo11n-cls-bus-input.npy",
+        "bytes": 602240,
+        "sha256": "2d69b64d9ab4a31e899390e8387613e4db81dded5d9114ea2719caa741df1a07"
+      },
+      "output_shape": [
+        1,
+        1000
+      ],
+      "max_absolute_error": 0.0,
+      "mean_absolute_error": 0.0,
+      "allclose_atol1e-4_rtol1e-4": true,
+      "pytorch_predictions": [
+        {
+          "class_id": 654,
+          "name": "minibus",
+          "probability": 0.5710126161575317
+        },
+        {
+          "class_id": 734,
+          "name": "police_van",
+          "probability": 0.3374518156051636
+        },
+        {
+          "class_id": 874,
+          "name": "trolleybus",
+          "probability": 0.04209774360060692
+        },
+        {
+          "class_id": 757,
+          "name": "recreational_vehicle",
+          "probability": 0.014150526374578476
+        },
+        {
+          "class_id": 829,
+          "name": "streetcar",
+          "probability": 0.005880388431251049
+        }
+      ],
+      "export_predictions": [
+        {
+          "class_id": 654,
+          "name": "minibus",
+          "probability": 0.5710126161575317
+        },
+        {
+          "class_id": 734,
+          "name": "police_van",
+          "probability": 0.3374518156051636
+        },
+        {
+          "class_id": 874,
+          "name": "trolleybus",
+          "probability": 0.04209774360060692
+        },
+        {
+          "class_id": 757,
+          "name": "recreational_vehicle",
+          "probability": 0.014150526374578476
+        },
+        {
+          "class_id": 829,
+          "name": "streetcar",
+          "probability": 0.005880388431251049
+        }
+      ],
+      "postprocess": "classification top5"
+    },
+    {
+      "task": "classify",
+      "sample": "bus",
+      "format": "yolo11n-cls.onnx",
+      "input": {
+        "path": "runs/phase2-edge/export-smoke/yolo11n-cls-bus-input.npy",
+        "bytes": 602240,
+        "sha256": "2d69b64d9ab4a31e899390e8387613e4db81dded5d9114ea2719caa741df1a07"
+      },
+      "output_shape": [
+        1,
+        1000
+      ],
+      "max_absolute_error": 1.1920928955078125e-07,
+      "mean_absolute_error": 3.2177741027261675e-10,
+      "allclose_atol1e-4_rtol1e-4": true,
+      "pytorch_predictions": [
+        {
+          "class_id": 654,
+          "name": "minibus",
+          "probability": 0.5710126161575317
+        },
+        {
+          "class_id": 734,
+          "name": "police_van",
+          "probability": 0.3374518156051636
+        },
+        {
+          "class_id": 874,
+          "name": "trolleybus",
+          "probability": 0.04209774360060692
+        },
+        {
+          "class_id": 757,
+          "name": "recreational_vehicle",
+          "probability": 0.014150526374578476
+        },
+        {
+          "class_id": 829,
+          "name": "streetcar",
+          "probability": 0.005880388431251049
+        }
+      ],
+      "export_predictions": [
+        {
+          "class_id": 654,
+          "name": "minibus",
+          "probability": 0.571012556552887
+        },
+        {
+          "class_id": 734,
+          "name": "police_van",
+          "probability": 0.3374517858028412
+        },
+        {
+          "class_id": 874,
+          "name": "trolleybus",
+          "probability": 0.04209786280989647
+        },
+        {
+          "class_id": 757,
+          "name": "recreational_vehicle",
+          "probability": 0.014150538481771946
+        },
+        {
+          "class_id": 829,
+          "name": "streetcar",
+          "probability": 0.005880409851670265
+        }
+      ],
+      "postprocess": "classification top5"
+    },
+    {
+      "task": "classify",
+      "sample": "bus",
+      "format": "yolo11n-cls-onnx-fp32.mnn",
+      "input": {
+        "path": "runs/phase2-edge/export-smoke/yolo11n-cls-bus-input.npy",
+        "bytes": 602240,
+        "sha256": "2d69b64d9ab4a31e899390e8387613e4db81dded5d9114ea2719caa741df1a07"
+      },
+      "output_shape": [
+        1,
+        1000
+      ],
+      "max_absolute_error": 0.00015437602996826172,
+      "mean_absolute_error": 1.916304483984277e-07,
+      "allclose_atol1e-4_rtol1e-4": true,
+      "pytorch_predictions": [
+        {
+          "class_id": 654,
+          "name": "minibus",
+          "probability": 0.5710126161575317
+        },
+        {
+          "class_id": 734,
+          "name": "police_van",
+          "probability": 0.3374518156051636
+        },
+        {
+          "class_id": 874,
+          "name": "trolleybus",
+          "probability": 0.04209774360060692
+        },
+        {
+          "class_id": 757,
+          "name": "recreational_vehicle",
+          "probability": 0.014150526374578476
+        },
+        {
+          "class_id": 829,
+          "name": "streetcar",
+          "probability": 0.005880388431251049
+        }
+      ],
+      "export_predictions": [
+        {
+          "class_id": 654,
+          "name": "minibus",
+          "probability": 0.5711669921875
+        },
+        {
+          "class_id": 734,
+          "name": "police_van",
+          "probability": 0.33746337890625
+        },
+        {
+          "class_id": 874,
+          "name": "trolleybus",
+          "probability": 0.042083740234375
+        },
+        {
+          "class_id": 757,
+          "name": "recreational_vehicle",
+          "probability": 0.014156341552734375
+        },
+        {
+          "class_id": 829,
+          "name": "streetcar",
+          "probability": 0.005881309509277344
+        }
+      ],
+      "postprocess": "classification top5"
+    },
+    {
+      "task": "classify",
+      "sample": "bus",
+      "format": "yolo11n-cls-onnx-weight8.mnn",
+      "input": {
+        "path": "runs/phase2-edge/export-smoke/yolo11n-cls-bus-input.npy",
+        "bytes": 602240,
+        "sha256": "2d69b64d9ab4a31e899390e8387613e4db81dded5d9114ea2719caa741df1a07"
+      },
+      "output_shape": [
+        1,
+        1000
+      ],
+      "max_absolute_error": 0.06643855571746826,
+      "mean_absolute_error": 0.00013718481932301074,
+      "allclose_atol1e-4_rtol1e-4": false,
+      "pytorch_predictions": [
+        {
+          "class_id": 654,
+          "name": "minibus",
+          "probability": 0.5710126161575317
+        },
+        {
+          "class_id": 734,
+          "name": "police_van",
+          "probability": 0.3374518156051636
+        },
+        {
+          "class_id": 874,
+          "name": "trolleybus",
+          "probability": 0.04209774360060692
+        },
+        {
+          "class_id": 757,
+          "name": "recreational_vehicle",
+          "probability": 0.014150526374578476
+        },
+        {
+          "class_id": 829,
+          "name": "streetcar",
+          "probability": 0.005880388431251049
+        }
+      ],
+      "export_predictions": [
+        {
+          "class_id": 654,
+          "name": "minibus",
+          "probability": 0.637451171875
+        },
+        {
+          "class_id": 734,
+          "name": "police_van",
+          "probability": 0.2823486328125
+        },
+        {
+          "class_id": 874,
+          "name": "trolleybus",
+          "probability": 0.0308074951171875
+        },
+        {
+          "class_id": 757,
+          "name": "recreational_vehicle",
+          "probability": 0.015054702758789062
+        },
+        {
+          "class_id": 408,
+          "name": "amphibian",
+          "probability": 0.006100654602050781
+        }
+      ],
+      "postprocess": "classification top5"
+    },
+    {
+      "task": "classify",
+      "sample": "zidane",
+      "format": "yolo11n-cls.torchscript",
+      "input": {
+        "path": "runs/phase2-edge/export-smoke/yolo11n-cls-zidane-input.npy",
+        "bytes": 602240,
+        "sha256": "596a9c7e806fea9bf39799e2a2ffb763fb5cb4cd170d97503a99dc6ac643be8f"
+      },
+      "output_shape": [
+        1,
+        1000
+      ],
+      "max_absolute_error": 0.0,
+      "mean_absolute_error": 0.0,
+      "allclose_atol1e-4_rtol1e-4": true,
+      "pytorch_predictions": [
+        {
+          "class_id": 834,
+          "name": "suit",
+          "probability": 0.3473454415798187
+        },
+        {
+          "class_id": 465,
+          "name": "bulletproof_vest",
+          "probability": 0.08517100661993027
+        },
+        {
+          "class_id": 457,
+          "name": "bow_tie",
+          "probability": 0.07854627072811127
+        },
+        {
+          "class_id": 819,
+          "name": "stage",
+          "probability": 0.06988522410392761
+        },
+        {
+          "class_id": 768,
+          "name": "rugby_ball",
+          "probability": 0.03551911935210228
+        }
+      ],
+      "export_predictions": [
+        {
+          "class_id": 834,
+          "name": "suit",
+          "probability": 0.3473454415798187
+        },
+        {
+          "class_id": 465,
+          "name": "bulletproof_vest",
+          "probability": 0.08517100661993027
+        },
+        {
+          "class_id": 457,
+          "name": "bow_tie",
+          "probability": 0.07854627072811127
+        },
+        {
+          "class_id": 819,
+          "name": "stage",
+          "probability": 0.06988522410392761
+        },
+        {
+          "class_id": 768,
+          "name": "rugby_ball",
+          "probability": 0.03551911935210228
+        }
+      ],
+      "postprocess": "classification top5"
+    },
+    {
+      "task": "classify",
+      "sample": "zidane",
+      "format": "yolo11n-cls.onnx",
+      "input": {
+        "path": "runs/phase2-edge/export-smoke/yolo11n-cls-zidane-input.npy",
+        "bytes": 602240,
+        "sha256": "596a9c7e806fea9bf39799e2a2ffb763fb5cb4cd170d97503a99dc6ac643be8f"
+      },
+      "output_shape": [
+        1,
+        1000
+      ],
+      "max_absolute_error": 7.748603820800781e-07,
+      "mean_absolute_error": 2.82226908510097e-09,
+      "allclose_atol1e-4_rtol1e-4": true,
+      "pytorch_predictions": [
+        {
+          "class_id": 834,
+          "name": "suit",
+          "probability": 0.3473454415798187
+        },
+        {
+          "class_id": 465,
+          "name": "bulletproof_vest",
+          "probability": 0.08517100661993027
+        },
+        {
+          "class_id": 457,
+          "name": "bow_tie",
+          "probability": 0.07854627072811127
+        },
+        {
+          "class_id": 819,
+          "name": "stage",
+          "probability": 0.06988522410392761
+        },
+        {
+          "class_id": 768,
+          "name": "rugby_ball",
+          "probability": 0.03551911935210228
+        }
+      ],
+      "export_predictions": [
+        {
+          "class_id": 834,
+          "name": "suit",
+          "probability": 0.3473462164402008
+        },
+        {
+          "class_id": 465,
+          "name": "bulletproof_vest",
+          "probability": 0.08517087250947952
+        },
+        {
+          "class_id": 457,
+          "name": "bow_tie",
+          "probability": 0.07854615151882172
+        },
+        {
+          "class_id": 819,
+          "name": "stage",
+          "probability": 0.0698847770690918
+        },
+        {
+          "class_id": 768,
+          "name": "rugby_ball",
+          "probability": 0.03551928699016571
+        }
+      ],
+      "postprocess": "classification top5"
+    },
+    {
+      "task": "classify",
+      "sample": "zidane",
+      "format": "yolo11n-cls-onnx-fp32.mnn",
+      "input": {
+        "path": "runs/phase2-edge/export-smoke/yolo11n-cls-zidane-input.npy",
+        "bytes": 602240,
+        "sha256": "596a9c7e806fea9bf39799e2a2ffb763fb5cb4cd170d97503a99dc6ac643be8f"
+      },
+      "output_shape": [
+        1,
+        1000
+      ],
+      "max_absolute_error": 6.666779518127441e-05,
+      "mean_absolute_error": 1.7312166278316e-07,
+      "allclose_atol1e-4_rtol1e-4": true,
+      "pytorch_predictions": [
+        {
+          "class_id": 834,
+          "name": "suit",
+          "probability": 0.3473454415798187
+        },
+        {
+          "class_id": 465,
+          "name": "bulletproof_vest",
+          "probability": 0.08517100661993027
+        },
+        {
+          "class_id": 457,
+          "name": "bow_tie",
+          "probability": 0.07854627072811127
+        },
+        {
+          "class_id": 819,
+          "name": "stage",
+          "probability": 0.06988522410392761
+        },
+        {
+          "class_id": 768,
+          "name": "rugby_ball",
+          "probability": 0.03551911935210228
+        }
+      ],
+      "export_predictions": [
+        {
+          "class_id": 834,
+          "name": "suit",
+          "probability": 0.347412109375
+        },
+        {
+          "class_id": 465,
+          "name": "bulletproof_vest",
+          "probability": 0.085174560546875
+        },
+        {
+          "class_id": 457,
+          "name": "bow_tie",
+          "probability": 0.078521728515625
+        },
+        {
+          "class_id": 819,
+          "name": "stage",
+          "probability": 0.06988525390625
+        },
+        {
+          "class_id": 768,
+          "name": "rugby_ball",
+          "probability": 0.03553009033203125
+        }
+      ],
+      "postprocess": "classification top5"
+    },
+    {
+      "task": "classify",
+      "sample": "zidane",
+      "format": "yolo11n-cls-onnx-weight8.mnn",
+      "input": {
+        "path": "runs/phase2-edge/export-smoke/yolo11n-cls-zidane-input.npy",
+        "bytes": 602240,
+        "sha256": "596a9c7e806fea9bf39799e2a2ffb763fb5cb4cd170d97503a99dc6ac643be8f"
+      },
+      "output_shape": [
+        1,
+        1000
+      ],
+      "max_absolute_error": 0.026433855295181274,
+      "mean_absolute_error": 8.701840124558657e-05,
+      "allclose_atol1e-4_rtol1e-4": false,
+      "pytorch_predictions": [
+        {
+          "class_id": 834,
+          "name": "suit",
+          "probability": 0.3473454415798187
+        },
+        {
+          "class_id": 465,
+          "name": "bulletproof_vest",
+          "probability": 0.08517100661993027
+        },
+        {
+          "class_id": 457,
+          "name": "bow_tie",
+          "probability": 0.07854627072811127
+        },
+        {
+          "class_id": 819,
+          "name": "stage",
+          "probability": 0.06988522410392761
+        },
+        {
+          "class_id": 768,
+          "name": "rugby_ball",
+          "probability": 0.03551911935210228
+        }
+      ],
+      "export_predictions": [
+        {
+          "class_id": 834,
+          "name": "suit",
+          "probability": 0.373779296875
+        },
+        {
+          "class_id": 465,
+          "name": "bulletproof_vest",
+          "probability": 0.092498779296875
+        },
+        {
+          "class_id": 457,
+          "name": "bow_tie",
+          "probability": 0.0773773193359375
+        },
+        {
+          "class_id": 819,
+          "name": "stage",
+          "probability": 0.07110595703125
+        },
+        {
+          "class_id": 768,
+          "name": "rugby_ball",
+          "probability": 0.03595733642578125
+        }
+      ],
+      "postprocess": "classification top5"
+    },
+    {
+      "task": "detect",
+      "sample": "bus",
+      "format": "yolo11n.torchscript",
+      "input": {
+        "path": "runs/phase2-edge/export-smoke/yolo11n-bus-input.npy",
+        "bytes": 1228928,
+        "sha256": "22e61fe3d047fc3eb8635978fb737a40333310331f04649b7cb756277f1ad7a9"
+      },
+      "output_shape": [
+        1,
+        84,
+        2100
+      ],
+      "max_absolute_error": 0.0,
+      "mean_absolute_error": 0.0,
+      "allclose_atol1e-4_rtol1e-4": true,
+      "pytorch_predictions": [
+        {
+          "xyxy_input_pixels": [
+            48.032257080078125,
+            68.03033447265625,
+            277.7001953125,
+            218.9578857421875
+          ],
+          "confidence": 0.8460786938667297,
+          "class_id": 5,
+          "name": "bus"
+        },
+        {
+          "xyxy_input_pixels": [
+            55.332584381103516,
+            116.81185913085938,
+            111.309814453125,
+            269.01556396484375
+          ],
+          "confidence": 0.8110940456390381,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            104.98640441894531,
+            118.43693542480469,
+            142.17457580566406,
+            252.9416046142578
+          ],
+          "confidence": 0.8027491569519043,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            238.33499145507812,
+            116.47940063476562,
+            279.7279357910156,
+            258.71624755859375
+          ],
+          "confidence": 0.7308119535446167,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            38.87709045410156,
+            165.76812744140625,
+            67.59850311279297,
+            262.5799560546875
+          ],
+          "confidence": 0.3172018229961395,
+          "class_id": 0,
+          "name": "person"
+        }
+      ],
+      "export_predictions": [
+        {
+          "xyxy_input_pixels": [
+            48.032257080078125,
+            68.03033447265625,
+            277.7001953125,
+            218.9578857421875
+          ],
+          "confidence": 0.8460786938667297,
+          "class_id": 5,
+          "name": "bus"
+        },
+        {
+          "xyxy_input_pixels": [
+            55.332584381103516,
+            116.81185913085938,
+            111.309814453125,
+            269.01556396484375
+          ],
+          "confidence": 0.8110940456390381,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            104.98640441894531,
+            118.43693542480469,
+            142.17457580566406,
+            252.9416046142578
+          ],
+          "confidence": 0.8027491569519043,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            238.33499145507812,
+            116.47940063476562,
+            279.7279357910156,
+            258.71624755859375
+          ],
+          "confidence": 0.7308119535446167,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            38.87709045410156,
+            165.76812744140625,
+            67.59850311279297,
+            262.5799560546875
+          ],
+          "confidence": 0.3172018229961395,
+          "class_id": 0,
+          "name": "person"
+        }
+      ],
+      "postprocess": "Ultralytics8.3.230 non_max_suppression conf0.25 iou0.45 class-aware max_det100, coordinates in 320x320 input; no claim of original-image boxes"
+    },
+    {
+      "task": "detect",
+      "sample": "bus",
+      "format": "yolo11n.onnx",
+      "input": {
+        "path": "runs/phase2-edge/export-smoke/yolo11n-bus-input.npy",
+        "bytes": 1228928,
+        "sha256": "22e61fe3d047fc3eb8635978fb737a40333310331f04649b7cb756277f1ad7a9"
+      },
+      "output_shape": [
+        1,
+        84,
+        2100
+      ],
+      "max_absolute_error": 0.0005950927734375,
+      "mean_absolute_error": 1.187038947136898e-06,
+      "allclose_atol1e-4_rtol1e-4": true,
+      "pytorch_predictions": [
+        {
+          "xyxy_input_pixels": [
+            48.032257080078125,
+            68.03033447265625,
+            277.7001953125,
+            218.9578857421875
+          ],
+          "confidence": 0.8460786938667297,
+          "class_id": 5,
+          "name": "bus"
+        },
+        {
+          "xyxy_input_pixels": [
+            55.332584381103516,
+            116.81185913085938,
+            111.309814453125,
+            269.01556396484375
+          ],
+          "confidence": 0.8110940456390381,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            104.98640441894531,
+            118.43693542480469,
+            142.17457580566406,
+            252.9416046142578
+          ],
+          "confidence": 0.8027491569519043,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            238.33499145507812,
+            116.47940063476562,
+            279.7279357910156,
+            258.71624755859375
+          ],
+          "confidence": 0.7308119535446167,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            38.87709045410156,
+            165.76812744140625,
+            67.59850311279297,
+            262.5799560546875
+          ],
+          "confidence": 0.3172018229961395,
+          "class_id": 0,
+          "name": "person"
+        }
+      ],
+      "export_predictions": [
+        {
+          "xyxy_input_pixels": [
+            48.032257080078125,
+            68.03032684326172,
+            277.7002258300781,
+            218.9578857421875
+          ],
+          "confidence": 0.8460783362388611,
+          "class_id": 5,
+          "name": "bus"
+        },
+        {
+          "xyxy_input_pixels": [
+            55.33258819580078,
+            116.81185913085938,
+            111.30982208251953,
+            269.01556396484375
+          ],
+          "confidence": 0.8110937476158142,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            104.98640441894531,
+            118.43692016601562,
+            142.17457580566406,
+            252.94158935546875
+          ],
+          "confidence": 0.8027487993240356,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            238.33499145507812,
+            116.47940063476562,
+            279.7279357910156,
+            258.71624755859375
+          ],
+          "confidence": 0.730812132358551,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            38.87709045410156,
+            165.76815795898438,
+            67.5985107421875,
+            262.5799865722656
+          ],
+          "confidence": 0.31720244884490967,
+          "class_id": 0,
+          "name": "person"
+        }
+      ],
+      "postprocess": "Ultralytics8.3.230 non_max_suppression conf0.25 iou0.45 class-aware max_det100, coordinates in 320x320 input; no claim of original-image boxes"
+    },
+    {
+      "task": "detect",
+      "sample": "bus",
+      "format": "yolo11n-onnx-fp32.mnn",
+      "input": {
+        "path": "runs/phase2-edge/export-smoke/yolo11n-bus-input.npy",
+        "bytes": 1228928,
+        "sha256": "22e61fe3d047fc3eb8635978fb737a40333310331f04649b7cb756277f1ad7a9"
+      },
+      "output_shape": [
+        1,
+        84,
+        2100
+      ],
+      "max_absolute_error": 0.09332275390625,
+      "mean_absolute_error": 0.0001524405088275671,
+      "allclose_atol1e-4_rtol1e-4": false,
+      "pytorch_predictions": [
+        {
+          "xyxy_input_pixels": [
+            48.032257080078125,
+            68.03033447265625,
+            277.7001953125,
+            218.9578857421875
+          ],
+          "confidence": 0.8460786938667297,
+          "class_id": 5,
+          "name": "bus"
+        },
+        {
+          "xyxy_input_pixels": [
+            55.332584381103516,
+            116.81185913085938,
+            111.309814453125,
+            269.01556396484375
+          ],
+          "confidence": 0.8110940456390381,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            104.98640441894531,
+            118.43693542480469,
+            142.17457580566406,
+            252.9416046142578
+          ],
+          "confidence": 0.8027491569519043,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            238.33499145507812,
+            116.47940063476562,
+            279.7279357910156,
+            258.71624755859375
+          ],
+          "confidence": 0.7308119535446167,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            38.87709045410156,
+            165.76812744140625,
+            67.59850311279297,
+            262.5799560546875
+          ],
+          "confidence": 0.3172018229961395,
+          "class_id": 0,
+          "name": "person"
+        }
+      ],
+      "export_predictions": [
+        {
+          "xyxy_input_pixels": [
+            48.024627685546875,
+            68.02609252929688,
+            277.752197265625,
+            218.96728515625
+          ],
+          "confidence": 0.8460693955421448,
+          "class_id": 5,
+          "name": "bus"
+        },
+        {
+          "xyxy_input_pixels": [
+            55.33270263671875,
+            116.79522705078125,
+            111.314208984375,
+            269.02362060546875
+          ],
+          "confidence": 0.8110932111740112,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            104.98039245605469,
+            118.42022705078125,
+            142.1736297607422,
+            252.95352172851562
+          ],
+          "confidence": 0.8027524352073669,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            238.3290557861328,
+            116.46994018554688,
+            279.73345947265625,
+            258.7326965332031
+          ],
+          "confidence": 0.7308182120323181,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            38.871253967285156,
+            165.7625732421875,
+            67.60047912597656,
+            262.5870666503906
+          ],
+          "confidence": 0.3172653317451477,
+          "class_id": 0,
+          "name": "person"
+        }
+      ],
+      "postprocess": "Ultralytics8.3.230 non_max_suppression conf0.25 iou0.45 class-aware max_det100, coordinates in 320x320 input; no claim of original-image boxes"
+    },
+    {
+      "task": "detect",
+      "sample": "bus",
+      "format": "yolo11n-onnx-weight8.mnn",
+      "input": {
+        "path": "runs/phase2-edge/export-smoke/yolo11n-bus-input.npy",
+        "bytes": 1228928,
+        "sha256": "22e61fe3d047fc3eb8635978fb737a40333310331f04649b7cb756277f1ad7a9"
+      },
+      "output_shape": [
+        1,
+        84,
+        2100
+      ],
+      "max_absolute_error": 22.0567626953125,
+      "mean_absolute_error": 0.039594996720552444,
+      "allclose_atol1e-4_rtol1e-4": false,
+      "pytorch_predictions": [
+        {
+          "xyxy_input_pixels": [
+            48.032257080078125,
+            68.03033447265625,
+            277.7001953125,
+            218.9578857421875
+          ],
+          "confidence": 0.8460786938667297,
+          "class_id": 5,
+          "name": "bus"
+        },
+        {
+          "xyxy_input_pixels": [
+            55.332584381103516,
+            116.81185913085938,
+            111.309814453125,
+            269.01556396484375
+          ],
+          "confidence": 0.8110940456390381,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            104.98640441894531,
+            118.43693542480469,
+            142.17457580566406,
+            252.9416046142578
+          ],
+          "confidence": 0.8027491569519043,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            238.33499145507812,
+            116.47940063476562,
+            279.7279357910156,
+            258.71624755859375
+          ],
+          "confidence": 0.7308119535446167,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            38.87709045410156,
+            165.76812744140625,
+            67.59850311279297,
+            262.5799560546875
+          ],
+          "confidence": 0.3172018229961395,
+          "class_id": 0,
+          "name": "person"
+        }
+      ],
+      "export_predictions": [
+        {
+          "xyxy_input_pixels": [
+            47.83495330810547,
+            67.60469818115234,
+            277.7720947265625,
+            218.97445678710938
+          ],
+          "confidence": 0.8433475494384766,
+          "class_id": 5,
+          "name": "bus"
+        },
+        {
+          "xyxy_input_pixels": [
+            55.3944091796875,
+            116.77481842041016,
+            111.08863830566406,
+            268.8352355957031
+          ],
+          "confidence": 0.8137931227684021,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            104.8436279296875,
+            118.41073608398438,
+            142.08497619628906,
+            252.87045288085938
+          ],
+          "confidence": 0.8109279274940491,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            238.48794555664062,
+            117.79290771484375,
+            279.6958312988281,
+            258.6041564941406
+          ],
+          "confidence": 0.7322741746902466,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            38.91204071044922,
+            165.79498291015625,
+            67.61721801757812,
+            262.3148498535156
+          ],
+          "confidence": 0.3578498065471649,
+          "class_id": 0,
+          "name": "person"
+        }
+      ],
+      "postprocess": "Ultralytics8.3.230 non_max_suppression conf0.25 iou0.45 class-aware max_det100, coordinates in 320x320 input; no claim of original-image boxes"
+    },
+    {
+      "task": "detect",
+      "sample": "zidane",
+      "format": "yolo11n.torchscript",
+      "input": {
+        "path": "runs/phase2-edge/export-smoke/yolo11n-zidane-input.npy",
+        "bytes": 1228928,
+        "sha256": "d20f83be15a995e1a26a0b9805f139b6f3813a762e763204329626c5e11006dc"
+      },
+      "output_shape": [
+        1,
+        84,
+        2100
+      ],
+      "max_absolute_error": 0.0,
+      "mean_absolute_error": 0.0,
+      "allclose_atol1e-4_rtol1e-4": true,
+      "pytorch_predictions": [
+        {
+          "xyxy_input_pixels": [
+            30.449310302734375,
+            120.34065246582031,
+            275.4648742675781,
+            247.39060974121094
+          ],
+          "confidence": 0.8896675705909729,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            186.62228393554688,
+            80.6453857421875,
+            286.3929138183594,
+            248.19268798828125
+          ],
+          "confidence": 0.8548339009284973,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            274.09033203125,
+            164.0460205078125,
+            319.44598388671875,
+            248.29693603515625
+          ],
+          "confidence": 0.3197006285190582,
+          "class_id": 0,
+          "name": "person"
+        }
+      ],
+      "export_predictions": [
+        {
+          "xyxy_input_pixels": [
+            30.449310302734375,
+            120.34065246582031,
+            275.4648742675781,
+            247.39060974121094
+          ],
+          "confidence": 0.8896675705909729,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            186.62228393554688,
+            80.6453857421875,
+            286.3929138183594,
+            248.19268798828125
+          ],
+          "confidence": 0.8548339009284973,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            274.09033203125,
+            164.0460205078125,
+            319.44598388671875,
+            248.29693603515625
+          ],
+          "confidence": 0.3197006285190582,
+          "class_id": 0,
+          "name": "person"
+        }
+      ],
+      "postprocess": "Ultralytics8.3.230 non_max_suppression conf0.25 iou0.45 class-aware max_det100, coordinates in 320x320 input; no claim of original-image boxes"
+    },
+    {
+      "task": "detect",
+      "sample": "zidane",
+      "format": "yolo11n.onnx",
+      "input": {
+        "path": "runs/phase2-edge/export-smoke/yolo11n-zidane-input.npy",
+        "bytes": 1228928,
+        "sha256": "d20f83be15a995e1a26a0b9805f139b6f3813a762e763204329626c5e11006dc"
+      },
+      "output_shape": [
+        1,
+        84,
+        2100
+      ],
+      "max_absolute_error": 0.0013885498046875,
+      "mean_absolute_error": 1.8736725451162783e-06,
+      "allclose_atol1e-4_rtol1e-4": true,
+      "pytorch_predictions": [
+        {
+          "xyxy_input_pixels": [
+            30.449310302734375,
+            120.34065246582031,
+            275.4648742675781,
+            247.39060974121094
+          ],
+          "confidence": 0.8896675705909729,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            186.62228393554688,
+            80.6453857421875,
+            286.3929138183594,
+            248.19268798828125
+          ],
+          "confidence": 0.8548339009284973,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            274.09033203125,
+            164.0460205078125,
+            319.44598388671875,
+            248.29693603515625
+          ],
+          "confidence": 0.3197006285190582,
+          "class_id": 0,
+          "name": "person"
+        }
+      ],
+      "export_predictions": [
+        {
+          "xyxy_input_pixels": [
+            30.449310302734375,
+            120.34066772460938,
+            275.4649658203125,
+            247.390625
+          ],
+          "confidence": 0.8896678686141968,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            186.62228393554688,
+            80.64539337158203,
+            286.3929138183594,
+            248.19268798828125
+          ],
+          "confidence": 0.854833722114563,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            274.09033203125,
+            164.04598999023438,
+            319.4459228515625,
+            248.29690551757812
+          ],
+          "confidence": 0.31970030069351196,
+          "class_id": 0,
+          "name": "person"
+        }
+      ],
+      "postprocess": "Ultralytics8.3.230 non_max_suppression conf0.25 iou0.45 class-aware max_det100, coordinates in 320x320 input; no claim of original-image boxes"
+    },
+    {
+      "task": "detect",
+      "sample": "zidane",
+      "format": "yolo11n-onnx-fp32.mnn",
+      "input": {
+        "path": "runs/phase2-edge/export-smoke/yolo11n-zidane-input.npy",
+        "bytes": 1228928,
+        "sha256": "d20f83be15a995e1a26a0b9805f139b6f3813a762e763204329626c5e11006dc"
+      },
+      "output_shape": [
+        1,
+        84,
+        2100
+      ],
+      "max_absolute_error": 0.0688323974609375,
+      "mean_absolute_error": 0.00016817757568787783,
+      "allclose_atol1e-4_rtol1e-4": false,
+      "pytorch_predictions": [
+        {
+          "xyxy_input_pixels": [
+            30.449310302734375,
+            120.34065246582031,
+            275.4648742675781,
+            247.39060974121094
+          ],
+          "confidence": 0.8896675705909729,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            186.62228393554688,
+            80.6453857421875,
+            286.3929138183594,
+            248.19268798828125
+          ],
+          "confidence": 0.8548339009284973,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            274.09033203125,
+            164.0460205078125,
+            319.44598388671875,
+            248.29693603515625
+          ],
+          "confidence": 0.3197006285190582,
+          "class_id": 0,
+          "name": "person"
+        }
+      ],
+      "export_predictions": [
+        {
+          "xyxy_input_pixels": [
+            30.432647705078125,
+            120.31739807128906,
+            275.47344970703125,
+            247.3957061767578
+          ],
+          "confidence": 0.8896612524986267,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            186.61941528320312,
+            80.61054992675781,
+            286.39703369140625,
+            248.19297790527344
+          ],
+          "confidence": 0.8548392057418823,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            274.0906677246094,
+            164.04354858398438,
+            319.4525451660156,
+            248.314453125
+          ],
+          "confidence": 0.3197201192378998,
+          "class_id": 0,
+          "name": "person"
+        }
+      ],
+      "postprocess": "Ultralytics8.3.230 non_max_suppression conf0.25 iou0.45 class-aware max_det100, coordinates in 320x320 input; no claim of original-image boxes"
+    },
+    {
+      "task": "detect",
+      "sample": "zidane",
+      "format": "yolo11n-onnx-weight8.mnn",
+      "input": {
+        "path": "runs/phase2-edge/export-smoke/yolo11n-zidane-input.npy",
+        "bytes": 1228928,
+        "sha256": "d20f83be15a995e1a26a0b9805f139b6f3813a762e763204329626c5e11006dc"
+      },
+      "output_shape": [
+        1,
+        84,
+        2100
+      ],
+      "max_absolute_error": 50.202484130859375,
+      "mean_absolute_error": 0.05118684843182564,
+      "allclose_atol1e-4_rtol1e-4": false,
+      "pytorch_predictions": [
+        {
+          "xyxy_input_pixels": [
+            30.449310302734375,
+            120.34065246582031,
+            275.4648742675781,
+            247.39060974121094
+          ],
+          "confidence": 0.8896675705909729,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            186.62228393554688,
+            80.6453857421875,
+            286.3929138183594,
+            248.19268798828125
+          ],
+          "confidence": 0.8548339009284973,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            274.09033203125,
+            164.0460205078125,
+            319.44598388671875,
+            248.29693603515625
+          ],
+          "confidence": 0.3197006285190582,
+          "class_id": 0,
+          "name": "person"
+        }
+      ],
+      "export_predictions": [
+        {
+          "xyxy_input_pixels": [
+            30.64959716796875,
+            120.39974975585938,
+            275.9352111816406,
+            247.18170166015625
+          ],
+          "confidence": 0.8945066928863525,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            186.865234375,
+            80.71511840820312,
+            286.1902770996094,
+            247.80032348632812
+          ],
+          "confidence": 0.8585190773010254,
+          "class_id": 0,
+          "name": "person"
+        },
+        {
+          "xyxy_input_pixels": [
+            273.9012756347656,
+            164.30206298828125,
+            319.5232849121094,
+            248.3406982421875
+          ],
+          "confidence": 0.34104081988334656,
+          "class_id": 0,
+          "name": "person"
+        }
+      ],
+      "postprocess": "Ultralytics8.3.230 non_max_suppression conf0.25 iou0.45 class-aware max_det100, coordinates in 320x320 input; no claim of original-image boxes"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "runs/phase2-edge/export-smoke/yolo11n-cls.torchscript",
+      "bytes": 11455082,
+      "sha256": "3e3b8848b7ac1daf6e45987a14bf2aeae677039664a04acd01972b498fc24b4e"
+    },
+    {
+      "path": "runs/phase2-edge/export-smoke/yolo11n-cls.onnx",
+      "bytes": 11275146,
+      "sha256": "3e3c8d0ecef7d2d66cc5619369d23a5a335303cf9fc09b1e0a454c3db6bf9a07"
+    },
+    {
+      "path": "runs/phase2-edge/export-smoke/yolo11n-cls-onnx-fp32.mnn",
+      "bytes": 11275392,
+      "sha256": "33b8f81c628d260dd0c5fd8d110d2904cc32a4cc88537d2d4c3e4078ccb79d1c"
+    },
+    {
+      "path": "runs/phase2-edge/export-smoke/yolo11n-cls-onnx-weight8.mnn",
+      "bytes": 2933892,
+      "sha256": "63ab3710611ec919c4ae8466b355618b72909423968f86e3093b73d761dbcf8c"
+    },
+    {
+      "path": "runs/phase2-edge/export-smoke/yolo11n.torchscript",
+      "bytes": 10934047,
+      "sha256": "498ad7dd1f926cf8e62150b13891e8a1b38f7b8cf1949fd45e483af742c99af3"
+    },
+    {
+      "path": "runs/phase2-edge/export-smoke/yolo11n.onnx",
+      "bytes": 10575559,
+      "sha256": "5ab9a45fa55c1e2c8b37591a11708c27b18aa32ab8823b1c0182658593e00679"
+    },
+    {
+      "path": "runs/phase2-edge/export-smoke/yolo11n-onnx-fp32.mnn",
+      "bytes": 10550860,
+      "sha256": "fcafdbdcaa3c9d3f4272617ec54c0d74a5076d1914fc55875ae8a82f6902aee1"
+    },
+    {
+      "path": "runs/phase2-edge/export-smoke/yolo11n-onnx-weight8.mnn",
+      "bytes": 2820888,
+      "sha256": "5705e746f13203a5be147593c52240db83e73a616f5c0d6b6d8be46d9f7b914a"
+    }
+  ],
+  "io_contracts": [
+    {
+      "specimen": "yolo11n-cls",
+      "task": "classify",
+      "input_layout": "NCHW",
+      "input_dtype": "float32",
+      "input_shape": [
+        1,
+        3,
+        224,
+        224
+      ],
+      "num_classes": 1000,
+      "output_kind": "classification-probabilities",
+      "preprocessing": "Ultralytics8.3.230 classify_transforms: RGB shortest-edge resize224 bilinear, center crop224, ToTensor, mean0/std1",
+      "output_shape": [
+        1,
+        1000
+      ]
+    },
+    {
+      "specimen": "yolo11n",
+      "task": "detect",
+      "input_layout": "NCHW",
+      "input_dtype": "float32",
+      "input_shape": [
+        1,
+        3,
+        320,
+        320
+      ],
+      "num_classes": 80,
+      "output_kind": "yolo11-detect-raw",
+      "preprocessing": "Ultralytics8.3.230 LetterBox320x320 auto=False center=True scaleup=True padding114; BGR->RGB, BCHW /255",
+      "output_shape": [
+        1,
+        84,
+        2100
+      ]
+    }
+  ],
+  "quantization": "weight8 uses --weightQuantBits8 storage compression, no activation calibration, no integer-kernel/speed claim; no synthetic/random calibration; no HeT dataset accessed",
+  "target_validation": "Windows AMD64 CPU only; no Ubuntu, ARMv7, RK3506, device memory/latency or hardware validation",
+  "stage_timing_note": "seconds include whole Python worker startup and model loading; not a warmed inference benchmark",
+  "mnn_license_observation": {
+    "installed_wheel_metadata": "BSD-3",
+    "upstream_readme": "Apache 2.0",
+    "source_url": "https://github.com/alibaba/MNN#license",
+    "limitation": "wheel metadata and upstream license label differ; verify the exact redistribution bundle before deployment"
+  },
+  "status": "completed_with_direct_route_blocked_and_measured_numerical_drift",
+  "unexpected_failures": []
+}

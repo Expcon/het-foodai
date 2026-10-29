@@ -40,6 +40,9 @@ checkpoints/
 *.pth
 *.pt
 *.onnx
+*.mnn
+*.mnn.weight
+/Ultralytics/
 *.safetensors
 
 # Local configs / credentials

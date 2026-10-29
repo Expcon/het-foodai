@@ -1,0 +1,247 @@
+{
+  "date": "2026-10-29",
+  "branch": "feature/phase2-oven-edge-foundation",
+  "base_commit": "f77ced3fc518a53e0f7e47880434412875ffa8f1",
+  "protected_artifacts": {
+    "state": "PASS_UNCHANGED",
+    "before_sha256": {
+      "configs/classes.json": "27d5337826c26a3b743ec0928ea8da050f4ae7bf0ef31e7efb051e4e907e9614",
+      "data/manifest.csv": "6bef9776c278d8efac86008a11c47386cb7d95b7164073b9bd07e84cb5cf2821",
+      "data/processed/selected_dataset_v1.1.0/manifest.csv": "6bef9776c278d8efac86008a11c47386cb7d95b7164073b9bd07e84cb5cf2821",
+      "src/foodai/contracts.py": "d630d10288748bc8fb0c7d393f312042fb72e158fb80ddc934f691f54925d22f",
+      "scripts/train_classifier.py": "97c0f6ba90406488a0ebe0c7143967eda955aa10ad5e0bec73ea298b9da26b83",
+      "scripts/evaluate_classifier.py": "b76a2ee34089f14631ce9c674708fc51c4e3fc76d9385a4ff1f6f4339e4d4eb0",
+      "src/foodai/checkpoint.py": "cb2d66f3e255f53955bd0ceb3ef9e64efcd76a33799613624f7178bc443b9671",
+      "src/foodai/vision.py": "662fad08d3648235917b835a85b10d77e7126fe40058ff120d0bcac08eb6bd0e",
+      "src/foodai/predictor.py": "f3952423b1daf257a59287656370a45662eefbdb60ee6a713edd956cbe9f1097",
+      "app/app.py": "aa927a9aa79728f2388e6398a932925e49c19665485ca4d4293a10a0dffdee26",
+      "historical_baseline_weights": "41056b3ea90d5fa718a18f48cf5182373d1010c5185cb426ba5c949b1ec1f4c5"
+    },
+    "after_sha256": {
+      "configs/classes.json": "27d5337826c26a3b743ec0928ea8da050f4ae7bf0ef31e7efb051e4e907e9614",
+      "data/manifest.csv": "6bef9776c278d8efac86008a11c47386cb7d95b7164073b9bd07e84cb5cf2821",
+      "data/processed/selected_dataset_v1.1.0/manifest.csv": "6bef9776c278d8efac86008a11c47386cb7d95b7164073b9bd07e84cb5cf2821",
+      "src/foodai/contracts.py": "d630d10288748bc8fb0c7d393f312042fb72e158fb80ddc934f691f54925d22f",
+      "scripts/train_classifier.py": "97c0f6ba90406488a0ebe0c7143967eda955aa10ad5e0bec73ea298b9da26b83",
+      "scripts/evaluate_classifier.py": "b76a2ee34089f14631ce9c674708fc51c4e3fc76d9385a4ff1f6f4339e4d4eb0",
+      "src/foodai/checkpoint.py": "cb2d66f3e255f53955bd0ceb3ef9e64efcd76a33799613624f7178bc443b9671",
+      "src/foodai/vision.py": "662fad08d3648235917b835a85b10d77e7126fe40058ff120d0bcac08eb6bd0e",
+      "src/foodai/predictor.py": "f3952423b1daf257a59287656370a45662eefbdb60ee6a713edd956cbe9f1097",
+      "app/app.py": "aa927a9aa79728f2388e6398a932925e49c19665485ca4d4293a10a0dffdee26",
+      "historical_baseline_weights": "41056b3ea90d5fa718a18f48cf5182373d1010c5185cb426ba5c949b1ec1f4c5"
+    }
+  },
+  "unit_tests": {
+    "command": "<project-python> -m unittest discover -s tests -v",
+    "exit_code": 0,
+    "tests_run": 99,
+    "passed": 98,
+    "failed": 0,
+    "skipped": 1,
+    "seconds": 16.727,
+    "skip_reason": "Windows OS does not permit test-directory symlinks",
+    "log": "unit-tests.log"
+  },
+  "capture_regression_red": {
+    "command": "<project-python> -m unittest discover -s tests -p test_oven_capture.py -v",
+    "exit_code": 1,
+    "tests_run": 22,
+    "failures": 2,
+    "errors": 1,
+    "skipped": 1,
+    "reason": "Review label change without physical ID; missing license handoff; cross-collection partial export"
+  },
+  "capture_regression_green": {
+    "exit_code": 0,
+    "tests_run": 22,
+    "passed": 21,
+    "skipped": 1
+  },
+  "offline_cli_smoke": {
+    "command": "<project-python> tests/smoke_oven_capture.py",
+    "exit_code": 0,
+    "state": "PASS_SOFTWARE_ONLY",
+    "synthetic_only": true,
+    "opened_camera": false,
+    "simulated_operator_review_not_ground_truth": true,
+    "tests": [
+      {
+        "case": "import",
+        "exit_code": 0,
+        "expected_exit_code": 0
+      },
+      {
+        "case": "import",
+        "exit_code": 1,
+        "expected_exit_code": 1
+      },
+      {
+        "case": "audit",
+        "exit_code": 1,
+        "expected_exit_code": 1
+      },
+      {
+        "case": "audit",
+        "exit_code": 0,
+        "expected_exit_code": 0
+      },
+      {
+        "case": "export",
+        "exit_code": 1,
+        "expected_exit_code": 1
+      },
+      {
+        "case": "review",
+        "exit_code": 0,
+        "expected_exit_code": 0
+      },
+      {
+        "case": "review",
+        "exit_code": 0,
+        "expected_exit_code": 0
+      },
+      {
+        "case": "review",
+        "exit_code": 0,
+        "expected_exit_code": 0
+      },
+      {
+        "case": "export",
+        "exit_code": 1,
+        "expected_exit_code": 1
+      },
+      {
+        "case": "export",
+        "exit_code": 0,
+        "expected_exit_code": 0
+      },
+      {
+        "case": "shared_validator",
+        "exit_code": 0,
+        "expected_exit_code": 0
+      },
+      {
+        "case": "import",
+        "exit_code": 0,
+        "expected_exit_code": 0
+      },
+      {
+        "case": "review",
+        "exit_code": 0,
+        "expected_exit_code": 0
+      },
+      {
+        "case": "export",
+        "exit_code": 1,
+        "expected_exit_code": 1
+      },
+      {
+        "case": "audit",
+        "exit_code": 0,
+        "expected_exit_code": 0
+      },
+      {
+        "case": "export",
+        "exit_code": 1,
+        "expected_exit_code": 1
+      },
+      {
+        "case": "export",
+        "exit_code": 0,
+        "expected_exit_code": 0
+      },
+      {
+        "case": "shared_validator",
+        "exit_code": 0,
+        "expected_exit_code": 0
+      }
+    ],
+    "candidate_images": 4,
+    "exact_pixel_near_duplicates_detected": true,
+    "missing_metadata_rejected": true,
+    "corrupt_image_rejected": true,
+    "unreviewed_and_cross_split_export_rejected": true,
+    "shared_nine_field_validator": "PASS",
+    "partial_catalog_and_cross_collection_split_rejected": true,
+    "formal_dataset_created": false,
+    "temporary_synthetic_files_removed_on_exit": true
+  },
+  "passive_inventory": {
+    "exit_code": 0,
+    "state": "UNKNOWN",
+    "enumerated_devices": 2,
+    "opened_any_device": false,
+    "oven_camera_identity": "UNKNOWN",
+    "actual_resolution": "UNKNOWN",
+    "sensitive_inventory_committed": false
+  },
+  "parent_mnn_runtime_recheck": [
+    {
+      "task": "classify",
+      "exit_code": 0,
+      "backend": "CPU",
+      "precision": "high",
+      "output_shape": [
+        1,
+        1000
+      ],
+      "output_dtype": "float32"
+    },
+    {
+      "task": "detect",
+      "exit_code": 0,
+      "backend": "CPU",
+      "precision": "high",
+      "output_shape": [
+        1,
+        84,
+        2100
+      ],
+      "output_dtype": "float32"
+    }
+  ],
+  "export_stages": {
+    "total": 29,
+    "exit0": 27,
+    "nonzero": [
+      {
+        "name": "yolo11n-cls-direct-TORCH-fp32",
+        "exit_code": 1
+      },
+      {
+        "name": "yolo11n-direct-TORCH-fp32",
+        "exit_code": 1
+      }
+    ],
+    "workflow_exit_code": 0,
+    "workflow_exit0_means_numerical_equivalence": false
+  },
+  "hardware": {
+    "oven_capture": "BLOCKED",
+    "rk3506": "BLOCKED",
+    "native_ubuntu_sdk": "BLOCKED",
+    "calibrated_int8_operations": "BLOCKED",
+    "physical_acceptance_rows": "20 BLOCKED"
+  },
+  "mvp_frozen_test_re_evaluated": false,
+  "new_food_accuracy_claimed": false,
+  "capture_interruption_red": {
+    "tests_run": 23,
+    "failures": 1,
+    "skipped": 1,
+    "exit_code": 1,
+    "reason": "images-only interrupted collection omitted from catalog"
+  },
+  "capture_final_green": {
+    "tests_run": 23,
+    "passed": 22,
+    "skipped": 1,
+    "verified_by": "complete 99-test suite",
+    "exit_code": 0
+  },
+  "environment_cleanup_recheck": "environment_cleanup_recheck.json",
+  "export_artifact_hash_recheck": {
+    "exit_code": 0,
+    "locally_existing_artifacts_verified": 12
+  }
+}
