@@ -1,0 +1,47 @@
+{
+  "version": "v1.0.5",
+  "status": "draft",
+  "notes": "User requested carrot replacing corn at ID 0. Old corn checkpoints are incompatible. User requested tomato replacing chicken wing at ID 4. Old wing checkpoints are incompatible. User approved general shrimp. Team freeze pending. Dataset delivery v1.0.5 approved by user; shared taxonomy freeze still pending.",
+  "classes": [
+    {
+      "id": 0,
+      "key": "carrot",
+      "zh": "胡萝卜"
+    },
+    {
+      "id": 1,
+      "key": "potato",
+      "zh": "土豆"
+    },
+    {
+      "id": 2,
+      "key": "broccoli",
+      "zh": "西兰花"
+    },
+    {
+      "id": 3,
+      "key": "pumpkin",
+      "zh": "南瓜"
+    },
+    {
+      "id": 4,
+      "key": "tomato",
+      "zh": "西红柿"
+    },
+    {
+      "id": 5,
+      "key": "chicken_breast",
+      "zh": "鸡胸肉"
+    },
+    {
+      "id": 6,
+      "key": "sea_bass",
+      "zh": "鲈鱼"
+    },
+    {
+      "id": 7,
+      "key": "shrimp",
+      "zh": "虾"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "version": "selected_dataset_v1",
+  "seed": 42,
+  "target_ratio": [
+    0.8,
+    0.1,
+    0.1
+  ],
+  "status": "split_generated_taxonomy_team_freeze_pending",
+  "inputs": 6767,
+  "input_sha256": "a3dd01f068d55e6ba336d54468d9241c136ac42f63699145df697034f3080481",
+  "fish_zip_sha256": "ffec025d7f5afdead1898cf6e58a5e3582aa377fee51eadb6c9e3166ab179202",
+  "audit_status": {
+    "candidate": 4816,
+    "exact_duplicate": 1,
+    "preaugmented_held_out_of_base_split": 1950
+  },
+  "counts": {
+    "images": 4816,
+    "splits": {
+      "external_test": 0,
+      "test": 482,
+      "train": 3852,
+      "val": 482
+    },
+    "per_class": {
+      "corn": {
+        "external_test": 0,
+        "val": 7,
+        "train": 59,
+        "test": 7
+      },
+      "potato": {
+        "external_test": 0,
+        "val": 146,
+        "train": 1165,
+        "test": 146
+      },
+      "broccoli": {
+        "external_test": 0,
+        "val": 148,
+        "train": 1185,
+        "test": 148
+      },
+      "pumpkin": {
+        "external_test": 0,
+        "val": 148,
+        "train": 1180,
+        "test": 148
+      },
+      "chicken_wing": {
+        "external_test": 0,
+        "val": 9,
+        "train": 68,
+        "test": 9
+      },
+      "chicken_breast": {
+        "external_test": 0,
+        "val": 8,
+        "train": 62,
+        "test": 8
+      },
+      "sea_bass": {
+        "external_test": 0,
+        "val": 5,
+        "train": 41,
+        "test": 5
+      },
+      "shrimp": {
+        "external_test": 0,
+        "val": 11,
+        "train": 92,
+        "test": 11
+      }
+    },
+    "distinct_capture_groups": 3573,
+    "missing_sha256": 0,
+    "unverified_license": 0,
+    "manifest_sha256": "28920a5704066f747a27abd508658c9ef2e7b5d0f87db597a866945d6f0dee12"
+  },
+  "class_groups": {
+    "corn": 73,
+    "potato": 1165,
+    "broccoli": 969,
+    "pumpkin": 1046,
+    "chicken_wing": 86,
+    "chicken_breast": 78,
+    "sea_bass": 51,
+    "shrimp": 104
+  },
+  "near_pairs": 1537,
+  "global_cross_split_group_leakage": 0,
+  "detected_near_pair_cross_split_leakage": 0,
+  "source_counts": {
+    "roboflow_fridge_genie_v1": 517,
+    "kaggle_vegetable_v1": 4199,
+    "large_scale_fish": 100
+  },
+  "quality_warnings": 0,
+  "limitations": [
+    "Perceptual grouping conservative; unknown capture groups may be missed.",
+    "Preaugmented images retained in input but excluded from base split.",
+    "Manual class labels accepted, not a biological species verification.",
+    "No external-source independent test, no model training or accuracy claim.",
+    "Formal taxonomy freeze requires team approval."
+  ]
+}

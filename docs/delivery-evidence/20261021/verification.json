@@ -1,0 +1,239 @@
+{
+  "started_date": "2026-10-21",
+  "verified_date": "2026-10-22",
+  "timezone": "Asia/Shanghai",
+  "branch": "integration/mvp-v1.0-delivery",
+  "main_untouched": "f229bc2127c0b00b8fe4ee30ff1ce3ccc5d96cbd",
+  "source_heads": {
+    "sun": "8d6fda07994b728673cb357112c6719c3a5dd69b",
+    "yang": "524879a2de05b05b53b6d1df3c6f880e316ec1a5"
+  },
+  "merge": {
+    "commit": "8f613fa",
+    "conflicts": 0,
+    "history": "Both source heads retained as ancestors; no squash/rewrite"
+  },
+  "unit_tests": {
+    "command": "python -m unittest discover -s tests -v",
+    "exit_code": 0,
+    "tests": 68,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 19.319
+  },
+  "artifact_checks": {
+    "manifest_sha256": "6bef9776c278d8efac86008a11c47386cb7d95b7164073b9bd07e84cb5cf2821",
+    "checkpoint_sha256": "41056b3ea90d5fa718a18f48cf5182373d1010c5185cb426ba5c949b1ec1f4c5",
+    "classes_file_sha256": "27d5337826c26a3b743ec0928ea8da050f4ae7bf0ef31e7efb051e4e907e9614",
+    "class_list_sha256": "afdc69e898ef6067b469b9f90eea3dfed84fbb76e7a5910ee1826a62f02326af",
+    "classes": [
+      {
+        "id": 0,
+        "key": "carrot",
+        "zh": "胡萝卜"
+      },
+      {
+        "id": 1,
+        "key": "potato",
+        "zh": "土豆"
+      },
+      {
+        "id": 2,
+        "key": "broccoli",
+        "zh": "西兰花"
+      },
+      {
+        "id": 3,
+        "key": "pumpkin",
+        "zh": "南瓜"
+      },
+      {
+        "id": 4,
+        "key": "tomato",
+        "zh": "西红柿"
+      },
+      {
+        "id": 5,
+        "key": "white_radish",
+        "zh": "白萝卜"
+      },
+      {
+        "id": 6,
+        "key": "cucumber",
+        "zh": "黄瓜"
+      },
+      {
+        "id": 7,
+        "key": "bell_pepper",
+        "zh": "甜椒"
+      }
+    ],
+    "release_zip_sha256": "22c0162b686d13b45c88982f1615d70030c8376fba4d9e25091995fb83478a02",
+    "zip_members_crc_sha": 10689,
+    "release_inventory_files": 10688,
+    "archive_config_matches_current": true,
+    "archive_manifest_matches_current": true,
+    "original_code_and_manifests_overwritten": false
+  },
+  "manifest_validation": {
+    "command": "python scripts/validate_manifest.py --manifest data/manifest.csv --classes configs/classes.json --check-files",
+    "exit_code": 0,
+    "rows": 10662,
+    "splits": {
+      "train": 8527,
+      "val": 1068,
+      "test": 1067
+    },
+    "unverified_licenses": 235,
+    "global_group_cross_split": 0,
+    "image_sha_cross_split": 0,
+    "distinct_global_groups": 7035
+  },
+  "ready_checks": {
+    "cpu": {
+      "exit_code": 0,
+      "state": "ready"
+    },
+    "cuda": {
+      "exit_code": 0,
+      "state": "ready"
+    }
+  },
+  "corrected_acceptance": {
+    "cpu": {
+      "exit_code": 0,
+      "real_images": 9,
+      "repeats": 5
+    },
+    "cuda": {
+      "exit_code": 0,
+      "real_images": 9,
+      "repeats": 10
+    },
+    "scope": "8 same-source train images plus PNG encoding of a real JPEG; functional check, not independent accuracy"
+  },
+  "historical_test": {
+    "correct": 1067,
+    "total": 1067,
+    "source": "supplied baseline test_evaluation.json"
+  },
+  "current_fixed_weight_test_recheck": {
+    "exit_code": 0,
+    "correct": 1067,
+    "total": 1067,
+    "selection_or_tuning": false
+  },
+  "http_routes": {
+    "cpu": {
+      "real_jpg_png_top3": "PASS",
+      "no_input": "PASS",
+      "corrupt_image": "PASS"
+    },
+    "cuda": {
+      "real_jpg_png_top3": "PASS",
+      "no_input": "PASS",
+      "corrupt_image": "PASS"
+    },
+    "missing": {
+      "missing_model": "PASS",
+      "no_input": "PASS",
+      "button_disabled": true
+    }
+  },
+  "http_harness_limit": "All HTTP assertions completed and JSON saved; first combined browser-wait harness exited 1 on timeout after interruption. No application failure inferred from that timeout.",
+  "browser": {
+    "real_cpu_jpg_upload_preview_top3": "PASS",
+    "no_upload_prompt": "PASS",
+    "clear_after_result": "BLOCKED: browser origin permission declined; no retry or workaround",
+    "further_browser_corrupt_missing_cuda_checks": "NOT_REPEATED after permission denial; actual HTTP/CLI checks recorded separately",
+    "screenshots": [
+      "delivery-real-cpu-top3.png",
+      "delivery-no-upload.png"
+    ]
+  },
+  "historical_acceptance": {
+    "acceptance.json": "Git content unchanged; old last-sample latency is not corrected measurement",
+    "acceptance_gpu.json": "Git content unchanged; old last-sample latency is not corrected measurement"
+  },
+  "clean_clone": {
+    "state": "PASS",
+    "source": "Fresh GitHub clone of integration/mvp-v1.0-delivery",
+    "tested_commit": "6ffe2162bc05d61124dac53a8d18eb25f24b9fe0",
+    "isolated_venv": true,
+    "system_site_packages": false,
+    "python": "3.12.10",
+    "versions": {
+      "torch": "2.8.0+cpu",
+      "torchvision": "0.23.0+cpu",
+      "gradio": "6.30.0",
+      "pillow": "12.3.0",
+      "numpy": "2.5.2"
+    },
+    "missing_before_restore": {
+      "exit_code": 1,
+      "state": "not_ready"
+    },
+    "restored_real_weights": {
+      "checkpoint_sha256": "41056b3ea90d5fa718a18f48cf5182373d1010c5185cb426ba5c949b1ec1f4c5",
+      "ready_exit_code": 0,
+      "state": "ready",
+      "device": "cpu"
+    },
+    "classes_file_sha256": "27d5337826c26a3b743ec0928ea8da050f4ae7bf0ef31e7efb051e4e907e9614",
+    "manifest_sha256": "6bef9776c278d8efac86008a11c47386cb7d95b7164073b9bd07e84cb5cf2821",
+    "acceptance": {
+      "exit_code": 0,
+      "real_files": 9,
+      "repeats": 3,
+      "errors_checked": [
+        "corrupt_image",
+        "missing_checkpoint"
+      ]
+    },
+    "unit_tests": {
+      "exit_code": 0,
+      "tests": 68,
+      "failures": 0,
+      "skipped": 1,
+      "skip_reason": "CUDA-specific timing test; fresh environment is intentionally CPU-only"
+    },
+    "gradio_startup": {
+      "http_status": 200,
+      "state": "ready",
+      "browser_actions": false
+    },
+    "git_worktree_clean": true,
+    "code_hashes_git_normalized": {
+      "scripts/acceptance_run.py": "e68fddef397e1023875afe2c1cbc388557d2a8da60a3f498e9bf503d0224d387",
+      "src/foodai/predictor.py": "d99ec84e4d5cf3ceca27e2fee5e59e2118e8fd600c0ce463a4b173d5a39fd9f4",
+      "src/foodai/checkpoint.py": "b30b4b5a98478d39c1ca33aab80a590682040c3db2451f7a919d4312ac4c60c3",
+      "src/foodai/vision.py": "90f6446434517806287837be58903ab52a9ed93cfeee4fa12d0843996cef28b0",
+      "app/app.py": "6008ec438b533d31b7269f84c4684c74d53f56029cf98b5b10bc5018854ff83b"
+    }
+  },
+  "versions": {
+    "torch": "2.14.1+cu130",
+    "torchvision": "0.29.1+cu130",
+    "gradio": "6.30.0",
+    "gradio_client": "2.7.2",
+    "numpy": "2.5.2",
+    "pillow": "12.3.0"
+  },
+  "code_hashes_git_normalized": {
+    "scripts/acceptance_run.py": "e68fddef397e1023875afe2c1cbc388557d2a8da60a3f498e9bf503d0224d387",
+    "src/foodai/predictor.py": "d99ec84e4d5cf3ceca27e2fee5e59e2118e8fd600c0ce463a4b173d5a39fd9f4",
+    "src/foodai/checkpoint.py": "b30b4b5a98478d39c1ca33aab80a590682040c3db2451f7a919d4312ac4c60c3",
+    "src/foodai/vision.py": "90f6446434517806287837be58903ab52a9ed93cfeee4fa12d0843996cef28b0",
+    "app/app.py": "6008ec438b533d31b7269f84c4684c74d53f56029cf98b5b10bc5018854ff83b"
+  },
+  "remaining": [
+    "Independent cross-scene formal evaluation",
+    "235 unknown source licenses",
+    "Cucumber 0225 semantic review",
+    "8->12->16 incremental learning",
+    "ONNX and physical edge deployment"
+  ],
+  "release_created": false,
+  "main_merged": false,
+  "delivery_decision": "Course demonstration candidate PASS with documented limits; unrestricted dataset redistribution and independent-scene claims not cleared"
+}

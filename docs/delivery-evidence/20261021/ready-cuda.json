@@ -1,0 +1,11 @@
+{
+  "state": "ready",
+  "message": "模型已加载并验证：stage8-20261020-164500-40a26d",
+  "checkpoint": "runs\\food-v1.1.0-baseline\\stage8-20261020-164500-40a26d\\best.pt",
+  "model_id": "stage8-20261020-164500-40a26d",
+  "num_classes": 8,
+  "input_size": 224,
+  "class_list_sha256": "afdc69e898ef6067b469b9f90eea3dfed84fbb76e7a5910ee1826a62f02326af",
+  "checkpoint_sha256": "41056b3ea90d5fa718a18f48cf5182373d1010c5185cb426ba5c949b1ec1f4c5",
+  "device": "cuda"
+}

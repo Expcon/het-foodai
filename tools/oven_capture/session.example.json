@@ -1,0 +1,12 @@
+{
+  "captured_at": "REPLACE_WITH_ISO8601_TIME_AND_TIMEZONE",
+  "camera_id": "UNKNOWN",
+  "camera_driver": "UNKNOWN_NOT_PROBED",
+  "oven_id": "UNKNOWN",
+  "physical_sample_ids": ["UNKNOWN"],
+  "session_id": "UNKNOWN",
+  "class_keys": ["carrot"],
+  "placement": "REPLACE_WITH_OBSERVED_POSITION",
+  "lighting": "REPLACE_WITH_OBSERVED_LIGHTING",
+  "license": "unknown"
+}
