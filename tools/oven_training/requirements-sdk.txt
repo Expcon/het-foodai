@@ -1,0 +1,17 @@
+# Additional SDK dependencies for the existing project CUDA Torch environment.
+charset-normalizer==3.5.2
+contourpy==1.4.0
+cycler==0.12.1
+fonttools==4.68.0
+kiwisolver==1.5.1
+matplotlib==3.11.2
+opencv-python==5.0.0.93
+polars-runtime-32==2.1.0
+polars==2.1.0
+psutil==7.2.2
+pyparsing==3.3.3
+requests==2.34.2
+scipy==1.18.1
+ultralytics-thop==2.2.5
+ultralytics==8.3.230
+urllib3==2.8.0
