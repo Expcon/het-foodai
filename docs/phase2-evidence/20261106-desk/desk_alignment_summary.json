@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "images": 569,
+  "top1_agree": 569,
+  "ordered_top3_agree": 569,
+  "invalid_probability_vectors": 0,
+  "max_abs_error": 1.7881393432617188e-06,
+  "acceptance": {
+    "max_absolute_probability_error": 0.0001,
+    "require_all_ordered_top3": true
+  },
+  "versions": {
+    "numpy": "2.2.6",
+    "Pillow": "12.0.0",
+    "onnxruntime": "1.23.2",
+    "opencv-python": "4.12.0.88"
+  },
+  "scope": "format alignment on previously seen oven images, NOT accuracy or deployment acceptance",
+  "preprocessing_tensors_exact": 569,
+  "onnx_sha256": "e1ea69368fa420f3df5a13ef1df8bea9837fdfd3e6f459adb64e3c040742ffb7",
+  "classes_sha256": "bee97ce33c0d8122eb428ace6e5879b7b8fcc095ba8f5df7853cb64222f391dc"
+}

@@ -1,0 +1,7 @@
+.build-venv/
+.pyinstaller-build/
+.pyinstaller-spec/
+dist/
+release-windows*/
+build-healthcheck-windows.json
+*.zip

@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "checks": {
+    "safe_png_unicode_sha": "PASS",
+    "numbering_optional_json": "PASS",
+    "opencv_version": "4.12.0",
+    "numpy_version": "2.2.6",
+    "pillow_version": "12.0.0",
+    "tkinter": "AVAILABLE",
+    "camera_enumeration": "IMPORT_OK",
+    "onnxruntime": "1.23.2",
+    "MNN": "IMPORT_OK"
+  },
+  "note": "Packaged-runtime smoke only. Camera/serial/video and model validation require physical Windows machines."
+}

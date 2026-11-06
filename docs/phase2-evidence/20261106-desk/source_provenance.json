@@ -1,0 +1,10 @@
+{
+  "source": "User supplied OvenCapture Windows v1.1.0 source tree; original desktop copy preserved",
+  "hashes": {
+    "camera_devices.py": "c565ceb60e0f61327cdfd15da4d69b19625bf2ff85221c6cbe41131b1631e0e6",
+    "capture_core.py": "19b6bd07d48ebcc9dacfa9d2d2d235af4fa7d0acf2bae8df9dc7643890315cd0",
+    "inference_engine.py": "e9590ef995331a320a141285a5e7d59dc000127103ed1ece25cb772e8585f240",
+    "oven_capture_gui.py": "7fd4355a0799c0ba4272a3c766a4ddfbe74f5ee86b9668a3527e0f4025dce2ce",
+    "build_windows.ps1": "16cddfe269b395c786c93309d89f3f98e3b7967037401ae03ba6669c4a796bca"
+  }
+}

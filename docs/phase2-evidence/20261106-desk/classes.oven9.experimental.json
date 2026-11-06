@@ -1,0 +1,79 @@
+{
+  "format": "het-oven-classifier/v1",
+  "class_keys": [
+    "asparagus",
+    "bacon",
+    "broccoli",
+    "chicken_wing",
+    "croissant",
+    "french_fries",
+    "potato",
+    "salmon",
+    "toast"
+  ],
+  "classes": [
+    {
+      "id": 0,
+      "key": "asparagus"
+    },
+    {
+      "id": 1,
+      "key": "bacon"
+    },
+    {
+      "id": 2,
+      "key": "broccoli"
+    },
+    {
+      "id": 3,
+      "key": "chicken_wing"
+    },
+    {
+      "id": 4,
+      "key": "croissant"
+    },
+    {
+      "id": 5,
+      "key": "french_fries"
+    },
+    {
+      "id": 6,
+      "key": "potato"
+    },
+    {
+      "id": 7,
+      "key": "salmon"
+    },
+    {
+      "id": 8,
+      "key": "toast"
+    }
+  ],
+  "class_list_sha256": "42bd80f04446cd87f8c719c78034bf274bd447fe7a60205713f118cd0b584b52",
+  "preprocess": {
+    "size": 224,
+    "color": "RGB",
+    "resize": "bilinear-contain-center-pad",
+    "pad": 114,
+    "scale": "1/255",
+    "layout": "NCHW"
+  },
+  "input_shape": [
+    1,
+    3,
+    224,
+    224
+  ],
+  "output_shape": [
+    1,
+    9
+  ],
+  "output_kind": "classification-probabilities",
+  "independent_validation": false,
+  "source_checkpoint_sha256": "72367305b65b31920c59865758dcdd4a1ee506751bde57db113f017c5c314b25",
+  "models": {
+    "onnx": {
+      "sha256": "e1ea69368fa420f3df5a13ef1df8bea9837fdfd3e6f459adb64e3c040742ffb7"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "status": "FAIL",
+  "images": 569,
+  "top1_agree": 569,
+  "ordered_top3_agree": 569,
+  "invalid_probability_vectors": 468,
+  "max_abs_error": 0.0005148649215698242,
+  "acceptance": {
+    "max_absolute_probability_error": 0.0001,
+    "require_all_ordered_top3": true
+  },
+  "versions": {
+    "MNN": "3.2.0",
+    "numpy": "2.2.6"
+  },
+  "scope": "format alignment on previously seen oven images, NOT accuracy or deployment acceptance",
+  "onnx_sha256": "e1ea69368fa420f3df5a13ef1df8bea9837fdfd3e6f459adb64e3c040742ffb7",
+  "mnn_sha256": "7d20e2923ba87190d339e51769376240190667072d8dd13098bf08acd2ba8b5c",
+  "mnn_bytes": 6185832,
+  "precision": "FP32 CPU high; no INT8 quantization; no ARM hardware test"
+}
