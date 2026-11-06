@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "model_ready": true,
+  "mode": "oven_round1",
+  "independent_validation": false,
+  "camera_opened": false,
+  "note": "Experimental file inference only; no independent validation or camera test.",
+  "result": {
+    "task": "classification",
+    "top3": [
+      {
+        "id": 0,
+        "label": "asparagus",
+        "score": 0.9999997615814209
+      },
+      {
+        "id": 8,
+        "label": "toast",
+        "score": 2.1381808323894802e-07
+      },
+      {
+        "id": 5,
+        "label": "french_fries",
+        "score": 1.1928522170023825e-08
+      }
+    ],
+    "probabilities": [
+      0.9999997615814209,
+      4.13394563025804e-09,
+      2.784079189410704e-09,
+      3.233944501079833e-10,
+      3.1770416158982684e-11,
+      1.1928522170023825e-08,
+      1.0812819972727539e-08,
+      1.0096506963819252e-09,
+      2.1381808323894802e-07
+    ],
+    "independent_validation": false
+  },
+  "model_sha256": "e1ea69368fa420f3df5a13ef1df8bea9837fdfd3e6f459adb64e3c040742ffb7",
+  "image_sha256": "302a1e366933a1e2cd19f4104f1589ebfb67ceb2ceaea666a46bd41b0b4db71f",
+  "latency_wall_ms": 51.06,
+  "timing_scope": "Image decode + preprocessing + CPU inference + output validation; excludes model load and file hashes"
+}

@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "exe_sha256": "f77da2c62387512eefe20e69d6bcba9552ada2f5d10a17d2bfc05d993e68615b",
+  "exe_bytes": 84916640,
+  "build_exit_code": 0,
+  "unit_test_exit_code": 0,
+  "unit_tests": {
+    "total": 151,
+    "passed": 150,
+    "skipped": 1,
+    "failed": 0
+  },
+  "native_exe_ui": {
+    "observed_model_ready": true,
+    "observed_experimental_scope": true,
+    "gallery_total": 3,
+    "gallery_valid_images": 2,
+    "expected_corrupt_image_failures": 1,
+    "top3_present_in_csv": true,
+    "accuracy_computed": false,
+    "camera_opened": false,
+    "test_window_closed": true
+  },
+  "limits": [
+    "File-fed source GUI current-frame check is not hardware verification",
+    "MNN conversion output failed numeric acceptance",
+    "No independent accuracy or ARM deployment acceptance"
+  ]
+}

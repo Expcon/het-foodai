@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "checks": {
+    "absent_camera_frame_refused": true,
+    "real_model_loaded_via_gui": true,
+    "file_fed_current_frame_prediction": true,
+    "model_switch_refused_while_busy": true,
+    "png_jpeg_predictions_and_corrupt_file_error": true,
+    "empty_folder_refused": true,
+    "failed_reload_clears_old_model": true,
+    "hardware_not_opened": true
+  },
+  "frame_source": "FILE-FED real image; not a physical camera",
+  "camera_opened": false,
+  "serial_opened": false,
+  "independent_validation": false,
+  "gallery_execution": {
+    "total": 3,
+    "succeeded": 2,
+    "failed": 1
+  }
+}

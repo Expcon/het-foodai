@@ -1,0 +1,36 @@
+HeT OvenCapture Desk v1.1.1-experimental
+
+这是原 v1.1 相机采集工具的实验模型集成版。不会控制烤箱加热。
+相机、编号、防覆盖和现有模型模式的默认值保留。
+
+首轮烤箱分类（实验·9类）
+1. 在“模型 / 图集”中选择已通过导出验证的 ONNX 和随附 classes.json。
+2. 模型类型选择“首轮烤箱分类（实验·9类）”，网络输入填写 224，点击“载入真实模型”。
+3. 只有类别顺序、预处理、SHA256 和真实前向输出检查通过，才会显示已加载。
+   该模式保留完整画面，按训练预处理等比例缩放居中补灰；不要选通用 YOLO 分类模式。
+4. 已有真实相机画面时，可点击“识别当前摄像头画面”。没有画面时不会模拟预测。
+5. “图集测试”处理所选文件夹内的 JPG/JPEG/PNG，最多 500 张，不递归子目录。
+   CSV 写入采集输出目录，包含预测类别、分数与逐文件错误；没有人工真值不计算准确率。
+6. 此模型只有实验训练结果，尚无独立验证。预测概率不是准确率，不用于控制加热或决定烹饪参数。
+7. 载入或推理期间不能切换已加载模型；重新加载失败后旧模型不会继续显示就绪。
+
+九类英文顺序：asparagus, bacon, broccoli, chicken_wing, croissant,
+french_fries, potato, salmon, toast。
+.pt 不由桌面端读取；不要把训练检查点重命名成 .onnx。
+MNN 只有在随附 classes.json 明确列出通过验证的 MNN SHA256 时才可用于首轮模式。
+没有该条目时拒绝加载；其他已知契约的通用 MNN 模式仍可使用。
+
+无需摄像头的真实模型自检（命令提示符，路径含空格时保留双引号）：
+HeT-OvenCapture-v1.1.1-experimental.exe --model-selfcheck --model "oven9.onnx" --classes "classes.json" --image "photo.jpg" --out "model-selfcheck.json"
+源码用项目自己的 Python 环境执行同样参数：
+python oven_capture_gui.py --model-selfcheck --model "oven9.onnx" --classes "classes.json" --image "photo.jpg" --out "model-selfcheck.json"
+返回码 0 表示真实模型/文件推理成功，1 表示失败；检查 JSON 的 status、model_ready 和 error。
+JSON 报告不能覆盖所选模型、类别文件或图片。
+--healthcheck "runtime.json" 只检查运行依赖和合成采集样本，不证明真实模型或硬件可用。
+
+开发者打包：
+powershell -NoProfile -ExecutionPolicy Bypass -File .\build_windows.ps1
+如果机器不支持 MNN wheel，可加 -SkipMNN 生成 ONNX 版。
+脚本只使用工具目录内独立 .build-venv，不修改全局 Python/CUDA 或原桌面版本环境。
+构建产物为 dist\HeT-OvenCapture-v1.1.1-experimental.exe 和同版本 ZIP。
+模型及真实照片不自动打包，不提交到代码仓库。

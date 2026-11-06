@@ -1,0 +1,54 @@
+{
+  "runs/oven-first-round-20261106/yolo11n-fixed30/last.pt": {
+    "sha256": "72367305b65b31920c59865758dcdd4a1ee506751bde57db113f017c5c314b25",
+    "unchanged": true
+  },
+  "configs/classes.json": {
+    "sha256": "27d5337826c26a3b743ec0928ea8da050f4ae7bf0ef31e7efb051e4e907e9614",
+    "unchanged": true
+  },
+  "configs/classes.draft.json": {
+    "sha256": "b1e7e37d06abf7484c28f01a44550808d652e00416943686d4e847a085de8801",
+    "unchanged": true
+  },
+  "data/manifest.csv": {
+    "sha256": "6bef9776c278d8efac86008a11c47386cb7d95b7164073b9bd07e84cb5cf2821",
+    "unchanged": true
+  },
+  "data/processed/selected_dataset_v1.1.0/manifest.csv": {
+    "sha256": "6bef9776c278d8efac86008a11c47386cb7d95b7164073b9bd07e84cb5cf2821",
+    "unchanged": true
+  },
+  "desktop_v1.1/camera_devices.py": {
+    "sha256": "c565ceb60e0f61327cdfd15da4d69b19625bf2ff85221c6cbe41131b1631e0e6",
+    "unchanged": true
+  },
+  "desktop_v1.1/capture_core.py": {
+    "sha256": "19b6bd07d48ebcc9dacfa9d2d2d235af4fa7d0acf2bae8df9dc7643890315cd0",
+    "unchanged": true
+  },
+  "desktop_v1.1/inference_engine.py": {
+    "sha256": "e9590ef995331a320a141285a5e7d59dc000127103ed1ece25cb772e8585f240",
+    "unchanged": true
+  },
+  "desktop_v1.1/oven_capture_gui.py": {
+    "sha256": "7fd4355a0799c0ba4272a3c766a4ddfbe74f5ee86b9668a3527e0f4025dce2ce",
+    "unchanged": true
+  },
+  "desktop_v1.1/build_windows.ps1": {
+    "sha256": "16cddfe269b395c786c93309d89f3f98e3b7967037401ae03ba6669c4a796bca",
+    "unchanged": true
+  },
+  "historical_baseline_best.pt": {
+    "sha256": "41056b3ea90d5fa718a18f48cf5182373d1010c5185cb426ba5c949b1ec1f4c5",
+    "unchanged": true
+  },
+  "copied_desk/camera_devices.py": {
+    "sha256": "c565ceb60e0f61327cdfd15da4d69b19625bf2ff85221c6cbe41131b1631e0e6",
+    "unchanged": true
+  },
+  "copied_desk/capture_core.py": {
+    "sha256": "19b6bd07d48ebcc9dacfa9d2d2d235af4fa7d0acf2bae8df9dc7643890315cd0",
+    "unchanged": true
+  }
+}

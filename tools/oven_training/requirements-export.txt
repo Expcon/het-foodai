@@ -1,0 +1,9 @@
+# Add to the existing isolated training environment, never the global interpreter.
+onnx==1.19.1
+onnxruntime==1.23.2
+protobuf==7.36.2
+ml_dtypes==0.6.0
+coloredlogs==15.0.1
+flatbuffers==25.12.19
+humanfriendly==10.0
+pyreadline3==3.5.6

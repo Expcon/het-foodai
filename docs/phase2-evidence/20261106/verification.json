@@ -1,0 +1,1124 @@
+{
+  "date": "2026-11-06",
+  "base_commit": "7054b16ec8bc7992738332a6959b31d745ffce27",
+  "branch": "feat/model-oven-first-round",
+  "source": {
+    "source": {
+      "archive_name": "food_classification_dataset.zip",
+      "sha256": "5a7d0ef8a72d2d85d19ed5b54e2aa0633370a28455c5c8cf9ecd2a2cf7be7d16",
+      "bytes": 422805862,
+      "members": 600,
+      "directories": 31,
+      "uncompressed_bytes": 476099561,
+      "origin": "user-supplied ZIP; original acquisition provenance unverified",
+      "license": "unknown",
+      "redistribution": "not permitted pending rights verification"
+    },
+    "image_count": 569,
+    "class_count": 9,
+    "class_original_split_counts": {
+      "asparagus": {
+        "train": 50,
+        "val": 6,
+        "test": 6
+      },
+      "bacon": {
+        "train": 50,
+        "val": 6,
+        "test": 7
+      },
+      "broccoli": {
+        "train": 48,
+        "val": 6,
+        "test": 6
+      },
+      "chicken_wing": {
+        "train": 49,
+        "val": 7,
+        "test": 7
+      },
+      "croissant": {
+        "train": 46,
+        "val": 6,
+        "test": 5
+      },
+      "french_fries": {
+        "train": 48,
+        "val": 6,
+        "test": 6
+      },
+      "potato": {
+        "train": 39,
+        "val": 5,
+        "test": 5
+      },
+      "salmon": {
+        "train": 48,
+        "val": 6,
+        "test": 6
+      },
+      "toast": {
+        "train": 76,
+        "val": 10,
+        "test": 9
+      }
+    },
+    "original_split_counts": {
+      "test": 57,
+      "train": 454,
+      "val": 58
+    },
+    "duplicate_counts": {
+      "sha256": {
+        "groups": 1,
+        "excess_copies": 1,
+        "cross_original_split_groups": 0
+      },
+      "pixel_sha256": {
+        "groups": 1,
+        "excess_copies": 1,
+        "cross_original_split_groups": 0
+      }
+    },
+    "near_cross_original_split_pair_count": 576,
+    "uncertainty_group_count": 1,
+    "physical_ids_available": false,
+    "new_split_counts": {
+      "excluded": 1,
+      "train": 568
+    }
+  },
+  "training": {
+    "command": "<project-venv-python> -u -m tools.oven_training.train --rows runs/oven-first-round-20261106/candidate_rows.json --pretrained runs/phase2-edge/export-smoke/yolo11n-cls.pt --out runs/oven-first-round-20261106/yolo11n-fixed30 --device cuda:0",
+    "exit_code": 0,
+    "run_info": {
+      "format": "oven-yolo-exploratory/v1",
+      "architecture": "yolo11n-cls",
+      "class_keys": [
+        "asparagus",
+        "bacon",
+        "broccoli",
+        "chicken_wing",
+        "croissant",
+        "french_fries",
+        "potato",
+        "salmon",
+        "toast"
+      ],
+      "class_list_sha256": "42bd80f04446cd87f8c719c78034bf274bd447fe7a60205713f118cd0b584b52",
+      "preprocess": {
+        "size": 224,
+        "color": "RGB",
+        "resize": "bilinear-contain-center-pad",
+        "pad": 114,
+        "scale": "1/255",
+        "layout": "NCHW"
+      },
+      "independent_validation": false,
+      "ultralytics_version": "8.3.230",
+      "epoch": 30,
+      "config": {
+        "epochs": 30,
+        "batch_size": 32,
+        "seed": 42,
+        "optimizer": "AdamW",
+        "lr": 0.001,
+        "weight_decay": 0.0005,
+        "amp": false,
+        "workers": 0,
+        "selection": "final_epoch_only",
+        "validation": false,
+        "independent_validation": false,
+        "preprocessing": {
+          "size": 224,
+          "color": "RGB",
+          "resize": "bilinear-contain-center-pad",
+          "pad": 114,
+          "scale": "1/255",
+          "layout": "NCHW"
+        },
+        "augmentation": "horizontal_flip_p0.5;color_jitter_brightness_contrast_saturation_0.1",
+        "rows_sha256": "d0fcd2a66d479a5928e5bd9f69edf6771da2fc8dadd26d2aa81e0e7e50763f5e",
+        "pretrained_sha256": "c62d41bf9625777760018bf914d2e6cd472420ccd01706d97a61cb6c82502bd7",
+        "class_keys": [
+          "asparagus",
+          "bacon",
+          "broccoli",
+          "chicken_wing",
+          "croissant",
+          "french_fries",
+          "potato",
+          "salmon",
+          "toast"
+        ]
+      },
+      "torch_version": "2.14.1+cu130",
+      "device": "cuda:0",
+      "samples": 568,
+      "seconds": 35.58447950000118,
+      "checkpoint_sha256": "72367305b65b31920c59865758dcdd4a1ee506751bde57db113f017c5c314b25"
+    },
+    "checkpoint_bytes": 6270865,
+    "parameter_count": 1542633
+  },
+  "batch_inference": {
+    "cuda_exit_code": 0,
+    "cpu_exit_code": 0,
+    "images_each": 569,
+    "cuda_metrics": {
+      "scope": "resubstitution_diagnostic_not_independent_evaluation",
+      "labelled_images": 569,
+      "correct": 569,
+      "resubstitution_accuracy": 1.0,
+      "independent_validation_accuracy": null,
+      "class_order": [
+        "asparagus",
+        "bacon",
+        "broccoli",
+        "chicken_wing",
+        "croissant",
+        "french_fries",
+        "potato",
+        "salmon",
+        "toast"
+      ],
+      "confusion_matrix": [
+        [
+          62,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          63,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          60,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          63,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          57,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          60,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          49,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          60,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          95
+        ]
+      ],
+      "per_class": {
+        "asparagus": {
+          "count": 62,
+          "correct": 62,
+          "recall_on_seen_images": 1.0
+        },
+        "bacon": {
+          "count": 63,
+          "correct": 63,
+          "recall_on_seen_images": 1.0
+        },
+        "broccoli": {
+          "count": 60,
+          "correct": 60,
+          "recall_on_seen_images": 1.0
+        },
+        "chicken_wing": {
+          "count": 63,
+          "correct": 63,
+          "recall_on_seen_images": 1.0
+        },
+        "croissant": {
+          "count": 57,
+          "correct": 57,
+          "recall_on_seen_images": 1.0
+        },
+        "french_fries": {
+          "count": 60,
+          "correct": 60,
+          "recall_on_seen_images": 1.0
+        },
+        "potato": {
+          "count": 49,
+          "correct": 49,
+          "recall_on_seen_images": 1.0
+        },
+        "salmon": {
+          "count": 60,
+          "correct": 60,
+          "recall_on_seen_images": 1.0
+        },
+        "toast": {
+          "count": 95,
+          "correct": 95,
+          "recall_on_seen_images": 1.0
+        }
+      }
+    },
+    "unique_training_metrics": {
+      "scope": "resubstitution_diagnostic_not_independent_evaluation",
+      "labelled_images": 568,
+      "correct": 568,
+      "resubstitution_accuracy": 1.0,
+      "independent_validation_accuracy": null,
+      "class_order": [
+        "asparagus",
+        "bacon",
+        "broccoli",
+        "chicken_wing",
+        "croissant",
+        "french_fries",
+        "potato",
+        "salmon",
+        "toast"
+      ],
+      "confusion_matrix": [
+        [
+          62,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          63,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          60,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          62,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          57,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          60,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          49,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          60,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          95
+        ]
+      ],
+      "per_class": {
+        "asparagus": {
+          "count": 62,
+          "correct": 62,
+          "recall_on_seen_images": 1.0
+        },
+        "bacon": {
+          "count": 63,
+          "correct": 63,
+          "recall_on_seen_images": 1.0
+        },
+        "broccoli": {
+          "count": 60,
+          "correct": 60,
+          "recall_on_seen_images": 1.0
+        },
+        "chicken_wing": {
+          "count": 62,
+          "correct": 62,
+          "recall_on_seen_images": 1.0
+        },
+        "croissant": {
+          "count": 57,
+          "correct": 57,
+          "recall_on_seen_images": 1.0
+        },
+        "french_fries": {
+          "count": 60,
+          "correct": 60,
+          "recall_on_seen_images": 1.0
+        },
+        "potato": {
+          "count": 49,
+          "correct": 49,
+          "recall_on_seen_images": 1.0
+        },
+        "salmon": {
+          "count": 60,
+          "correct": 60,
+          "recall_on_seen_images": 1.0
+        },
+        "toast": {
+          "count": 95,
+          "correct": 95,
+          "recall_on_seen_images": 1.0
+        }
+      }
+    },
+    "cpu_metrics": {
+      "scope": "resubstitution_diagnostic_not_independent_evaluation",
+      "labelled_images": 569,
+      "correct": 569,
+      "resubstitution_accuracy": 1.0,
+      "independent_validation_accuracy": null,
+      "class_order": [
+        "asparagus",
+        "bacon",
+        "broccoli",
+        "chicken_wing",
+        "croissant",
+        "french_fries",
+        "potato",
+        "salmon",
+        "toast"
+      ],
+      "confusion_matrix": [
+        [
+          62,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          63,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          60,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          63,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          57,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          60,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          49,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          60,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          95
+        ]
+      ],
+      "per_class": {
+        "asparagus": {
+          "count": 62,
+          "correct": 62,
+          "recall_on_seen_images": 1.0
+        },
+        "bacon": {
+          "count": 63,
+          "correct": 63,
+          "recall_on_seen_images": 1.0
+        },
+        "broccoli": {
+          "count": 60,
+          "correct": 60,
+          "recall_on_seen_images": 1.0
+        },
+        "chicken_wing": {
+          "count": 63,
+          "correct": 63,
+          "recall_on_seen_images": 1.0
+        },
+        "croissant": {
+          "count": 57,
+          "correct": 57,
+          "recall_on_seen_images": 1.0
+        },
+        "french_fries": {
+          "count": 60,
+          "correct": 60,
+          "recall_on_seen_images": 1.0
+        },
+        "potato": {
+          "count": 49,
+          "correct": 49,
+          "recall_on_seen_images": 1.0
+        },
+        "salmon": {
+          "count": 60,
+          "correct": 60,
+          "recall_on_seen_images": 1.0
+        },
+        "toast": {
+          "count": 95,
+          "correct": 95,
+          "recall_on_seen_images": 1.0
+        }
+      }
+    },
+    "top1_cpu_gpu_agreement": 569,
+    "max_top1_score_absolute_difference": 0.0045005083084106445,
+    "timing_limitation": "CPU and CUDA batch jobs overlapped; timing includes decode and is not an isolated CPU/GPU speed comparison",
+    "cuda_timing": {
+      "scope": "batch includes decode, EXIF/RGB, letterbox, tensor, H2D, forward, Top3, D2H; excludes initial validation/hash/model load/JSON writing",
+      "cuda_synchronized": true,
+      "warmup": "one zero-input forward in load verification; no image warmup",
+      "batches": [
+        {
+          "size": 16,
+          "batch_e2e_ms": 444.7373000002699,
+          "amortized_ms_per_image": 27.79608125001687
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 341.4769000009983,
+          "amortized_ms_per_image": 21.342306250062393
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 345.33809999993537,
+          "amortized_ms_per_image": 21.58363124999596
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 360.15779999797815,
+          "amortized_ms_per_image": 22.509862499873634
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 338.66130000023986,
+          "amortized_ms_per_image": 21.16633125001499
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 344.530999998824,
+          "amortized_ms_per_image": 21.5331874999265
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 344.15309999894816,
+          "amortized_ms_per_image": 21.50956874993426
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 346.8938000005437,
+          "amortized_ms_per_image": 21.68086250003398
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 352.33709999738494,
+          "amortized_ms_per_image": 22.02106874983656
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 347.09509999811416,
+          "amortized_ms_per_image": 21.693443749882135
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 343.9879000034125,
+          "amortized_ms_per_image": 21.49924375021328
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 357.5000999990152,
+          "amortized_ms_per_image": 22.34375624993845
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 353.2828999996127,
+          "amortized_ms_per_image": 22.080181249975794
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 374.3243999997503,
+          "amortized_ms_per_image": 23.395274999984395
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 406.8748999998206,
+          "amortized_ms_per_image": 25.42968124998879
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 379.33189999967,
+          "amortized_ms_per_image": 23.708243749979374
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 406.1066000031133,
+          "amortized_ms_per_image": 25.38166250019458
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 409.52590000233613,
+          "amortized_ms_per_image": 25.595368750146008
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 367.4051000016334,
+          "amortized_ms_per_image": 22.962818750102088
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 371.65989999994054,
+          "amortized_ms_per_image": 23.228743749996283
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 372.8363999980502,
+          "amortized_ms_per_image": 23.302274999878136
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 379.38889999713865,
+          "amortized_ms_per_image": 23.711806249821166
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 416.1442000004172,
+          "amortized_ms_per_image": 26.009012500026074
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 384.4004999991739,
+          "amortized_ms_per_image": 24.02503124994837
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 415.55759999755537,
+          "amortized_ms_per_image": 25.97234999984721
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 410.21489999911864,
+          "amortized_ms_per_image": 25.638431249944915
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 376.4026999997441,
+          "amortized_ms_per_image": 23.525168749984005
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 424.025200001779,
+          "amortized_ms_per_image": 26.50157500011119
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 433.368199999677,
+          "amortized_ms_per_image": 27.085512499979814
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 401.61499999885564,
+          "amortized_ms_per_image": 25.100937499928477
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 376.1311999987811,
+          "amortized_ms_per_image": 23.508199999923818
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 377.56960000115214,
+          "amortized_ms_per_image": 23.59810000007201
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 348.74610000042594,
+          "amortized_ms_per_image": 21.79663125002662
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 349.8479999980191,
+          "amortized_ms_per_image": 21.865499999876192
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 341.8874999988475,
+          "amortized_ms_per_image": 21.367968749927968
+        },
+        {
+          "size": 9,
+          "batch_e2e_ms": 215.14620000016293,
+          "amortized_ms_per_image": 23.905133333351436
+        }
+      ]
+    },
+    "cpu_timing": {
+      "scope": "batch includes decode, EXIF/RGB, letterbox, tensor, H2D, forward, Top3, D2H; excludes initial validation/hash/model load/JSON writing",
+      "cuda_synchronized": false,
+      "warmup": "one zero-input forward in load verification; no image warmup",
+      "batches": [
+        {
+          "size": 16,
+          "batch_e2e_ms": 421.8064999986382,
+          "amortized_ms_per_image": 26.362906249914886
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 388.1553999999596,
+          "amortized_ms_per_image": 24.259712499997477
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 396.10109999921406,
+          "amortized_ms_per_image": 24.75631874995088
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 424.9037000008684,
+          "amortized_ms_per_image": 26.556481250054276
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 382.53290000284323,
+          "amortized_ms_per_image": 23.908306250177702
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 366.3321999993059,
+          "amortized_ms_per_image": 22.895762499956618
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 365.67310000100406,
+          "amortized_ms_per_image": 22.854568750062754
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 373.65760000102455,
+          "amortized_ms_per_image": 23.353600000064034
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 360.67390000243904,
+          "amortized_ms_per_image": 22.54211875015244
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 362.62559999886435,
+          "amortized_ms_per_image": 22.66409999992902
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 365.4034000028332,
+          "amortized_ms_per_image": 22.837712500177076
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 365.0981999999203,
+          "amortized_ms_per_image": 22.81863749999502
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 362.8011000000697,
+          "amortized_ms_per_image": 22.675068750004357
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 355.5982999969274,
+          "amortized_ms_per_image": 22.22489374980796
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 361.62960000001476,
+          "amortized_ms_per_image": 22.601850000000923
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 363.77379999976256,
+          "amortized_ms_per_image": 22.73586249998516
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 365.9379999990051,
+          "amortized_ms_per_image": 22.87112499993782
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 368.89739999969606,
+          "amortized_ms_per_image": 23.056087499981004
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 358.9418999981717,
+          "amortized_ms_per_image": 22.433868749885733
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 384.56700000097044,
+          "amortized_ms_per_image": 24.035437500060652
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 376.76989999818034,
+          "amortized_ms_per_image": 23.54811874988627
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 367.40540000027977,
+          "amortized_ms_per_image": 22.962837500017486
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 358.52479999812203,
+          "amortized_ms_per_image": 22.407799999882627
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 353.2658999974956,
+          "amortized_ms_per_image": 22.079118749843474
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 347.6346999996167,
+          "amortized_ms_per_image": 21.727168749976045
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 344.50010000000475,
+          "amortized_ms_per_image": 21.531256250000297
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 348.0455000026268,
+          "amortized_ms_per_image": 21.752843750164175
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 382.0527000025322,
+          "amortized_ms_per_image": 23.878293750158264
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 390.63399999940884,
+          "amortized_ms_per_image": 24.414624999963053
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 387.66450000184705,
+          "amortized_ms_per_image": 24.22903125011544
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 386.59089999782736,
+          "amortized_ms_per_image": 24.16193124986421
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 379.6663000030094,
+          "amortized_ms_per_image": 23.729143750188086
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 358.03909999958705,
+          "amortized_ms_per_image": 22.37744374997419
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 362.93989999830956,
+          "amortized_ms_per_image": 22.683743749894347
+        },
+        {
+          "size": 16,
+          "batch_e2e_ms": 364.9248000001535,
+          "amortized_ms_per_image": 22.807800000009593
+        },
+        {
+          "size": 9,
+          "batch_e2e_ms": 221.3914999992994,
+          "amortized_ms_per_image": 24.59905555547771
+        }
+      ]
+    }
+  },
+  "field_cli": {
+    "state": "PASS",
+    "real_checkpoint": true,
+    "real_png": true,
+    "jpeg_is_reencoding_not_independent_sample": true,
+    "malformed_inputs_synthetic": true,
+    "camera_opened": false,
+    "cases": [
+      {
+        "case": "real_png_and_derived_jpg",
+        "exit_code": 0,
+        "expected_exit_code": 0
+      },
+      {
+        "case": "missing_image",
+        "exit_code": 2,
+        "expected_exit_code": 2
+      },
+      {
+        "case": "corrupt_image",
+        "exit_code": 2,
+        "expected_exit_code": 2
+      },
+      {
+        "case": "no_image_argument",
+        "exit_code": 2,
+        "expected_exit_code": 2
+      },
+      {
+        "case": "invalid_batch",
+        "exit_code": 2,
+        "expected_exit_code": 2
+      },
+      {
+        "case": "missing_model",
+        "exit_code": 2,
+        "expected_exit_code": 2
+      },
+      {
+        "case": "corrupt_model",
+        "exit_code": 2,
+        "expected_exit_code": 2
+      }
+    ]
+  },
+  "unit_tests": {
+    "command": "<project-venv-python> -m unittest discover -s tests -v",
+    "exit_code": 0,
+    "run": 115,
+    "passed": 114,
+    "skipped": 1,
+    "failed": 0,
+    "seconds": 20.121,
+    "skip_reason": "Windows symlink privilege unavailable"
+  },
+  "protected_before": {
+    "configs/classes.json": "27d5337826c26a3b743ec0928ea8da050f4ae7bf0ef31e7efb051e4e907e9614",
+    "configs/classes.draft.json": "b1e7e37d06abf7484c28f01a44550808d652e00416943686d4e847a085de8801",
+    "data/manifest.csv": "6bef9776c278d8efac86008a11c47386cb7d95b7164073b9bd07e84cb5cf2821",
+    "data/processed/selected_dataset_v1.1.0/manifest.csv": "6bef9776c278d8efac86008a11c47386cb7d95b7164073b9bd07e84cb5cf2821",
+    "src/foodai/contracts.py": "d630d10288748bc8fb0c7d393f312042fb72e158fb80ddc934f691f54925d22f",
+    "src/foodai/predictor.py": "f3952423b1daf257a59287656370a45662eefbdb60ee6a713edd956cbe9f1097",
+    "scripts/train_classifier.py": "97c0f6ba90406488a0ebe0c7143967eda955aa10ad5e0bec73ea298b9da26b83",
+    "scripts/evaluate_classifier.py": "b76a2ee34089f14631ce9c674708fc51c4e3fc76d9385a4ff1f6f4339e4d4eb0",
+    "historical_baseline_best.pt": "41056b3ea90d5fa718a18f48cf5182373d1010c5185cb426ba5c949b1ec1f4c5"
+  },
+  "protected_after": {
+    "configs/classes.json": "27d5337826c26a3b743ec0928ea8da050f4ae7bf0ef31e7efb051e4e907e9614",
+    "configs/classes.draft.json": "b1e7e37d06abf7484c28f01a44550808d652e00416943686d4e847a085de8801",
+    "data/manifest.csv": "6bef9776c278d8efac86008a11c47386cb7d95b7164073b9bd07e84cb5cf2821",
+    "data/processed/selected_dataset_v1.1.0/manifest.csv": "6bef9776c278d8efac86008a11c47386cb7d95b7164073b9bd07e84cb5cf2821",
+    "src/foodai/contracts.py": "d630d10288748bc8fb0c7d393f312042fb72e158fb80ddc934f691f54925d22f",
+    "src/foodai/predictor.py": "f3952423b1daf257a59287656370a45662eefbdb60ee6a713edd956cbe9f1097",
+    "scripts/train_classifier.py": "97c0f6ba90406488a0ebe0c7143967eda955aa10ad5e0bec73ea298b9da26b83",
+    "scripts/evaluate_classifier.py": "b76a2ee34089f14631ce9c674708fc51c4e3fc76d9385a4ff1f6f4339e4d4eb0",
+    "historical_baseline_best.pt": "41056b3ea90d5fa718a18f48cf5182373d1010c5185cb426ba5c949b1ec1f4c5"
+  },
+  "global_environment_modified": false,
+  "hardware_accessed": false,
+  "formal_validation_metric": null
+}

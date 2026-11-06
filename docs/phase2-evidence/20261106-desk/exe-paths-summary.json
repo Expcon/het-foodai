@@ -1,0 +1,37 @@
+[
+  {
+    "exit_code": 0,
+    "case": "png",
+    "expected_exit": 0,
+    "model_ready": true,
+    "status": "PASS"
+  },
+  {
+    "exit_code": 0,
+    "case": "jpg",
+    "expected_exit": 0,
+    "model_ready": true,
+    "status": "PASS"
+  },
+  {
+    "exit_code": 1,
+    "case": "corrupt",
+    "expected_exit": 1,
+    "model_ready": false,
+    "status": "FAIL"
+  },
+  {
+    "exit_code": 1,
+    "case": "missing-model",
+    "expected_exit": 1,
+    "model_ready": false,
+    "status": "FAIL"
+  },
+  {
+    "exit_code": 1,
+    "case": "unapproved-mnn",
+    "expected_exit": 1,
+    "model_ready": false,
+    "status": "FAIL"
+  }
+]

@@ -1,0 +1,34 @@
+Creating new Ultralytics Settings v0.0.6 file
+View Ultralytics Settings with 'yolo settings' or at '<workspace>\runs\oven-first-round-20261106\sdk-settings\Ultralytics\settings.json'
+Update Settings with 'yolo settings key=value', i.e. 'yolo settings runs_dir=path/to/dir'. For help see https://docs.ultralytics.com/quickstart/#ultralytics-settings.
+{"epoch": 1, "train_loss": 0.36534060308263755, "train_accuracy_augmented": 0.8943661971830986, "samples": 568, "seconds": 4.514964500001952}
+{"epoch": 2, "train_loss": 0.061258126745446465, "train_accuracy_augmented": 0.9753521126760564, "samples": 568, "seconds": 0.9990609999986191}
+{"epoch": 3, "train_loss": 0.05201964505987478, "train_accuracy_augmented": 0.9823943661971831, "samples": 568, "seconds": 1.0078549999998359}
+{"epoch": 4, "train_loss": 0.10339417077705894, "train_accuracy_augmented": 0.9683098591549296, "samples": 568, "seconds": 1.020229499998095}
+{"epoch": 5, "train_loss": 0.02260495924299032, "train_accuracy_augmented": 0.9947183098591549, "samples": 568, "seconds": 1.003790000002482}
+{"epoch": 6, "train_loss": 0.009254803644939207, "train_accuracy_augmented": 0.9982394366197183, "samples": 568, "seconds": 1.12891959999979}
+{"epoch": 7, "train_loss": 0.010293640304540455, "train_accuracy_augmented": 0.9947183098591549, "samples": 568, "seconds": 1.0087483999996039}
+{"epoch": 8, "train_loss": 0.02403307978955793, "train_accuracy_augmented": 0.9929577464788732, "samples": 568, "seconds": 1.0201569000018935}
+{"epoch": 9, "train_loss": 0.04676006726500854, "train_accuracy_augmented": 0.9806338028169014, "samples": 568, "seconds": 0.924034899999242}
+{"epoch": 10, "train_loss": 0.07865693350650475, "train_accuracy_augmented": 0.9753521126760564, "samples": 568, "seconds": 0.9501013999979477}
+{"epoch": 11, "train_loss": 0.023173749046793705, "train_accuracy_augmented": 0.9911971830985915, "samples": 568, "seconds": 0.9534568000017316}
+{"epoch": 12, "train_loss": 0.07094530523328346, "train_accuracy_augmented": 0.9788732394366197, "samples": 568, "seconds": 0.9658180000005814}
+{"epoch": 13, "train_loss": 0.13510004532667744, "train_accuracy_augmented": 0.9647887323943662, "samples": 568, "seconds": 1.0270554999988235}
+{"epoch": 14, "train_loss": 0.028436643039499422, "train_accuracy_augmented": 0.9911971830985915, "samples": 568, "seconds": 1.0229245999980776}
+{"epoch": 15, "train_loss": 0.027853815475295127, "train_accuracy_augmented": 0.9894366197183099, "samples": 568, "seconds": 1.0869462000009662}
+{"epoch": 16, "train_loss": 0.008865474686387296, "train_accuracy_augmented": 0.9964788732394366, "samples": 568, "seconds": 1.1001666999982262}
+{"epoch": 17, "train_loss": 0.005374305195775224, "train_accuracy_augmented": 0.9982394366197183, "samples": 568, "seconds": 1.1023366000008537}
+{"epoch": 18, "train_loss": 0.0005249734670760005, "train_accuracy_augmented": 1.0, "samples": 568, "seconds": 1.2021924000000581}
+{"epoch": 19, "train_loss": 0.001724346797473886, "train_accuracy_augmented": 1.0, "samples": 568, "seconds": 1.124147800001083}
+{"epoch": 20, "train_loss": 0.00043678321475146704, "train_accuracy_augmented": 1.0, "samples": 568, "seconds": 1.147712899997714}
+{"epoch": 21, "train_loss": 0.00017896679563703618, "train_accuracy_augmented": 1.0, "samples": 568, "seconds": 1.1980623000017658}
+{"epoch": 22, "train_loss": 0.00012219485424665576, "train_accuracy_augmented": 1.0, "samples": 568, "seconds": 1.1418316999988747}
+{"epoch": 23, "train_loss": 0.00024544434133313704, "train_accuracy_augmented": 1.0, "samples": 568, "seconds": 1.1049979999988864}
+{"epoch": 24, "train_loss": 0.0006811078690102285, "train_accuracy_augmented": 1.0, "samples": 568, "seconds": 1.1746110000021872}
+{"epoch": 25, "train_loss": 0.03969096661767509, "train_accuracy_augmented": 0.9894366197183099, "samples": 568, "seconds": 1.1234335000008286}
+{"epoch": 26, "train_loss": 0.031591476041259586, "train_accuracy_augmented": 0.9876760563380281, "samples": 568, "seconds": 1.1619445999967866}
+{"epoch": 27, "train_loss": 0.006871984086924193, "train_accuracy_augmented": 0.9982394366197183, "samples": 568, "seconds": 1.0900150000015856}
+{"epoch": 28, "train_loss": 0.0963769243557898, "train_accuracy_augmented": 0.9841549295774648, "samples": 568, "seconds": 1.082050299999537}
+{"epoch": 29, "train_loss": 0.026754054506608567, "train_accuracy_augmented": 0.9947183098591549, "samples": 568, "seconds": 1.0805144000005384}
+{"epoch": 30, "train_loss": 0.005692658734402921, "train_accuracy_augmented": 0.9982394366197183, "samples": 568, "seconds": 1.100954700003058}
+{"state": "EXPLORATORY_TRAINING_COMPLETED", "epoch": 30, "independent_validation": false, "checkpoint_sha256": "72367305b65b31920c59865758dcdd4a1ee506751bde57db113f017c5c314b25"}
