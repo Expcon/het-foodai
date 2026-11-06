@@ -3,11 +3,18 @@ import tempfile
 import json
 from pathlib import Path
 import numpy as np
-from tools.oven_training.export_desk import compare_probabilities, make_contract, revoke_mnn
+from tools.oven_training.export_desk import compare_probabilities, make_contract, revoke_mnn, pending_contract
 from tools.oven_training.model import PREPROCESS, class_digest
 
 
 class OvenExportTests(unittest.TestCase):
+    def test_pending_alignment_has_no_loadable_model_authorization(self):
+        contract={'format':'het-oven-classifier/v2','models':{'onnx':{'sha256':'a'*64}}}
+        pending=pending_contract(contract)
+        self.assertEqual(pending['models'],{})
+        self.assertEqual(pending['alignment_status'],'PENDING')
+        self.assertIn('onnx',contract['models'])
+
     def test_alignment_requires_all_probabilities_and_ordered_top3(self):
         p = np.array([.5, .3, .2], dtype=np.float32)
         self.assertTrue(compare_probabilities(p, p)['pass'])
