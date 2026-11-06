@@ -17,10 +17,21 @@ import numpy as np
 from PIL import Image, ImageOps
 
 
+def class_keys_sha256(keys):
+    """Match the export's ordered-key fingerprint without importing training code."""
+    return hashlib.sha256(json.dumps(keys, ensure_ascii=False, separators=(',', ':')).encode('utf-8')).hexdigest()
+
+
 OVEN_FORMAT = "het-oven-classifier/v1"
 OVEN_KEYS = ['asparagus', 'bacon', 'broccoli', 'chicken_wing', 'croissant',
              'french_fries', 'potato', 'salmon', 'toast']
-OVEN_CLASS_SHA = '42bd80f04446cd87f8c719c78034bf274bd447fe7a60205713f118cd0b584b52'
+OVEN_CLASS_SHA = class_keys_sha256(OVEN_KEYS)
+OVEN_ROUND2_FORMAT = "het-oven-classifier/v2"
+OVEN_ROUND2_KEYS = OVEN_KEYS + ['corn', 'sausage', 'steak']
+OVEN_ROUND2_CLASS_SHA = class_keys_sha256(OVEN_ROUND2_KEYS)
+OVEN_MODES = {'oven_round1': (OVEN_FORMAT, OVEN_KEYS),
+              'oven_round2': (OVEN_ROUND2_FORMAT, OVEN_ROUND2_KEYS)}
+OVEN_FORMAT_MODES = {value[0]: mode for mode, value in OVEN_MODES.items()}
 OVEN_PREPROCESS = dict(size=224, color='RGB', resize='bilinear-contain-center-pad',
                        pad=114, scale='1/255', layout='NCHW')
 
@@ -29,9 +40,15 @@ class ModelContractError(RuntimeError):
     pass
 
 
+def _oven_spec(mode):
+    if mode not in OVEN_MODES:
+        raise ModelContractError("Unrecognized oven mode")
+    return OVEN_MODES[mode]
+
+
 def read_image_unicode(path, mode=None):
     """OpenCV imread may fail with Chinese path names on Windows."""
-    if mode == "oven_round1":
+    if mode in OVEN_MODES:
         try:
             with Image.open(path) as source:
                 rgb = np.asarray(ImageOps.exif_transpose(source).convert('RGB'))
@@ -57,21 +74,22 @@ def _read_json(path):
         raise ModelContractError(f"Invalid class contract: {path}") from exc
 
 
-def load_oven_contract(path, model_path):
+def load_oven_contract(path, model_path, mode='oven_round1'):
+    expected_format, keys = _oven_spec(mode)
     obj = _read_json(path)
-    if not isinstance(obj, dict) or obj.get('format') != OVEN_FORMAT:
-        raise ModelContractError("oven_round1 requires the exported het-oven-classifier/v1 classes.json")
-    if obj.get('class_keys') != OVEN_KEYS or obj.get('class_list_sha256') != OVEN_CLASS_SHA:
-        raise ModelContractError("Round-1 ordered class keys/hash mismatch")
+    if not isinstance(obj, dict) or obj.get('format') != expected_format:
+        raise ModelContractError(f"{mode} requires the exported {expected_format} classes.json")
+    if obj.get('class_keys') != keys or obj.get('class_list_sha256') != class_keys_sha256(keys):
+        raise ModelContractError(f"{mode} ordered class keys/hash mismatch")
     rows = obj.get('classes')
-    if (not isinstance(rows, list) or len(rows) != len(OVEN_KEYS) or
+    if (not isinstance(rows, list) or len(rows) != len(keys) or
         any(not isinstance(row, dict) or type(row.get('id')) is not int or
-            row['id'] != i or row.get('key') != OVEN_KEYS[i] for i, row in enumerate(rows))):
-        raise ModelContractError("Round-1 class IDs/keys must match the explicit experimental order")
+            row['id'] != i or row.get('key') != keys[i] for i, row in enumerate(rows))):
+        raise ModelContractError(f"{mode} class IDs/keys must match the explicit experimental order")
     if (obj.get('preprocess') != OVEN_PREPROCESS or obj.get('input_shape') != [1,3,224,224] or
-        obj.get('output_shape') != [1,9] or obj.get('output_kind') != 'classification-probabilities' or
+        obj.get('output_shape') != [1,len(keys)] or obj.get('output_kind') != 'classification-probabilities' or
         obj.get('independent_validation') is not False):
-        raise ModelContractError("Round-1 preprocessing/output/experimental-scope mismatch")
+        raise ModelContractError(f"{mode} preprocessing/output/experimental-scope mismatch")
     source_sha = obj.get('source_checkpoint_sha256')
     if not isinstance(source_sha, str) or not re.fullmatch('[0-9a-f]{64}', source_sha):
         raise ModelContractError("Source checkpoint SHA256 is required")
@@ -86,8 +104,9 @@ def load_oven_contract(path, model_path):
 
 
 def _reject_oven_in_generic_mode(model_path, labels_path, labels):
-    if labels == OVEN_KEYS:
-        raise ModelContractError("Round-1 oven classes require oven_round1 mode; generic modes crop differently")
+    for mode, (_, keys) in OVEN_MODES.items():
+        if labels == keys:
+            raise ModelContractError(f"Oven classes require {mode} mode; generic modes crop differently")
     paths = {Path(labels_path), Path(model_path).parent/'classes.json', Path(model_path).with_suffix('.json')}
     for path in paths:
         if path.suffix.lower() != '.json' or not path.is_file():
@@ -97,12 +116,13 @@ def _reject_oven_in_generic_mode(model_path, labels_path, labels):
         except ModelContractError:
             if path == Path(labels_path): raise
             continue
-        if not isinstance(obj, dict) or obj.get('format') != OVEN_FORMAT:
+        mode = OVEN_FORMAT_MODES.get(obj.get('format')) if isinstance(obj, dict) else None
+        if mode is None:
             continue
         entries = obj.get('models', {})
         entry = entries.get(Path(model_path).suffix.lower().lstrip('.'), {}) if isinstance(entries, dict) else {}
         if path == Path(labels_path) or (isinstance(entry, dict) and entry.get('sha256') == file_sha256(model_path)):
-            raise ModelContractError("This oven contract/model requires oven_round1 mode")
+            raise ModelContractError(f"This oven contract/model requires {mode} mode")
 
 
 def load_labels(path):
@@ -180,12 +200,12 @@ def _letterbox(frame_bgr, height, width):
 
 
 def prepare_input(frame_bgr, mode: str, height: int, width: int):
-    if mode == "oven_round1":
+    if mode in OVEN_MODES:
         if (height, width) != (224, 224):
-            raise ModelContractError("Round-1 oven input must be 224x224")
+            raise ModelContractError(f"{mode} oven input must be 224x224")
         if (not isinstance(frame_bgr, np.ndarray) or frame_bgr.dtype != np.uint8 or
             frame_bgr.ndim != 3 or frame_bgr.shape[2] != 3 or min(frame_bgr.shape[:2]) < 1):
-            raise ModelContractError("Round-1 input must be a nonempty uint8 BGR frame")
+            raise ModelContractError(f"{mode} input must be a nonempty uint8 BGR frame")
         try:
             rgb = Image.fromarray(cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB))
             resized = ImageOps.contain(rgb, (224,224), Image.Resampling.BILINEAR)
@@ -224,18 +244,21 @@ def parse_classification(output, labels):
     return [{"id": int(i), "label": labels[int(i)], "score": float(probs[i])} for i in indices]
 
 
-def parse_oven_classification(output, labels):
+def parse_oven_classification(output, labels, mode='oven_round1'):
+    expected_format, keys = _oven_spec(mode)
+    count = len(keys)
     arr = np.asarray(output)
-    if arr.shape != (1,9) or arr.dtype != np.float32:
-        raise ModelContractError(f"Round-1 output must be float32 [1,9], got {arr.dtype} {arr.shape}")
+    if arr.shape != (1,count) or arr.dtype != np.float32 or len(labels) != count:
+        raise ModelContractError(f"{mode} output must be float32 [1,{count}] with matching labels, got {arr.dtype} {arr.shape}")
     if (not np.isfinite(arr).all() or np.any(arr < 0) or np.any(arr > 1) or
         abs(float(arr.astype(np.float64).sum()) - 1) > 1e-4):
-        raise ModelContractError("Round-1 output must be probabilities in [0,1] summing to 1; logits are rejected")
+        raise ModelContractError(f"{mode} output must be probabilities in [0,1] summing to 1; logits are rejected")
     scores = arr[0]
     indices = np.argsort(-scores, kind='stable')[:3]
     return {'task':'classification',
             'top3':[{'id':int(i), 'label':labels[int(i)], 'score':float(scores[i])} for i in indices],
-            'probabilities':scores.tolist(), 'independent_validation':False}
+            'probabilities':scores.tolist(), 'independent_validation':False,
+            'mode':mode, 'contract_format':expected_format, 'class_list_sha256':class_keys_sha256(keys)}
 
 
 def parse_yolo_detection(output, labels, context, conf=0.25, iou=0.45, limit=100):
@@ -291,10 +314,10 @@ class ModelEngine:
         self.path = Path(model_path)
         if not self.path.is_file():
             raise ModelContractError("Model file not found")
-        if mode not in {'oven_round1', 'yolo_classify', 'efficientnet_imagenet', 'yolo_detect'}:
+        if mode not in OVEN_MODES and mode not in {'yolo_classify', 'efficientnet_imagenet', 'yolo_detect'}:
             raise ModelContractError("Unrecognized preprocessing mode")
-        self.contract = load_oven_contract(labels_path, self.path) if mode == 'oven_round1' else None
-        self.labels = list(OVEN_KEYS) if self.contract else load_labels(labels_path)
+        self.contract = load_oven_contract(labels_path, self.path, mode) if mode in OVEN_MODES else None
+        self.labels = list(self.contract['class_keys']) if self.contract else load_labels(labels_path)
         if not self.contract:
             _reject_oven_in_generic_mode(self.path, labels_path, self.labels)
         self.mode = mode
@@ -303,8 +326,8 @@ class ModelEngine:
         self.model = None
         self.input_name = None
         self.height, self.width = int(input_size), int(input_size)
-        if mode == 'oven_round1' and self.height != 224:
-            raise ModelContractError("Round-1 oven input must be 224x224")
+        if self.contract and self.height != 224:
+            raise ModelContractError(f"{mode} oven input must be 224x224")
         if self.height < 64 or self.height > 2048:
             raise ModelContractError("Input size outside supported range")
         if mode == "yolo_detect" and self.height % 32:
@@ -317,8 +340,9 @@ class ModelEngine:
                 raise ModelContractError("ONNX Runtime is not bundled in this build") from exc
             self.session = ort.InferenceSession(str(self.path), providers=["CPUExecutionProvider"])
             metadata = self.session.get_modelmeta().custom_metadata_map
-            if mode != 'oven_round1' and metadata.get('het_contract_format') == OVEN_FORMAT:
-                raise ModelContractError("This ONNX model requires oven_round1 mode")
+            required_mode = OVEN_FORMAT_MODES.get(metadata.get('het_contract_format'))
+            if required_mode is not None and mode != required_mode:
+                raise ModelContractError(f"This ONNX model requires {required_mode} mode")
             inputs = self.session.get_inputs()
             if len(inputs) != 1:
                 raise ModelContractError("Only single-input models are supported")
@@ -326,11 +350,11 @@ class ModelEngine:
             shape = inputs[0].shape
             if len(shape) != 4 or shape[1] != 3 or inputs[0].type != "tensor(float)":
                 raise ModelContractError("Only float32 NCHW single-RGB-input ONNX models supported")
-            if mode == 'oven_round1':
+            if self.contract:
                 outputs = self.session.get_outputs()
                 if (shape != [1,3,224,224] or len(outputs) != 1 or
-                    outputs[0].shape != [1,9] or outputs[0].type != 'tensor(float)'):
-                    raise ModelContractError("Round-1 ONNX must have static float32 [1,3,224,224] -> [1,9]")
+                    outputs[0].shape != [1,len(self.labels)] or outputs[0].type != 'tensor(float)'):
+                    raise ModelContractError(f"{mode} ONNX must have static float32 [1,3,224,224] -> [1,{len(self.labels)}]")
             self.height = shape[2] if isinstance(shape[2], int) else self.height
             self.width = shape[3] if isinstance(shape[3], int) else self.width
         elif ext == ".mnn":
@@ -350,7 +374,7 @@ class ModelEngine:
             raise ModelContractError("Supported models: .onnx, .mnn; .pt belongs to the original PyTorch demo")
         if self.contract:
             # Readiness requires real execution. This synthetic zero tensor is only a contract check.
-            parse_oven_classification(self._forward(np.zeros((1,3,224,224), np.float32)), self.labels)
+            parse_oven_classification(self._forward(np.zeros((1,3,224,224), np.float32)), self.labels, self.mode)
             expected = self.contract['models'][ext.lstrip('.')]['sha256']
             if file_sha256(self.path) != expected:
                 raise ModelContractError("Model changed while loading; model not ready")
@@ -374,8 +398,8 @@ class ModelEngine:
         with self.lock:
             arr, context = prepare_input(frame_bgr, self.mode, self.height, self.width)
             output = self._forward(arr)
-            if self.mode == 'oven_round1':
-                return parse_oven_classification(output, self.labels)
+            if self.contract:
+                return parse_oven_classification(output, self.labels, self.mode)
             if self.mode == "yolo_detect":
                 return {"task":"detection", "detections": parse_yolo_detection(output, self.labels, context)}
             return {"task":"classification", "top3": parse_classification(output, self.labels)}

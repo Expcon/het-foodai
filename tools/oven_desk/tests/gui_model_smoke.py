@@ -2,6 +2,7 @@
 
 python tests/gui_model_smoke.py --model oven9.onnx --classes classes.json
     --image real-photo.png --out <ignored-runs>/source-gui-smoke.json
+For a verified twelve-class export, add --mode oven_round2.
 """
 import argparse
 import csv
@@ -16,7 +17,7 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import oven_capture_gui as gui
-from inference_engine import read_image_unicode, file_sha256
+from inference_engine import read_image_unicode, file_sha256, OVEN_MODES
 
 
 def pump_until(root, predicate, timeout=30):
@@ -38,12 +39,12 @@ def run(args):
     gallery.mkdir()
     empty = artifacts/'empty-gallery'
     empty.mkdir()
-    frame = read_image_unicode(args.image, mode='oven_round1')
+    frame = read_image_unicode(args.image, mode=args.mode)
     rgb = Image.fromarray(np.ascontiguousarray(frame[:,:,::-1]))
     rgb.save(gallery/'real-file-decoded.png')
     rgb.save(gallery/'real-file-derived.jpg', quality=95)
     (gallery/'corrupt-test-fixture.jpg').write_bytes(b'SYNTHETIC corrupt-image negative test')
-    report = dict(status='FAIL', camera_opened=False, serial_opened=False,
+    report = dict(status='FAIL', mode=args.mode, camera_opened=False, serial_opened=False,
                   frame_source='FILE-FED real image; not a physical camera',
                   independent_validation=False, source_image_sha256=file_sha256(args.image),
                   model_sha256=file_sha256(args.model), checks={}, dialogs=[], logs=[])
@@ -59,7 +60,8 @@ def run(args):
         app.output.set(str(artifacts/'csv-output'))
         app.model_file.set(str(args.model.resolve()))
         app.label_file.set(str(args.classes.resolve()))
-        app.model_task.set(gui.OVEN_MODE_LABEL)
+        app.model_task.set({'oven_round1': gui.OVEN_MODE_LABEL,
+                            'oven_round2': gui.OVEN_ROUND2_MODE_LABEL}[args.mode])
         app.network_size.set('224')
         original_log = app._log
         def record_log(text):
@@ -129,6 +131,7 @@ def run(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--mode', choices=list(OVEN_MODES), default='oven_round1')
     parser.add_argument('--model', type=Path, required=True)
     parser.add_argument('--classes', type=Path, required=True)
     parser.add_argument('--image', type=Path, required=True)

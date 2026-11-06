@@ -5,6 +5,7 @@ with the project venv; only after PASS run mnn with the isolated edge venv.
 """
 import argparse
 import importlib.metadata
+import hashlib
 import json
 from pathlib import Path
 import time
@@ -35,8 +36,12 @@ def compare_probabilities(reference, actual):
                 actual_probability_sum=float(b.sum()), **{'pass': bool(valid and np.array_equal(ta,tb) and error.max()<=ATOL)})
 
 
-def make_contract(meta, checkpoint_sha, onnx_sha):
-    return dict(format='het-oven-classifier/v1', class_keys=meta['class_keys'],
+def make_contract(meta, checkpoint_sha, onnx_sha, format_version='v1'):
+    if format_version not in ('v1','v2'):raise ValueError('Unknown Desk contract')
+    if format_version=='v2':
+        from .round2 import V2_KEYS
+        if meta['class_keys']!=V2_KEYS:raise ValueError('Round2 IDs must append to the original nine')
+    return dict(format='het-oven-classifier/'+format_version, class_keys=meta['class_keys'],
                 classes=[dict(id=i,key=k) for i,k in enumerate(meta['class_keys'])],
                 class_list_sha256=meta['class_list_sha256'], preprocess=PREPROCESS,
                 input_shape=[1,3,224,224], output_shape=[1,len(meta['class_keys'])],
@@ -54,6 +59,11 @@ def summarize(records, versions):
                 versions=versions, scope='format alignment on previously seen oven images, NOT accuracy or deployment acceptance')
 
 
+def pending_contract(contract):
+    """An interrupted/failed alignment must not leave a GUI-loadable approval."""
+    return {**contract, 'models': {}, 'alignment_status': 'PENDING'}
+
+
 def revoke_mnn(contract_path):
     """A failed recheck must never retain an earlier MNN authorization."""
     contract=json.loads(contract_path.read_text(encoding='utf-8'))
@@ -68,11 +78,11 @@ def export_and_align(args):
     import onnxruntime as ort
     import torch
     from PIL import Image
-    configure_sdk()
     torch.set_num_threads(4)
     torch.set_float32_matmul_precision('highest')
     out=output_dir(args.out)
     out.mkdir(parents=True,exist_ok=False)
+    configure_sdk(out/'sdk-settings')
     model,meta=load_model(args.checkpoint,'cpu',args.expect_sha256)
     if digest(args.rows)!=meta.get('config',{}).get('rows_sha256'):
         raise ValueError('Alignment requires the complete original rows bound to this checkpoint')
@@ -85,7 +95,12 @@ def export_and_align(args):
             return self.network(x)[0]
 
     wrapper=Probabilities(model).eval()
-    model_path=out/'oven9.onnx'
+    is_round2=getattr(args,'source_root',None) is not None
+    version='v2' if is_round2 else 'v1'
+    if is_round2:
+        from .round2 import V2_KEYS,resolve_image
+        if meta['class_keys']!=V2_KEYS:raise ValueError('External-source export requires round2 ordered classes')
+    model_path=out/('oven12.onnx' if is_round2 else 'oven9.onnx')
     # Explicit legacy exporter: static batch 1, unfused FP32, probability output.
     with torch.inference_mode():
         torch.onnx.export(wrapper,torch.zeros(1,3,224,224),str(model_path),
@@ -93,46 +108,47 @@ def export_and_align(args):
                           opset_version=17,dynamo=False,external_data=False)
     graph=onnx.load(model_path)
     onnx.checker.check_model(graph,full_check=True)
-    onnx.helper.set_model_props(graph,{'het_contract_format':'het-oven-classifier/v1',
+    onnx.helper.set_model_props(graph,{'het_contract_format':'het-oven-classifier/'+version,
                                     'class_list_sha256':meta['class_list_sha256'],
                                     'preprocess':json.dumps(PREPROCESS,sort_keys=True)})
     onnx.save(graph,model_path)
-    contract=make_contract(meta,digest(args.checkpoint),digest(model_path))
+    contract=make_contract(meta,digest(args.checkpoint),digest(model_path),version)
     # Class file is published only after all image checks succeed.
-    write_json(out/'contract.pending.json',contract)
+    write_json(out/'contract.pending.json',pending_contract(contract))
     options=ort.SessionOptions()
     options.intra_op_num_threads=4
     session=ort.InferenceSession(str(model_path),sess_options=options,providers=['CPUExecutionProvider'])
     rows=json.loads(args.rows.read_text(encoding='utf-8'))
     if not rows: raise ValueError('No real image records')
-    tensors=np.lib.format.open_memmap(out/'inputs.npy',mode='w+',dtype=np.float32,shape=(len(rows),3,224,224))
+    tensors=None if is_round2 else np.lib.format.open_memmap(out/'inputs.npy',mode='w+',dtype=np.float32,shape=(len(rows),3,224,224))
     reference=[]
     records=[]
     pre=transform(False)
     started=time.perf_counter()
     with torch.inference_mode():
         for i,row in enumerate(rows):
-            path=input_path(row['relative_path'])
+            path=resolve_image(row,args.source_root) if is_round2 else input_path(row['relative_path'])
             if digest(path)!=row['sha256']:raise ValueError('Original image SHA mismatch')
             with Image.open(path) as image: tensor=pre(image).unsqueeze(0)
             array=tensor.numpy()
-            tensors[i]=array[0]
+            if tensors is not None:tensors[i]=array[0]
             p=wrapper(tensor).numpy()[0]
             q=session.run(['probabilities'],{'images':array})[0][0]
             record=compare_probabilities(p,q)
-            record.update(image_id=row['image_id'],sha256=row['sha256'],reference_probabilities=p.tolist(),actual_probabilities=q.tolist())
+            record.update(image_id=row['image_id'],sha256=row['sha256'],input_tensor_sha256=hashlib.sha256(array.tobytes()).hexdigest(),reference_probabilities=p.tolist(),actual_probabilities=q.tolist())
             records.append(record)
             reference.append(p)
             if (i+1)%50==0: print(f'Compared {i+1}/{len(rows)}',flush=True)
-    tensors.flush()
-    del tensors
+    if tensors is not None:
+        tensors.flush()
+        del tensors
     np.save(out/'pytorch_probabilities.npy',np.asarray(reference),allow_pickle=False)
     versions={k:importlib.metadata.version(k) for k in ['torch','torchvision','ultralytics','onnx','onnxruntime','numpy','Pillow']}
     summary=summarize(records,versions)
     summary.update(checkpoint_sha256=contract['source_checkpoint_sha256'],onnx_sha256=digest(model_path),
                    onnx_bytes=model_path.stat().st_size,rows_sha256=digest(args.rows),
-                   input_tensors_sha256=digest(out/'inputs.npy'),reference_sha256=digest(out/'pytorch_probabilities.npy'),
-                   elapsed_comparison_seconds=time.perf_counter()-started,input_shape=[1,3,224,224],output_shape=[1,9])
+                   input_tensors_sha256=None if is_round2 else digest(out/'inputs.npy'),reference_sha256=digest(out/'pytorch_probabilities.npy'),
+                   elapsed_comparison_seconds=time.perf_counter()-started,input_shape=[1,3,224,224],output_shape=[1,len(meta['class_keys'])])
     write_json(out/'onnx_alignment.json',dict(summary=summary,images=records))
     if summary['status']=='PASS': write_json(out/'classes.json',contract)
     print(json.dumps(summary),flush=True)
@@ -190,6 +206,7 @@ def main():
     p.add_argument('--checkpoint',type=Path)
     p.add_argument('--expect-sha256')
     p.add_argument('--rows',type=Path)
+    p.add_argument('--source-root',type=Path,help='Round2 external read-only photo root; emits the twelve-class v2 contract')
     args=p.parse_args()
     if args.action=='export' and (not args.checkpoint or not args.rows or not args.expect_sha256):
         p.error('export requires --checkpoint, --expect-sha256, --rows')

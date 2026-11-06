@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""HeT OvenCapture Desk v1.1.1-experimental — Windows x64 GUI.
+"""HeT OvenCapture Desk v1.2.0-experimental — Windows x64 GUI.
 
 No oven heating control, firmware access, automatic camera scanning or network calls.
 Camera is explicitly selected by name/backend; manual-index fallback stays available.
@@ -26,7 +26,7 @@ from tkinter import filedialog, messagebox, ttk
 
 from capture_core import PhotoStore, VideoRecorder, frame_properties, fourcc_to_text, now_local, safe_stem, write_exclusive
 from camera_devices import CameraChoice, list_cameras, compatible_alternate, manual_choice
-from inference_engine import ModelContractError, ModelEngine, read_image_unicode, file_sha256
+from inference_engine import ModelContractError, ModelEngine, read_image_unicode, file_sha256, OVEN_MODES
 
 try:
     from tkinterdnd2 import TkinterDnD, DND_FILES
@@ -37,8 +37,9 @@ except ImportError:
     DND_AVAILABLE = False
 
 APP = "HeT OvenCapture Desk"
-VERSION = "1.1.1-experimental"
+VERSION = "1.2.0-experimental"
 OVEN_MODE_LABEL = "首轮烤箱分类（实验·9类）"
+OVEN_ROUND2_MODE_LABEL = "二轮烤箱分类（实验·12类）"
 BACKENDS = {"自动兼容（同设备）": "auto", "DirectShow (dshow)": "dshow", "Media Foundation (msmf)": "msmf"}
 RESOLUTIONS = ("1920×1080", "1280×720", "640×480", "224×224", "自动 (不请求)")
 PREVIEW_SIZES = ("自适应", "960×540", "640×360", "480×270", "224×224")
@@ -549,13 +550,13 @@ class DesktopApp:
         ttk.Label(p,text="支持 ONNX/MNN 的指定输出契约。\nPyTorch .pt 请继续使用原 Gradio 项目。",foreground="#536579",justify="left").pack(anchor="w",pady=(0,9))
         self._file_row(p,"模型文件",self.model_file,[('Model files','*.onnx *.mnn'),('All files','*.*')])
         self._file_row(p,"类别文件",self.label_file,[('Labels','*.txt *.json'),('All files','*.*')])
-        self._combo(p,"模型类型",self.model_task,[OVEN_MODE_LABEL,"YOLO 分类 (RGB/255)","EfficientNet 分类 (ImageNet)","YOLOv8/11 检测 (原始输出)"])
+        self._combo(p,"模型类型",self.model_task,[OVEN_MODE_LABEL,OVEN_ROUND2_MODE_LABEL,"YOLO 分类 (RGB/255)","EfficientNet 分类 (ImageNet)","YOLOv8/11 检测 (原始输出)"])
         self._combo(p,"网络输入",self.network_size,["224","320","416","512","640"],readonly=False)
         ttk.Label(p,textvariable=self.model_state,foreground="#235884",wraplength=315).pack(anchor="w",pady=(9,7))
         ttk.Button(p,text="载入真实模型",style="Accent.TButton",command=self.load_model).pack(fill="x",pady=(0,5))
         ttk.Button(p,text="识别当前摄像头画面",command=self.infer_current).pack(fill="x",pady=5)
         ttk.Button(p,text="图集测试：选择 JPG/PNG 文件夹",command=self.test_gallery).pack(fill="x",pady=5)
-        ttk.Label(p,text="首轮烤箱模型：选择实验·9类、224 和随附 classes.json。\n该模型尚无独立验证，只显示实验预测。\n图集测试输出预测与 CSV；没有真值不显示准确率。\n检测仅支持 YOLOv8/11 raw xywh，无法解析即拒绝。",foreground="#536579",justify="left",wraplength=315).pack(anchor="w",pady=(12,4))
+        ttk.Label(p,text="烤箱模型：按导出版本选择首轮9类或二轮12类、224 和随附 classes.json。\n烤箱模型尚无独立验证，只显示实验预测。\n图集测试输出预测与 CSV；没有真值不显示准确率。\n检测仅支持 YOLOv8/11 raw xywh，无法解析即拒绝。",foreground="#536579",justify="left",wraplength=315).pack(anchor="w",pady=(12,4))
 
     def _file_row(self,parent,label,var,types):
         row=ttk.Frame(parent);row.pack(fill="x",pady=5)
@@ -786,7 +787,7 @@ class DesktopApp:
             messagebox.showinfo("目录",str(path))
 
     def _model_mode(self):
-        return {OVEN_MODE_LABEL:"oven_round1", "YOLO 分类 (RGB/255)":"yolo_classify",
+        return {OVEN_MODE_LABEL:"oven_round1", OVEN_ROUND2_MODE_LABEL:"oven_round2", "YOLO 分类 (RGB/255)":"yolo_classify",
                 "EfficientNet 分类 (ImageNet)":"efficientnet_imagenet",
                 "YOLOv8/11 检测 (原始输出)":"yolo_detect"}[self.model_task.get()]
 
@@ -1011,7 +1012,7 @@ class DesktopApp:
             elif kind=="model_ready":
                 self.model=payload
                 self.model_loading=False
-                scope=" · 实验预测 / 无独立验证" if payload.mode=="oven_round1" else ""
+                scope=" · 实验预测 / 无独立验证" if payload.mode in OVEN_MODES else ""
                 self.model_state.set(f"模型：已加载 {payload.path.name} · {len(payload.labels)} 类 · {payload.height}×{payload.width}{scope}")
                 self._log("模型加载成功。输出必须匹配类别数量和选择的解析协议。")
             elif kind=="model_error":
@@ -1149,13 +1150,15 @@ def healthcheck(report_file):
     return 0 if status=="PASS" else 1
 
 
-def model_selfcheck(model_path, classes_path, image_path, report_file):
+def model_selfcheck(model_path, classes_path, image_path, report_file, mode='oven_round1'):
     """Load a real export and predict a file without constructing Tk or opening hardware."""
-    report={'status':'FAIL', 'model_ready':False, 'mode':'oven_round1',
+    report={'status':'FAIL', 'model_ready':False, 'mode':mode,
             'independent_validation':False, 'camera_opened':False,
             'note':'Experimental file inference only; no independent validation or camera test.'}
     try:
-        engine=ModelEngine(model_path, classes_path, 'oven_round1', 224)
+        if mode not in OVEN_MODES:
+            raise ModelContractError("Model selfcheck requires an explicit oven mode")
+        engine=ModelEngine(model_path, classes_path, mode, 224)
         started=time.perf_counter()
         result=engine.predict_file(image_path)
         elapsed_ms=round((time.perf_counter()-started)*1000,2)
@@ -1189,14 +1192,15 @@ def main():
         raise SystemExit(healthcheck(sys.argv[2]))
     if len(sys.argv)>=2 and sys.argv[1]=="--model-selfcheck":
         import argparse
-        parser=argparse.ArgumentParser(description="No-camera real-model check for the experimental round-1 oven export")
+        parser=argparse.ArgumentParser(description="No-camera real-model check for an experimental oven export")
         parser.add_argument('--model-selfcheck', action='store_true')
+        parser.add_argument('--mode', choices=list(OVEN_MODES), default='oven_round1', help='Oven export version; default preserves round-1 usage')
         parser.add_argument('--model', required=True, help='Exported ONNX/MNN model; .pt is not accepted')
-        parser.add_argument('--classes', required=True, help='Matching het-oven-classifier/v1 classes.json')
+        parser.add_argument('--classes', required=True, help='Matching het-oven-classifier/v1 or v2 classes.json')
         parser.add_argument('--image', required=True, help='Real JPG/PNG image to predict')
         parser.add_argument('--out', required=True, help='JSON report (PASS or FAIL); exit code 0 or 1')
         args=parser.parse_args()
-        raise SystemExit(model_selfcheck(args.model,args.classes,args.image,args.out))
+        raise SystemExit(model_selfcheck(args.model,args.classes,args.image,args.out,mode=args.mode))
     root=RootClass()
     DesktopApp(root)
     root.mainloop()

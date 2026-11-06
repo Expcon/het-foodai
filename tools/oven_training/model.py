@@ -66,8 +66,8 @@ def output_dir(path):
     return path
 
 
-def configure_sdk():
-    local=ROOT/'runs/oven-first-round-20261106/sdk-settings'
+def configure_sdk(local=None):
+    local=output_dir(local) if local is not None else ROOT/'runs/oven-first-round-20261106/sdk-settings'
     local.mkdir(parents=True,exist_ok=True)
     os.environ.update(YOLO_CONFIG_DIR=str(local),MPLCONFIGDIR=str(local/'matplotlib'),YOLO_AUTOINSTALL='false',YOLO_OFFLINE='true',CUBLAS_WORKSPACE_CONFIG=':4096:8')
     from tools.edge_export.offline_guard import install
