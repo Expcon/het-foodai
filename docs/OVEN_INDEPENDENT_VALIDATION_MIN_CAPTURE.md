@@ -4,7 +4,7 @@
 
 ## 开始前
 
-使用保留的 `tools/oven_training/recipes/physical-validation-intake.csv` 空白登记表。不要将文件序号、模型预测、不同角度或不同层位直接写成“新实物ID”。旧训练池保持整体train，不从中临时抽帧充当独立验证，也不根据本次A/B分数挑照片。
+现场先按[三张简表流程](OVEN_INDEPENDENT_VALIDATION_INTAKE_GUIDE.md)登记实物、会话及每张照片的层位/背景，数据负责人审核后再对接保留的 `tools/oven_training/recipes/physical-validation-intake.csv` 技术表；原资格门禁不变。不要将文件序号、模型预测、不同角度或不同层位直接写成“新实物ID”。旧训练池保持整体train，不从中临时抽帧充当独立验证，也不根据本次A/B分数挑照片。
 
 核实新实物来自新的采购/制作/交接记录，并且不是旧训练实物。采集者现场赋予真实持久ID，记录上游来源或批次；原料切片/切段的共同母体也要关联：同一土豆切块、同一玉米切段、同一鱼肉来源的多条，均不能拆成独立集合。身份无法核实时保留unknown和BLOCKED。
 
