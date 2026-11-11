@@ -86,7 +86,7 @@ class FixedImages(Dataset):
         return self.preprocess(image), label
 
 
-def evaluate_fixed(model, loader, keys, device):
+def evaluate_fixed(model, loader, keys, device, *, per_image=None):
     """No augmentation, eval mode, sample-weighted CE; restore RNG and mixed modes."""
     modes = [(module, module.training) for module in model.modules()]
     rng = (random.getstate(), np.random.get_state(), torch.get_rng_state())
@@ -94,6 +94,7 @@ def evaluate_fixed(model, loader, keys, device):
     before = bn_snapshot(model);classes = len(keys)
     matrix = torch.zeros(classes, classes, dtype=torch.int64)
     class_loss = torch.zeros(classes, dtype=torch.float64)
+    sample_index = 0
     try:
         model.eval()
         with torch.inference_mode():
@@ -108,6 +109,15 @@ def evaluate_fixed(model, loader, keys, device):
                 loss = torch.nn.functional.cross_entropy(logits, labels, reduction='none')
                 if not bool(torch.isfinite(loss).all()): raise ValueError('Nonfinite fixed-eval loss')
                 target = labels.cpu();predicted = logits.argmax(1).cpu()
+                if per_image is not None:
+                    raw = logits.detach().cpu();scores = raw.softmax(1)
+                    order = raw.argsort(dim=1, descending=True, stable=True)
+                    losses = loss.cpu()
+                    for i in range(len(target)):
+                        per_image.append(dict(sample_index=sample_index, target_id=int(target[i]),
+                            input_sha256=tensor_sha256(images[i]), logits=raw[i].tolist(), scores=scores[i].tolist(),
+                            top1_id=int(predicted[i]), top3_ids=order[i,:min(3,classes)].tolist(), loss=float(losses[i])))
+                        sample_index += 1
                 matrix += torch.bincount(target*classes+predicted, minlength=classes*classes).reshape(classes, classes)
                 class_loss.scatter_add_(0, target, loss.double().cpu())
         after = bn_snapshot(model)

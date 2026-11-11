@@ -11,7 +11,7 @@ from .model import ROOT,PREPROCESS,class_digest,check_rows,configure_sdk,digest,
 
 
 def fit_exploratory(entries, keys, out, pretrained, device, rows_sha256, provenance=None,
-                    *, recipe=None, validation_entries=None, validation_report=None):
+                    *, recipe=None, validation_entries=None, validation_report=None, observation=None):
     """Shared fixed recipe; caller validates hashes, labels and train-only groups."""
     out=output_dir(out)
     if out.exists():raise ValueError('Use a new run directory; never overwrite a training run')
@@ -77,6 +77,12 @@ def fit_exploratory(entries, keys, out, pretrained, device, rows_sha256, provena
         timing_scope='epoch seconds include batch evidence and end-epoch eval; initialization and epoch0 eval excluded',
         trainable_parameters=sum(p.numel() for p in model.parameters() if p.requires_grad),
         training_source_sha256=digest(Path(__file__)),validation=validation_report))
+    observer=None
+    if observation is not None:
+        from .observation import ObservationRun, LoaderCursor, parameter_copies, gradient_evidence
+        loaders={'train':loader,'fixed':fixed_loader}
+        if val_loader is not None:loaders['validation']=val_loader
+        observer=ObservationRun(out/'observations',model,optimizer,loaders,config,entries,**observation)
     def finish_epoch(epoch, before, trace, tail=None):
         after=bn_snapshot(model);change=bn_delta(before,after)
         expected=len(loader) if epoch and options['bn_policy']=='update' else 0
@@ -84,7 +90,15 @@ def fit_exploratory(entries, keys, out, pretrained, device, rows_sha256, provena
             raise RuntimeError('BN update count differs from configured policy')
         if options['bn_policy']=='frozen_stats' and not change['running_unchanged']:
             raise RuntimeError('Frozen BN running statistics changed')
-        fixed=evaluate_fixed(model,fixed_loader,keys,device)
+        if observer is None:
+            fixed=evaluate_fixed(model,fixed_loader,keys,device)
+        else:
+            persistent_before=model_state_sha256(model);evidence=[]
+            fixed=evaluate_fixed(model,fixed_loader,keys,device,per_image=evidence)
+            if model_state_sha256(model)!=persistent_before:raise RuntimeError('Observed eval changed model state')
+            if observer.reference is not None and after['running_sha256']!=observer.records[epoch]['bn']['running_sha256']:
+                raise RuntimeError('R0 BN buffers differ from reference')
+            observer.evaluation(epoch,fixed,evidence)
         validation={'status':validation_report['status'],'readiness':validation_report}
         if val_loader is not None:
             validation['metrics']=evaluate_fixed(model,val_loader,keys,device)
@@ -104,17 +118,30 @@ def fit_exploratory(entries, keys, out, pretrained, device, rows_sha256, provena
             set_training_mode(model,options['bn_policy'])
             epoch_before=bn_snapshot(model);trace=[];tail=None
             total=correct=0;loss_sum=0.;epoch_start=time.perf_counter()
+            cursor=LoaderCursor(loader) if observer is not None else None
             for batch_index,(images,labels,indices) in enumerate(loader):
                 last=batch_index==len(loader)-1
                 tail_before=bn_snapshot(model) if last else None
                 batch=dict(size=len(labels),indices=indices.tolist(),augmented_input_sha256=tensor_sha256(images),
                            class_counts={key:int((labels==i).sum()) for i,key in enumerate(keys)})
                 trace.append(batch)
+                if observer is not None:
+                    cursor.record(indices);observer.batch(epoch,batch_index,batch)
+                observe_tail=observer is not None and last and epoch in observer.tail_epochs
                 images,labels=images.to(device),labels.to(device)
                 optimizer.zero_grad(set_to_none=True)
+                if observe_tail:
+                    observer.save(f'epoch_{epoch:03d}_tail_pre.pt',epoch,'pre_forward',cursor.state(loader),(images,labels,indices))
+                parameters_before=parameter_copies(model) if observer is not None else None
                 logits=model(images);loss=criterion(logits,labels)
                 if not torch.isfinite(loss):raise RuntimeError('Non-finite training loss')
-                loss.backward();optimizer.step()
+                loss.backward()
+                gradient=gradient_evidence(model) if observer is not None else None
+                optimizer.step()
+                if observer is not None:
+                    observer.global_step+=1
+                    if observe_tail:observer.save(f'epoch_{epoch:03d}_tail_post.pt',epoch,'post_step',cursor.state(loader))
+                    observer.step(epoch,batch_index,parameters_before,gradient,loss.item(),int((logits.argmax(1)==labels).sum()))
                 loss_sum+=loss.item()*len(labels);correct+=(logits.argmax(1)==labels).sum().item();total+=len(labels)
                 if last:
                     tail=dict(size=batch['size'],class_counts=batch['class_counts'],bn_delta=bn_delta(tail_before,bn_snapshot(model)),
@@ -127,6 +154,7 @@ def fit_exploratory(entries, keys, out, pretrained, device, rows_sha256, provena
             row=dict(epoch=epoch,train_loss=loss_sum/total,train_accuracy_augmented=correct/total,samples=total,seconds=time.perf_counter()-epoch_start,
                      train_eval_loss=monitored['train_eval']['loss'],train_eval_top1=monitored['train_eval']['top1'],
                      val_eval_loss=val_metrics.get('loss'),val_eval_top1=val_metrics.get('top1'))
+            if observer is not None:observer.online(row)
             writer.writerow(row);stream.flush();print(json.dumps(row),flush=True)
     metadata=dict(format='oven-yolo-exploratory/v1',architecture='yolo11n-cls',class_keys=keys,class_list_sha256=class_digest(keys),
         preprocess=PREPROCESS,independent_validation=False,ultralytics_version='8.3.230',epoch=options['epochs'],config=config,
@@ -136,6 +164,7 @@ def fit_exploratory(entries, keys, out, pretrained, device, rows_sha256, provena
     temporary.replace(out/'last.pt')
     metadata['checkpoint_sha256']=digest(out/'last.pt')
     (out/'run_info.json').write_text(json.dumps(metadata,indent=2)+'\n',encoding='utf-8')
+    if observer is not None:observer.complete()
     print(json.dumps({'state':'EXPLORATORY_TRAINING_COMPLETED','epoch':options['epochs'],'independent_validation':False,'checkpoint_sha256':metadata['checkpoint_sha256']}))
     return metadata
 

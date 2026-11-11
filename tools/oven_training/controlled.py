@@ -97,7 +97,10 @@ def main():
     p.add_argument('--recipe',type=Path,required=True);p.add_argument('--out',type=Path,required=True)
     p.add_argument('--pretrained',type=Path,required=True);p.add_argument('--validation-rows',type=Path)
     p.add_argument('--run',action='store_true');p.add_argument('--device',default='cuda:0')
+    p.add_argument('--observe-r0',action='store_true',help='Record full states and require exact original-A replay')
+    p.add_argument('--reference-run',type=Path,help='Original A training directory; read only')
     args=p.parse_args();recipe=recipe_config(json.loads(args.recipe.read_text(encoding='utf-8')))
+    if args.observe_r0 != (args.reference_run is not None):p.error('--observe-r0 and --reference-run must be supplied together')
     all_rows=read_rows(args.rows);rows=[r for r in all_rows if r.get('new_split')!='excluded']
     seen=set();entries=[]
     for row in rows:
@@ -129,7 +132,8 @@ def main():
         from .train import fit_exploratory
         fit_exploratory(entries,V2_KEYS,out/'training',args.pretrained,args.device,digest(args.rows),
                         provenance={'scope':'controlled exploratory BN statistics experiment; not formal accuracy'},
-                        recipe=recipe,validation_entries=val_entries,validation_report=readiness)
+                        recipe=recipe,validation_entries=val_entries,validation_report=readiness,
+                        observation={'reference':args.reference_run} if args.observe_r0 else None)
     return 0
 
 
