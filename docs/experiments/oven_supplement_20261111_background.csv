@@ -1,0 +1,9 @@
+﻿class_key,visual_background,images,independent_objects,scope,v2_top1_matches,v2_top3_contains,R1_top1_matches,R1_top3_contains,both_candidate_match,R1_rescue_candidate,R1_regression_candidate,both_candidate_mismatch
+potato,foil_visible,18,unknown,diagnostic candidate counts; NOT accuracy,3,12,17,18,3,14,0,1
+potato,black_tray_visible,18,unknown,diagnostic candidate counts; NOT accuracy,6,8,18,18,6,12,0,0
+sausage,foil_visible,18,unknown,diagnostic candidate counts; NOT accuracy,1,18,5,11,0,5,1,12
+sausage,black_tray_visible,18,unknown,diagnostic candidate counts; NOT accuracy,4,16,17,18,4,13,0,1
+salmon,foil_visible,18,unknown,diagnostic candidate counts; NOT accuracy,16,18,13,18,11,2,5,0
+salmon,black_tray_visible,18,unknown,diagnostic candidate counts; NOT accuracy,12,18,16,17,12,4,0,2
+corn,foil_visible,18,unknown,diagnostic candidate counts; NOT accuracy,0,6,11,17,0,11,0,7
+corn,black_tray_visible,18,unknown,diagnostic candidate counts; NOT accuracy,0,5,4,10,0,4,0,14
