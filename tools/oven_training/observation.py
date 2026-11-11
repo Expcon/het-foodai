@@ -181,22 +181,50 @@ def gradient_evidence(model):
 
 
 class ObservationRun:
-    def __init__(self, out, model, optimizer, loaders, config, entries, *, reference=None, tail_epochs=(24,27,28,29,30)):
+    def __init__(self, out, model, optimizer, loaders, config, entries, *, reference=None, tail_epochs=(24,27,28,29,30), comparison='exact'):
+        if comparison not in {'exact','lr_only'} or (comparison=='lr_only' and reference is None):
+            raise ValueError('Observation comparison requires an explicit valid reference mode')
+        self.comparison=comparison;self.checked_batches=0
         self.out = output_dir(out); self.out.mkdir(parents=True, exist_ok=False)
         self.reference = Path(reference) if reference is not None else None
         self.tail_epochs = set(tail_epochs); self.global_step = 0
         self.model = model; self.optimizer = optimizer; self.loaders = loaders
         self.source = [dict(sample_index=i, source_sha256=digest(path), path=str(path), class_key=key) for i,(path,key) in enumerate(entries)]
-        from . import train, monitor
-        self.binding = dict(config=config, class_list_sha256=class_digest(config['class_keys']),
+        from . import train, monitor, controlled
+        self.binding = dict(config=config, comparison_mode=comparison, class_list_sha256=class_digest(config['class_keys']),
             sources=self.source, torch_version=str(torch.__version__), numpy_version=np.__version__,
             cuda_version=torch.version.cuda, device=str(next(model.parameters()).device),
             deterministic_algorithms=torch.are_deterministic_algorithms_enabled(),cudnn_benchmark=torch.backends.cudnn.benchmark,
-            source_sha256={Path(p).name:digest(p) for p in [__file__,train.__file__,monitor.__file__]})
+            source_sha256={Path(p).name:digest(p) for p in [__file__,train.__file__,monitor.__file__,controlled.__file__]})
         self.records = {}
         if self.reference is not None:
-            if config != json.loads((self.reference/'fixed_config.json').read_text(encoding='utf-8')):
-                raise ValueError('R0 recipe/config differs from original A')
+            old_config=json.loads((self.reference/'fixed_config.json').read_text(encoding='utf-8'))
+            if comparison=='exact':
+                if config!=old_config:raise ValueError('R0 recipe/config differs from original A')
+            else:
+                controlled.recipe_config({k:config[k] for k in controlled.DEFAULT_RECIPE},lr_control=True)
+                if old_config['lr']!=.001 or {k for k in set(config)|set(old_config) if config.get(k)!=old_config.get(k)}!={'lr'}:
+                    raise ValueError('R1 permits only lr to differ from R0')
+                try:
+                    reference_gate=json.loads((self.reference/'observations/gate.json').read_text(encoding='utf-8'))
+                except (OSError,ValueError) as exc:raise ValueError('R1 reference requires a completed exact R0 gate') from exc
+                if reference_gate.get('status')!='PASS' or reference_gate.get('all_reference_metrics_and_batches_equal') is not True or reference_gate.get('reference_bound') is not True:
+                    raise ValueError('R1 reference is not a completed exact R0')
+                old_binding=json.loads((self.reference/'observations/binding.json').read_text(encoding='utf-8'))
+                for key in ['sources','class_list_sha256','torch_version','numpy_version','cuda_version','device','deterministic_algorithms','cudnn_benchmark']:
+                    if self.binding[key]!=old_binding[key]:raise ValueError('R1 reference source/environment differs: '+key)
+                ref_index=[json.loads(s) for s in (self.reference/'observations/checkpoints.jsonl').read_text(encoding='utf-8').splitlines()]
+                initial_record=next(r for r in ref_index if r['file']=='checkpoints/epoch_000.pt')
+                initial_payload=load_snapshot(self.reference/'observations'/initial_record['file'],initial_record['sha256'])
+                current_optimizer=cpu_tree(optimizer.state_dict());reference_optimizer=initial_payload['optimizer_state']
+                if current_optimizer['state'] or reference_optimizer['state']:
+                    raise ValueError('R1 requires pristine initialization optimizer state')
+                a=[{k:v for k,v in g.items() if k!='lr'} for g in current_optimizer['param_groups']]
+                b=[{k:v for k,v in g.items() if k!='lr'} for g in reference_optimizer['param_groups']]
+                if a!=b or any(g['lr']!=.0003 for g in current_optimizer['param_groups']) or any(g['lr']!=.001 for g in reference_optimizer['param_groups']):
+                    raise ValueError('R1 initial optimizer differs beyond lr')
+                self.binding['reference_config_sha256']=digest(self.reference/'fixed_config.json')
+                self.binding['reference_gate_sha256']=digest(self.reference/'observations/gate.json')
             for e in range(config['epochs']+1):
                 self.records[e]=json.loads((self.reference/'monitor'/f'epoch_{e:03d}.json').read_text(encoding='utf-8'))
             initial=json.loads((self.reference/'monitor/initialization.json').read_text(encoding='utf-8'))
@@ -224,8 +252,11 @@ class ObservationRun:
     def batch(self, epoch, batch_index, trace):
         if self.reference is not None and trace!=self.records[epoch]['batch_trace']['batches'][batch_index]:
             raise ValueError(f'R0 batch/input mismatch at epoch {epoch} batch {batch_index}')
+        if self.reference is not None:self.checked_batches+=1
 
     def step(self, epoch, batch_index, before, gradient, loss, correct):
+        if any(group['lr']!=self.binding['config']['lr'] for group in self.optimizer.param_groups):
+            raise ValueError('Observed optimizer lr differs from registered constant recipe')
         changes={'head':0.,'backbone':0.}
         for name,p in self.model.named_parameters():
             delta=p.detach().cpu().double()-before[name].double()
@@ -238,7 +269,7 @@ class ObservationRun:
 
     def evaluation(self, epoch, metrics, evidence):
         if len(evidence)!=len(self.source): raise ValueError('Incomplete per-image fixed eval')
-        if self.reference is not None and metrics!=self.records[epoch]['train_eval']:
+        if self.reference is not None and (self.comparison=='exact' or epoch==0) and metrics!=self.records[epoch]['train_eval']:
             raise ValueError(f'R0 fixed-eval mismatch at epoch {epoch}')
         for row,source in zip(evidence,self.source):
             if row['sample_index']!=source['sample_index'] or metrics['class_order'][row['target_id']]!=source['class_key']:
@@ -250,20 +281,28 @@ class ObservationRun:
         self.save(f'epoch_{epoch:03d}.pt',epoch,'epoch_end')
 
     def online(self, row):
-        if self.reference is None:return
+        if self.reference is None or self.comparison!='exact':return
         old=self.history[row['epoch']]
         for key in ['train_loss','train_accuracy_augmented','train_eval_loss','train_eval_top1']:
             if row[key]!=float(old[key]): raise ValueError(f'R0 online metric {key} differs at epoch {row["epoch"]}')
 
     def complete(self):
+        equal=None
         if self.reference is not None:
             old=torch.load(self.reference/'last.pt',map_location='cpu',weights_only=True)['model_state']
             now=self.model.state_dict()
-            if list(old)!=list(now) or any(not torch.equal(old[k],now[k].detach().cpu()) for k in old):
+            equal=list(old)==list(now) and all(torch.equal(old[k],now[k].detach().cpu()) for k in old)
+            expected_batches=sum(len(self.records[e]['batch_trace']['batches']) for e in range(1,self.binding['config']['epochs']+1))
+            if self.checked_batches!=expected_batches or self.global_step!=expected_batches:
+                raise ValueError('Incomplete reference batch comparison')
+            if self.comparison=='exact' and not equal:
                 raise ValueError('R0 final persistent tensors differ from A')
         for record in self.index:
             if digest(self.out/record['file'])!=record['sha256']:raise ValueError('Saved checkpoint changed')
-        write_json_new(self.out/'gate.json',dict(status='PASS',scope='seen-training-image exact reproduction; not independent accuracy',
+        write_json_new(self.out/'gate.json',dict(status='PASS',scope='seen-training-image mechanism experiment; not independent accuracy',
+            comparison_mode=self.comparison,only_config_difference='lr' if self.comparison=='lr_only' else None,
+            all_reference_batch_traces_equal=self.reference is not None,reference_batches_checked=self.checked_batches,
+            final_state_equals_reference=equal,
             reference_bound=self.reference is not None,epochs=self.binding['config']['epochs'],global_steps=self.global_step,
             checkpoints=len(self.index),final_persistent_tensors=len(self.model.state_dict()),
-            final_model_state_sha256=model_state_sha256(self.model),all_reference_metrics_and_batches_equal=self.reference is not None))
+            final_model_state_sha256=model_state_sha256(self.model),all_reference_metrics_and_batches_equal=self.reference is not None and self.comparison=='exact'))

@@ -33,13 +33,17 @@ def read_rows(path):
     return rows
 
 
-def recipe_config(values=None):
+def recipe_config(values=None, *, lr_control=False):
     values = {} if values is None else values
     if not isinstance(values, dict) or set(values)-set(DEFAULT_RECIPE): raise ValueError('Unknown recipe fields')
     result = {**DEFAULT_RECIPE, **values}
     if type(result['epochs']) is not int or result['epochs'] < 1: raise ValueError('Epochs must be a positive integer')
     if result['bn_policy'] not in {'update','frozen_stats'}: raise ValueError('Unknown BN statistics policy')
+    if lr_control:
+        if type(result['lr']) is not float or result['lr'] != .0003 or result['bn_policy'] != 'update':
+            raise ValueError('Registered R1 requires lr=0.0003 and normal BN updates')
     for key, value in DEFAULT_RECIPE.items():
+        if key == 'lr' and lr_control: continue
         if key not in {'epochs','bn_policy'} and (type(result[key]) is not type(value) or result[key] != value):
             raise ValueError('Controlled recipe fixes '+key)
     return result
@@ -97,10 +101,12 @@ def main():
     p.add_argument('--recipe',type=Path,required=True);p.add_argument('--out',type=Path,required=True)
     p.add_argument('--pretrained',type=Path,required=True);p.add_argument('--validation-rows',type=Path)
     p.add_argument('--run',action='store_true');p.add_argument('--device',default='cuda:0')
-    p.add_argument('--observe-r0',action='store_true',help='Record full states and require exact original-A replay')
+    observation_mode=p.add_mutually_exclusive_group()
+    observation_mode.add_argument('--observe-r0',action='store_true',help='Record full states and require exact original-A replay')
+    observation_mode.add_argument('--observe-r1',action='store_true',help='Registered lr-only control against completed exact R0')
     p.add_argument('--reference-run',type=Path,help='Original A training directory; read only')
-    args=p.parse_args();recipe=recipe_config(json.loads(args.recipe.read_text(encoding='utf-8')))
-    if args.observe_r0 != (args.reference_run is not None):p.error('--observe-r0 and --reference-run must be supplied together')
+    args=p.parse_args();recipe=recipe_config(json.loads(args.recipe.read_text(encoding='utf-8')),lr_control=args.observe_r1)
+    if (args.observe_r0 or args.observe_r1) != (args.reference_run is not None):p.error('Observation mode and --reference-run must be supplied together')
     all_rows=read_rows(args.rows);rows=[r for r in all_rows if r.get('new_split')!='excluded']
     seen=set();entries=[]
     for row in rows:
@@ -133,7 +139,8 @@ def main():
         fit_exploratory(entries,V2_KEYS,out/'training',args.pretrained,args.device,digest(args.rows),
                         provenance={'scope':'controlled exploratory BN statistics experiment; not formal accuracy'},
                         recipe=recipe,validation_entries=val_entries,validation_report=readiness,
-                        observation={'reference':args.reference_run} if args.observe_r0 else None)
+                        observation={'reference':args.reference_run,'comparison':'lr_only' if args.observe_r1 else 'exact'}
+                                    if args.observe_r0 or args.observe_r1 else None)
     return 0
 
 

@@ -21,7 +21,7 @@ def fit_exploratory(entries, keys, out, pretrained, device, rows_sha256, provena
     from .monitor import (FixedImages, IndexedImages, evaluate_fixed, set_training_mode,
                           bn_snapshot, bn_delta, tensor_sha256, model_state_sha256)
     from .export_desk import write_json
-    options=recipe_config(recipe)
+    options=recipe_config(recipe,lr_control=observation is not None and observation.get('comparison')=='lr_only')
     validation_entries=validation_entries or []
     validation_report=validation_report or {'status':'BLOCKED','issues':{'no_qualified_independent_validation':1}}
     if validation_entries and validation_report.get('status')!='READY_FOR_EXPLORATORY_MONITORING':
@@ -67,7 +67,7 @@ def fit_exploratory(entries, keys, out, pretrained, device, rows_sha256, provena
     val_loader=DataLoader(FixedImages(val_items),batch_size=32,shuffle=False,num_workers=0,
                           generator=torch.Generator().manual_seed(20042)) if val_items else None
     model=new_model(keys,pretrained).to(device)
-    optimizer=torch.optim.AdamW(model.parameters(),lr=.001,weight_decay=.0005)
+    optimizer=torch.optim.AdamW(model.parameters(),lr=options['lr'],weight_decay=options['weight_decay'])
     criterion=torch.nn.CrossEntropyLoss()
     initial=bn_snapshot(model)
     write_json(out/'monitor/initialization.json',dict(model_state_sha256=model_state_sha256(model),
@@ -96,7 +96,7 @@ def fit_exploratory(entries, keys, out, pretrained, device, rows_sha256, provena
             persistent_before=model_state_sha256(model);evidence=[]
             fixed=evaluate_fixed(model,fixed_loader,keys,device,per_image=evidence)
             if model_state_sha256(model)!=persistent_before:raise RuntimeError('Observed eval changed model state')
-            if observer.reference is not None and after['running_sha256']!=observer.records[epoch]['bn']['running_sha256']:
+            if observer.reference is not None and (observer.comparison=='exact' or epoch==0) and after['running_sha256']!=observer.records[epoch]['bn']['running_sha256']:
                 raise RuntimeError('R0 BN buffers differ from reference')
             observer.evaluation(epoch,fixed,evidence)
         validation={'status':validation_report['status'],'readiness':validation_report}
