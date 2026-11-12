@@ -79,9 +79,8 @@ def run(args):
             pump_until(root, lambda: not app.model_loading)
             assert app.model is not None, app.model_state.get()
             report['checks']['real_model_loaded_via_gui'] = True
-            app.camera_status.set('FILE-FED real image · NO physical camera')
-            app.latest_frame = frame.copy()
-            app._log('FILE-FED smoke：下一条“摄像头当前帧”来自真实图片文件，不是摄像头。')
+            app.open_image_file(args.image)
+            app._log('FILE-FED smoke：真实图片通过导入流程识别，不是物理摄像头。')
             app.infer_current()
             engine = app.model
             app.load_model()

@@ -32,6 +32,7 @@ def run(args):
         identifiers={entry['id']:label for label,entry in app.model_profiles.items()}
         assert set(sequence)<=set(identifiers)
         frame=read_image_unicode(args.image,'oven_round2')
+        app.open_image_file(args.image)
         for ident in sequence:
             label=identifiers[ident];app.model_profile.set(label);app.select_model_profile()
             assert app.model is None and not app.model_loading
@@ -41,7 +42,7 @@ def run(args):
             assert app.model.contract['source_checkpoint_sha256']==app.model_profiles[label]['checkpoint_sha256']
             result=app.model.predict(frame)
             assert len(result['top3'])==3 and 'accuracy' not in json.dumps(result).lower()
-            app.latest_frame=frame.copy();app.infer_current();held=app.model
+            app.infer_current();held=app.model
             other=identifiers['v2' if ident=='R1' else 'R1']
             app.model_profile.set(other);app.select_model_profile()
             assert app.model is held and app.model_profile.get()==label
@@ -49,7 +50,7 @@ def run(args):
             report['models'].append(dict(id=ident,checkpoint_sha256=app.model.contract['source_checkpoint_sha256'],top3=result['top3']))
         report['checks']['_'.join(sequence)+'_real_load_and_prediction']=True
         report['checks']['busy_switch_refused']=True
-        app.latest_frame=None;app.infer_current();assert not app.inference_running
+        app.use_camera_source();app.latest_frame=None;app.infer_current();assert not app.inference_running
         report['checks']['absent_frame_refused']=True
         app.model_profile.set(MANUAL_LABEL);app.select_model_profile()
         app.model_file.set(str(args.out.parent/'missing.onnx'));app.load_model()

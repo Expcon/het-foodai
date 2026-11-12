@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""HeT OvenCapture Desk v1.2.0-experimental — Windows x64 GUI.
+"""HeT OvenCapture Desk v1.3.0 presentation experiment — Windows x64 GUI.
 
 No oven heating control, firmware access, automatic camera scanning or network calls.
 Camera is explicitly selected by name/backend; manual-index fallback stays available.
@@ -28,6 +28,8 @@ from capture_core import PhotoStore, VideoRecorder, frame_properties, fourcc_to_
 from camera_devices import CameraChoice, list_cameras, compatible_alternate, manual_choice
 from inference_engine import ModelContractError, ModelEngine, read_image_unicode, file_sha256, OVEN_MODES
 from model_catalog import MANUAL_LABEL, read_catalog, resolve_profile
+from recognition_session import RecognitionSession, frame_sha256
+from presentation import Presentation
 
 try:
     from tkinterdnd2 import TkinterDnD, DND_FILES
@@ -38,7 +40,7 @@ except ImportError:
     DND_AVAILABLE = False
 
 APP = "HeT OvenCapture Desk"
-VERSION = "1.2.2-r2-experimental"
+VERSION = "1.3.0-presentation-experimental"
 OVEN_MODE_LABEL = "首轮烤箱分类（实验·9类）"
 OVEN_ROUND2_MODE_LABEL = "二轮烤箱分类（实验·12类）"
 BACKENDS = {"自动兼容（同设备）": "auto", "DirectShow (dshow)": "dshow", "Media Foundation (msmf)": "msmf"}
@@ -339,8 +341,8 @@ class DesktopApp:
     def __init__(self, root, catalog_path=None):
         self.root = root
         self.root.title(f"{APP} v{VERSION} · 食材图像采集与模型测试")
-        self.root.geometry("1370x850")
-        self.root.minsize(1060, 670)
+        self.root.geometry(f"{min(1280,self.root.winfo_screenwidth()-40)}x{min(820,self.root.winfo_screenheight()-90)}")
+        self.root.minsize(900, 580)
         self.root.configure(bg="#F4F6FA")
         self.style = ttk.Style(root)
         self.style.theme_use("clam")
@@ -362,6 +364,14 @@ class DesktopApp:
         self.last_model_profile=MANUAL_LABEL
         self.frames = queue.Queue(maxsize=2)
         self.events = create_events()
+        # Completion must never be dropped behind a bounded stream of camera logs.
+        self.task_events = queue.SimpleQueue()
+        self.recognition = RecognitionSession()
+        self.loaded_identity = None
+        self.imported_path = None
+        self._imported_mode = None
+        self._model_job = None
+        self._gallery_job = None
         self.commands = queue.Queue()
         self.worker = None
         self.latest_frame = None
@@ -384,6 +394,8 @@ class DesktopApp:
         self._closing = False
         self._vars()
         self._make_ui()
+        for variable in [self.model_file,self.label_file,self.model_task,self.network_size]:
+            variable.trace_add('write',self._model_config_changed)
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
         self.root.after(50, self._poll)
         if sys.platform=="win32":self.root.after(450,self.refresh_cameras)
@@ -423,56 +435,7 @@ class DesktopApp:
         self.baudrate = tk.StringVar(value="115200")
 
     def _make_ui(self):
-        top = ttk.Frame(self.root, padding=(18, 14, 18, 8))
-        top.pack(side="top", fill="x")
-        ttk.Label(top, text="HeT OvenCapture", font=("Microsoft YaHei UI", 19, "bold")).pack(side="left")
-        ttk.Label(top, text="   Windows 相机采集 / MNN·ONNX 模型实验", foreground="#516477").pack(side="left", pady=6)
-        ttk.Label(top, text="不控制加热 · 原始解码帧 · 防覆盖", foreground="#227845").pack(side="right")
-        main = ttk.Panedwindow(self.root, orient="horizontal")
-        main.pack(fill="both", expand=True, padx=12, pady=(4,12))
-        side = ttk.Frame(main, padding=(8,6,8,8), width=390)
-        main.add(side, weight=0)
-        right = ttk.Frame(main, padding=(8,6,8,8))
-        main.add(right, weight=4)
-        tabs = ttk.Notebook(side)
-        tabs.pack(fill="both", expand=True)
-        self.capture_tab = self._scrollable_tab(tabs, "相机 / 采集")
-        self.model_tab = self._scrollable_tab(tabs, "模型 / 图集")
-        self.serial_tab = self._scrollable_tab(tabs, "串口 (可选)")
-        self._build_capture_tab()
-        self._build_model_tab()
-        self._build_serial_tab()
-        ttk.Label(right, textvariable=self.camera_status, font=("Microsoft YaHei UI", 12, "bold")).pack(anchor="w", pady=(0,8))
-        preview_frame = tk.Frame(right, bg="black", highlightthickness=1, highlightbackground="#B9C4CD")
-        preview_frame.pack(fill="both", expand=True)
-        self.preview = tk.Label(preview_frame, bg="black", fg="#DCE8F5", text="等待打开摄像头\n\n选择编号及后端 → 打开摄像头", font=("Microsoft YaHei UI", 13))
-        self.preview.pack(fill="both", expand=True)
-        quickbar=ttk.Frame(right)
-        quickbar.pack(fill="x",pady=(8,0))
-        ttk.Label(quickbar,text="实物编号").pack(side="left",padx=(0,6))
-        ttk.Entry(quickbar,textvariable=self.sample_id,width=25).pack(side="left",padx=(0,10))
-        ttk.Label(quickbar,text="例：carrot_001 → carrot_001_0001.png",foreground="#536579").pack(side="left")
-        buttonbar=ttk.Frame(right)
-        buttonbar.pack(fill="x", pady=(9,8))
-        ttk.Button(buttonbar, text="保存照片 (S)", style="Accent.TButton", command=self.save_photo).pack(side="left", padx=(0,6))
-        self.burst_btn = ttk.Button(buttonbar, text="开始连拍", command=self.toggle_burst)
-        self.burst_btn.pack(side="left", padx=6)
-        self.record_btn = ttk.Button(buttonbar, text="开始录像", command=self.toggle_recording)
-        self.record_btn.pack(side="left", padx=6)
-        ttk.Button(buttonbar, text="驱动相机设置", command=self.open_camera_settings).pack(side="left", padx=6)
-        ttk.Button(buttonbar, text="打开保存目录", command=self.open_output_folder).pack(side="left", padx=6)
-        ttk.Label(right, textvariable=self.photo_status, foreground="#536579").pack(anchor="w", pady=(0,8))
-        ttk.Label(right, text="操作日志（只保存在本机）", font=("Microsoft YaHei UI",10,"bold")).pack(anchor="w")
-        logframe = ttk.Frame(right)
-        logframe.pack(fill="x", pady=(5,0))
-        self.log_box = tk.Text(logframe, height=9, wrap="word", bg="#13263C", fg="#DAE8F4",
-             insertbackground="white", borderwidth=0, font=("Consolas", 9), padx=10, pady=7, state="disabled")
-        scroll=ttk.Scrollbar(logframe, orient="vertical", command=self.log_box.yview)
-        self.log_box.configure(yscrollcommand=scroll.set)
-        scroll.pack(side="right", fill="y")
-        self.log_box.pack(side="left", fill="both", expand=True)
-        self.root.bind_all("<KeyPress-s>", self._key_save)
-        self.root.bind_all("<KeyPress-S>", self._key_save)
+        self.presentation=Presentation(self,VERSION)
 
     def _scrollable_tab(self, notebook, label):
         panel=ttk.Frame(notebook)
@@ -517,21 +480,13 @@ class DesktopApp:
 
     def _build_capture_tab(self):
         p=self.capture_tab
-        ttk.Label(p, text="摄像头", font=("Microsoft YaHei UI",12,"bold")).pack(anchor="w", pady=(2,8))
-        self.camera_picker = self._combo(p,"实际摄像头",self.camera_choice,[],readonly=True)
-        self.camera_picker.bind("<<ComboboxSelected>>", self._camera_selected)
-        ttk.Button(p,text="刷新摄像头列表（只读）",command=self.refresh_cameras).pack(fill="x",pady=(1,7))
-        self._entry(p,"手动编号",self.device)
-        ttk.Label(p,text="识别不到设备时才填手动编号；自动模式只匹配同一设备。",
-                  foreground="#536579", wraplength=310).pack(anchor="w",pady=(0,5))
-        self._combo(p,"连接后端",self.backend,list(BACKENDS))
-        self._combo(p,"图像格式",self.camformat,FORMAT_LABELS)
-        self._combo(p,"采集分辨率",self.resolution,RESOLUTIONS)
-        self._combo(p,"显示尺寸",self.preview_size,PREVIEW_SIZES)
-        r=ttk.Frame(p);r.pack(fill="x",pady=(8,9))
-        self.connect_btn=ttk.Button(r,text="打开摄像头",style="Accent.TButton",command=self.toggle_camera)
-        self.connect_btn.pack(side="left",fill="x",expand=True,padx=(0,3))
-        ttk.Button(r,text="读取曝光 / 增益",command=self.inspect_camera).pack(side="left",fill="x",expand=True,padx=(3,0))
+        ttk.Label(p,text="摄像头",font=("Microsoft YaHei UI",12,"bold")).pack(anchor="w",pady=(2,8))
+        self.camera_picker=self._combo(p,"实际摄像头",self.camera_choice,[],readonly=True)
+        self.camera_picker.bind("<<ComboboxSelected>>",self._camera_selected)
+        ttk.Button(p,text="刷新设备列表（不打开）",command=self.refresh_cameras).pack(fill="x",pady=6)
+        self.connect_btn=ttk.Button(p,text="打开摄像头",style="Accent.TButton",command=self.toggle_camera)
+        self.connect_btn.pack(fill="x",pady=5)
+        ttk.Button(p,text="后端、手动编号及驱动设置…",command=lambda:self.presentation.show('高级设置')).pack(fill="x",pady=3)
         ttk.Separator(p).pack(fill="x",pady=9)
         ttk.Label(p,text="文件保存",font=("Microsoft YaHei UI",12,"bold")).pack(anchor="w",pady=(2,7))
         out_row=ttk.Frame(p); out_row.pack(fill="x",pady=3)
@@ -554,7 +509,7 @@ class DesktopApp:
 
     def _build_model_tab(self):
         p=self.model_tab
-        ttk.Label(p,text="模型测试（可选）",font=("Microsoft YaHei UI",12,"bold")).pack(anchor="w",pady=(2,9))
+        ttk.Label(p,text="模型管理",font=("Microsoft YaHei UI",12,"bold")).pack(anchor="w",pady=(2,9))
         ttk.Label(p,text="支持 ONNX/MNN 的指定输出契约。\nPyTorch .pt 请继续使用原 Gradio 项目。",foreground="#536579",justify="left").pack(anchor="w",pady=(0,9))
         picker=self._combo(p,'实验模型',self.model_profile,[MANUAL_LABEL,*self.model_profiles])
         picker.bind('<<ComboboxSelected>>',self.select_model_profile)
@@ -564,9 +519,10 @@ class DesktopApp:
         self._combo(p,"网络输入",self.network_size,["224","320","416","512","640"],readonly=False)
         ttk.Label(p,textvariable=self.model_state,foreground="#235884",wraplength=315).pack(anchor="w",pady=(9,7))
         ttk.Button(p,text="载入真实模型",style="Accent.TButton",command=self.load_model).pack(fill="x",pady=(0,5))
-        ttk.Button(p,text="识别当前摄像头画面",command=self.infer_current).pack(fill="x",pady=5)
+        ttk.Button(p,text="返回识别页面",command=lambda:self.presentation.show("识别")).pack(fill="x",pady=5)
         ttk.Button(p,text="图集测试：选择 JPG/PNG 文件夹",command=self.test_gallery).pack(fill="x",pady=5)
         ttk.Label(p,text="烤箱模型：按导出版本选择首轮9类或二轮12类、224 和随附 classes.json。\n烤箱模型尚无独立验证，只显示实验预测。\n图集测试输出预测与 CSV；没有真值不显示准确率。\n检测仅支持 YOLOv8/11 raw xywh，无法解析即拒绝。",foreground="#536579",justify="left",wraplength=315).pack(anchor="w",pady=(12,4))
+
 
     def _file_row(self,parent,label,var,types):
         row=ttk.Frame(parent);row.pack(fill="x",pady=5)
@@ -586,6 +542,168 @@ class DesktopApp:
                 field.dnd_bind('<<Drop>>', on_drop)
             except Exception:
                 pass
+
+    def _build_camera_advanced(self,parent):
+        ttk.Label(parent,text="相机高级设置",font=("Microsoft YaHei UI",12,"bold")).pack(anchor="w",pady=8)
+        ttk.Label(parent,text="只在确认设备后手动连接；此页面不会自动打开相机或控制加热。",wraplength=900).pack(anchor="w",pady=4)
+        self._entry(parent,"手动编号",self.device)
+        self._combo(parent,"连接后端",self.backend,list(BACKENDS))
+        self._combo(parent,"图像格式",self.camformat,FORMAT_LABELS)
+        self._combo(parent,"采集分辨率",self.resolution,RESOLUTIONS)
+        self._combo(parent,"显示尺寸",self.preview_size,PREVIEW_SIZES)
+        bar=ttk.Frame(parent);bar.pack(fill="x",pady=8)
+        ttk.Button(bar,text="读取曝光 / 增益",command=self.inspect_camera).pack(side="left",padx=(0,8))
+        ttk.Button(bar,text="驱动相机设置",command=self.open_camera_settings).pack(side="left")
+
+    def _refresh_presentation(self):
+        if hasattr(self,'presentation'):self.presentation.refresh()
+
+    def _show_feedback(self,message,error=False):
+        if hasattr(self,'presentation'):self.presentation.message(message,error)
+        self._log(('错误：' if error else '')+str(message))
+
+    def _invalidate_model_view(self):
+        self.model=None;self.loaded_identity=None
+        if hasattr(self,'recognition'):
+            self.recognition.invalidate_model()
+            self.presentation.clear_result()
+        self._refresh_presentation()
+
+    def _config_signature(self):
+        return (self.model_file.get().strip(),self.label_file.get().strip(),self.model_task.get(),
+                self.network_size.get().strip(),self.model_profile.get())
+
+    def _model_config_changed(self,*_args):
+        self._invalidate_model_view()
+        self.model_state.set('模型：未就绪，配置已变化，请载入验证')
+        if self.imported_path is not None:
+            try:mode=self._model_mode()
+            except KeyError:mode=None
+            if mode is not None and mode!=self._imported_mode:
+                self.open_image_file(self.imported_path,navigate=False)
+        self._show_feedback('模型配置已变化，请到模型管理载入并验证。')
+
+    def _recognition_frame(self):
+        if self.recognition.source['kind']=='file':return self.recognition.source_frame
+        return self.latest_frame if self.camera_ready else None
+
+    def choose_image(self):
+        path=filedialog.askopenfilename(title='打开待识别图片',filetypes=[('图片','*.jpg *.jpeg *.png')])
+        if path:self.open_image_file(path)
+
+    def open_image_file(self,path,*,navigate=True):
+        path=Path(path).expanduser()
+        self.imported_path=None
+        self.recognition.set_source('file',path.name)
+        self.presentation.clear_result()
+        try:
+            mode=self._model_mode()
+            before=file_sha256(path);frame=read_image_unicode(path,mode)
+            if file_sha256(path)!=before:raise ModelContractError('图片在读取期间发生变化，请重新打开')
+            self.recognition.set_source('file',path.name,frame,original_sha256=before)
+            self.recognition.source.update(path=str(path.resolve()),opened_at=now_local())
+            self.imported_path=path;self._imported_mode=mode
+            self._show_feedback('图片已打开。载入模型后点击“识别当前画面”。')
+        except Exception as exc:
+            self._show_feedback('无法打开图片：'+str(exc),True)
+        if navigate:self.presentation.show('识别')
+        self.presentation.draw_source();self._refresh_presentation()
+
+    def use_camera_source(self):
+        self.imported_path=None;self._imported_mode=None
+        label=self.camera_info.get('device_name','摄像头未连接') if self.camera_ready else '摄像头未连接'
+        self.recognition.set_source('camera',label)
+        self.presentation.clear_result();self.presentation.show('识别');self.presentation.draw_source()
+        self._show_feedback('正在显示摄像头画面。' if self.camera_ready else '还没有摄像头画面。请选择设备并明确打开，或直接打开图片。')
+        self._refresh_presentation()
+
+    def _clear_camera_view(self):
+        self.camera_ready=False;self.latest_frame=None;self.latest_capture_ts=0
+        while True:
+            try:self.frames.get_nowait()
+            except queue.Empty:break
+        if hasattr(self,'recognition') and self.recognition.source['kind']=='camera':
+            self.recognition.set_source('camera','摄像头已断开')
+            self.presentation.clear_result();self.presentation.draw_source()
+        if hasattr(self,'preview'):self.preview.configure(image='',text='摄像头未连接')
+
+    def _check_camera_liveness(self):
+        if self.camera_ready and self.worker is not None and not self.worker.is_alive():
+            self._clear_camera_view()
+            self.camera_status.set('摄像头：连接已结束')
+            self.connect_btn.configure(text='打开摄像头',state='normal')
+            self._show_feedback('摄像头连接已结束。可重新选择连接，或打开图片。',True)
+
+    def save_display_image(self):
+        frame=self._recognition_frame()
+        if frame is None:
+            self._show_feedback('没有可保存的当前图像。',True);return
+        path=filedialog.asksaveasfilename(title='保存当前图像（不覆盖）',defaultextension='.png',
+            initialfile=safe_stem('image')+'.png',filetypes=[('PNG','*.png')])
+        if not path:return
+        try:
+            ok,encoded=cv2.imencode('.png',frame.copy())
+            if not ok:raise ValueError('图片编码失败')
+            write_exclusive(Path(path),[encoded.tobytes()])
+            self._show_feedback('图片已保存：'+Path(path).name)
+        except Exception as exc:self._show_feedback('保存图片失败：'+str(exc),True)
+
+    def save_recognition_result(self):
+        if self.recognition.record is None or self.inference_running:
+            self._show_feedback('没有当前有效的识别结果可保存。',True);return
+        folder=filedialog.askdirectory(title='选择本次结果保存目录',initialdir=self.output.get())
+        if not folder:return
+        try:
+            target=self.recognition.save_result(folder)
+            self._show_feedback('结果和对应识别帧已保存：'+str(target))
+        except Exception as exc:self._show_feedback('保存识别结果失败：'+str(exc),True)
+
+    def _post_task(self,kind,payload):
+        getattr(self,'task_events',self.events).put((kind,payload))
+
+    def _handle_task_event(self,kind,payload):
+        if kind in {'model_ready','model_error'}:
+            job,signature,value=payload[:3]
+            if job is not self._model_job:return
+            self._model_job=None;self.model_loading=False
+            if (signature!=self._config_signature() or
+                self._load_generation!=self.recognition.model_generation):
+                self._invalidate_model_view();self.model_state.set('模型：未就绪，配置已变化')
+                self._show_feedback('加载期间模型配置已变化，旧加载结果已拒绝，请重新载入。',True)
+            elif kind=='model_error':
+                self._invalidate_model_view();self.model_state.set('模型：加载失败')
+                self._show_feedback('模型加载失败：'+str(value),True)
+            else:
+                self.model=value;self.loaded_identity=payload[3]
+                self.model_state.set(f'模型：已加载 {value.path.name} · {len(value.labels)} 类 · {value.height}×{value.width} · 实验预测')
+                self._show_feedback('模型已通过真实校验。请选择图像并点击识别。')
+                self.presentation.show('识别')
+        elif kind in {'predict','predict_error'}:
+            request,tag=payload[:2]
+            if self.recognition.active is not request:return
+            if kind=='predict':
+                _,_,result,elapsed=payload
+                accepted=self.recognition.finish(request,result,elapsed)
+                if accepted:
+                    self.presentation.show_result(self.recognition.record)
+                    entries=result['top3'] if result['task']=='classification' else result['detections'][:3]
+                    summary=' | '.join(f"{r['label']} {r['score']:.1%}" for r in entries) or '无检测框'
+                    self._show_feedback(f'识别完成：{summary}。分数为模型输出。')
+                    self._log(f'真实模型预测 {tag}：{summary}；耗时 {elapsed:.2f}ms（预处理、推理、输出检查，含锁等待；不含解码/加载/界面）')
+                else:self._log('图像或模型已变化，已忽略过期结果。')
+            else:
+                accepted=self.recognition.fail(request,payload[2])
+                if accepted:self._show_feedback('预测失败：'+str(payload[2]),True)
+            self.inference_running=False
+        elif kind in {'gallery_done','gallery_error'}:
+            job,value=payload
+            if job is not self._gallery_job:return
+            self._gallery_job=None;self.inference_running=False
+            if kind=='gallery_done':
+                total,ok,path=value
+                self._show_feedback(f'图集测试结束 {ok}/{total} 张执行成功，CSV={path}（没有真值不计算准确率）')
+            else:self._show_feedback('图集结果保存失败：'+str(value),True)
+        self._refresh_presentation()
 
     def _build_serial_tab(self):
         p=self.serial_tab
@@ -695,6 +813,7 @@ class DesktopApp:
     def toggle_camera(self):
         if self.worker and self.worker.is_alive():
             self._log("请求关闭摄像头…")
+            self.camera_ready=False;self._clear_camera_view()
             self.worker.stop()
             self.connect_btn.configure(state="disabled")
             return
@@ -807,79 +926,90 @@ class DesktopApp:
             self._log('模型任务进行中，请完成后再切换模型')
             return
         label=self.model_profile.get()
+        self._invalidate_model_view()
+        self.model_state.set('模型：未就绪，请载入并验证所选实验模型')
         if label==MANUAL_LABEL:
             self.last_model_profile=label
             return
-        self.model=None
-        self.model_state.set('模型：未就绪，请载入并验证所选实验模型')
         try:
             profile=resolve_profile(self.model_profiles[label])
             self.model_file.set(str(profile['model']));self.label_file.set(str(profile['classes']))
             self.model_task.set(OVEN_ROUND2_MODE_LABEL);self.network_size.set('224')
             self.last_model_profile=label
+            self._show_feedback('已选择 '+label+'，请点击“载入真实模型”。')
         except (KeyError,OSError,ModelContractError) as exc:
             self.model_profile.set(self.last_model_profile)
-            self._log('实验模型选择失败：'+str(exc))
+            self._show_feedback('实验模型选择失败：'+str(exc),True)
 
     def load_model(self):
         if self.model_loading or self.inference_running:
-            self._log("模型任务进行中，请完成后再切换模型")
+            self._log('模型任务进行中，请完成后再切换模型')
             return
-        self.model=None
-        self.model_state.set("模型：未就绪，等待验证新模型")
+        self._invalidate_model_view()
+        self.model_state.set('模型：未就绪，等待验证新模型')
         path,labels=self.model_file.get().strip(),self.label_file.get().strip()
         if not path or not labels:
-            messagebox.showinfo("模型", "请选择模型文件 (.onnx 或 .mnn) 和类别文件 (.txt 或 .json)")
+            self._show_feedback('请选择模型及配套类别文件，再点击载入。',True)
+            messagebox.showinfo('模型','请选择模型文件 (.onnx 或 .mnn) 和类别文件 (.txt 或 .json)')
             return
         try:
-            mode=self._model_mode()
-            input_size=int(self.network_size.get().strip())
-            expected_checkpoint=None
+            mode=self._model_mode();input_size=int(self.network_size.get().strip());expected_checkpoint=None
             selected=getattr(self,'model_profile',None)
             if selected is not None and selected.get()!=MANUAL_LABEL:
-                profile=resolve_profile(self.model_profiles[selected.get()])
-                expected_checkpoint=profile['checkpoint_sha256']
+                profile=resolve_profile(self.model_profiles[selected.get()]);expected_checkpoint=profile['checkpoint_sha256']
                 if Path(path).resolve()!=profile['model'].resolve() or Path(labels).resolve()!=profile['classes'].resolve() or mode!='oven_round2' or input_size!=224:
                     raise ModelContractError('所选实验模型路径/模式已改变；请重新选择，或切回手动选择')
-        except (ValueError, KeyError, OSError, ModelContractError) as exc:
-            messagebox.showwarning("模型", "无效的网络输入尺寸、模式或实验模型："+str(exc))
+        except (ValueError,KeyError,OSError,ModelContractError) as exc:
+            self._show_feedback('模型配置无效：'+str(exc),True)
+            messagebox.showwarning('模型','无效的网络输入尺寸、模式或实验模型：'+str(exc))
             return
-        self.model_loading=True
-        self.model_state.set("模型：正在验证输入输出及加载权重…")
+        self.model_loading=True;self.model_state.set('模型：正在验证输入输出及加载权重…')
+        signature=self._config_signature();job=object();self._model_job=job
+        self._load_generation=self.recognition.model_generation if hasattr(self,'recognition') else 0
+        display_name=self.model_profile.get() if self.model_profile.get()!=MANUAL_LABEL else Path(path).name
+        self._refresh_presentation()
         def task():
             try:
+                before=(file_sha256(path),file_sha256(labels))
                 engine=ModelEngine(path,labels,mode,input_size)
                 if expected_checkpoint is not None and engine.contract['source_checkpoint_sha256']!=expected_checkpoint:
                     raise ModelContractError('Loaded checkpoint differs from selected experiment')
-                post_event(self.events,"model_ready",engine)
-            except Exception as exc:
-                post_event(self.events,"model_error",f"{type(exc).__name__}: {exc}")
+                if before!=(file_sha256(path),file_sha256(labels)):raise ModelContractError('模型或类别文件在载入期间发生变化')
+                identity=dict(display_name=display_name,model_sha256=before[0],classes_sha256=before[1],
+                    checkpoint_sha256=(engine.contract or {}).get('source_checkpoint_sha256'),mode=mode,
+                    input_shape=[1,3,engine.height,engine.width])
+                identity['catalog_id']=self.model_profiles.get(display_name,{}).get('id') if hasattr(self,'model_profiles') else None
+                self._post_task('model_ready',(job,signature,engine,identity))
+            except Exception as exc:self._post_task('model_error',(job,signature,f'{type(exc).__name__}: {exc}'))
         threading.Thread(target=task,daemon=True).start()
 
-    def _start_predict(self,frame,tag="摄像头当前帧"):
+    def _start_predict(self,frame,tag='当前图像'):
         engine=self.model
         if engine is None or self.model_loading:
-            messagebox.showwarning("模型未就绪", "先载入真实 ONNX/MNN 模型和匹配的类别文件。不会产生模拟预测。")
-            return
+            self._show_feedback('模型未就绪。请到模型管理选择并载入真实模型。',True);return
         if self.inference_running:
-            self._log("预测任务进行中，请稍后")
-            return
-        self.inference_running=True
+            self._log('预测任务进行中，请稍后');return
+        try:request=self.recognition.begin(frame,self.loaded_identity)
+        except (ValueError,RuntimeError) as exc:
+            self._show_feedback(str(exc),True);return
+        self.presentation.clear_result();self.inference_running=True
+        self._show_feedback('正在识别，请稍候…');self._refresh_presentation()
         def task():
             try:
-                t0=time.perf_counter()
-                result=engine.predict(frame)
-                result["latency_wall_ms"] = round((time.perf_counter()-t0)*1000,2)
-                post_event(self.events,"predict",(tag,result))
-            except Exception as exc:
-                post_event(self.events,"predict_error",f"{tag}: {type(exc).__name__}: {exc}")
+                started=time.perf_counter();result=engine.predict(request.frame)
+                elapsed=(time.perf_counter()-started)*1000
+                self._post_task('predict',(request,tag,result,elapsed))
+            except Exception as exc:self._post_task('predict_error',(request,tag,f'{type(exc).__name__}: {exc}'))
         threading.Thread(target=task,daemon=True).start()
 
     def infer_current(self):
-        if self.latest_frame is None:
-            self._log("当前没有真实帧，无法预测")
-            return
-        self._start_predict(self.latest_frame.copy())
+        frame=self._recognition_frame()
+        if frame is None:
+            self.recognition.record=None;self.presentation.clear_result()
+            self._show_feedback('当前没有可识别的真实画面，请打开图片或连接摄像头。',True);return
+        if self.recognition.source['kind']=='camera':
+            self.recognition.source.update(captured_at_host_approx=datetime.fromtimestamp(self.latest_capture_ts).astimezone().isoformat() if self.latest_capture_ts else None)
+        self._start_predict(frame,self.recognition.source['label'])
 
     def test_gallery(self):
         engine=self.model
@@ -901,6 +1031,9 @@ class DesktopApp:
             messagebox.showwarning("图集测试", f"已发现 {len(files)} 张图片。为避免不受控的大批量处理，本次最多处理前 500 张。")
             files=files[:500]
         self.inference_running=True
+        job=object();self._gallery_job=job
+        self.recognition.record=None;self.presentation.clear_result();self._refresh_presentation()
+        identity=dict(self.loaded_identity or {})
         self._log(f"图集测试开始：{len(files)} 张，推理结果仅作为预测，不等于真实准确率")
         target = Path(self.output.get().strip()).expanduser()
         def task():
@@ -908,6 +1041,7 @@ class DesktopApp:
             for index,path in enumerate(files):
                 try:
                     result=engine.predict_file(path)
+                    result["model_identity"]=identity
                     if result["task"]=="classification":
                         top=result["top3"][0]
                         row={"image":str(path),"status":"OK","task":"classification","predicted_label":top["label"],"score":top["score"],"detections":"","full_result":json.dumps(result,ensure_ascii=False)}
@@ -927,9 +1061,9 @@ class DesktopApp:
                 writer=csv.DictWriter(sio,fieldnames=["image","status","task","predicted_label","score","detections","full_result"])
                 writer.writeheader();writer.writerows(rows)
                 write_exclusive(csvfile,[sio.getvalue().encode("utf-8-sig")])
-                post_event(self.events,"gallery_done",(len(rows),sum(r["status"]=="OK" for r in rows),str(csvfile)))
+                self._post_task("gallery_done",(job,(len(rows),sum(r["status"]=="OK" for r in rows),str(csvfile))))
             except Exception as exc:
-                post_event(self.events,"predict_error",f"图集结果保存失败: {exc}")
+                self._post_task("gallery_error",(job,str(exc)))
         threading.Thread(target=task,daemon=True).start()
 
     def refresh_serials(self):
@@ -982,6 +1116,11 @@ class DesktopApp:
 
     def _poll(self):
         if self._closing:return
+        self._check_camera_liveness()
+        for _ in range(50):
+            try:kind,payload=self.task_events.get_nowait()
+            except queue.Empty:break
+            self._handle_task_event(kind,payload)
         for _ in range(50):
             try:
                 kind,payload=self.events.get_nowait()
@@ -1021,13 +1160,18 @@ class DesktopApp:
             elif kind=="camera_ready":
                 self.camera_info=payload
                 self.camera_ready=True
+                if self.recognition.source['kind']=='camera':
+                    self.recognition.set_source('camera',payload['device_name'])
+                    self.presentation.clear_result()
                 self.connect_btn.configure(text="停止摄像头",state="normal")
                 self.camera_status.set(f"已连接 {payload['device_name']} · {payload['backend']} #{payload['device_index']} · {payload['actual_decoded_width']}×{payload['actual_decoded_height']}")
                 self._log(f"实际取帧 {payload['actual_decoded_width']}×{payload['actual_decoded_height']}，FOURCC={payload['reported_fourcc']}，驱动 FPS={payload['driver_fps']}(仅报告值)")
             elif kind=="camera_error":
-                self._log("摄像头错误: "+str(payload))
+                self._clear_camera_view()
+                self._show_feedback("摄像头错误: "+str(payload),True)
                 self.camera_status.set("摄像头错误：检查日志并尝试其他后端")
             elif kind=="camera_stopped":
+                self._clear_camera_view()
                 self.camera_ready=False
                 self.burst_running=False
                 self.burst_btn.configure(text="开始连拍")
@@ -1048,38 +1192,12 @@ class DesktopApp:
                 self.photo_status.set("已保存："+Path(name).name)
             elif kind=="saved_path":
                 self.photo_status.set("录像已保存："+Path(payload).name)
-            elif kind=="model_ready":
-                self.model=payload
-                self.model_loading=False
-                scope=" · 实验预测 / 无独立验证" if payload.mode in OVEN_MODES else ""
-                self.model_state.set(f"模型：已加载 {payload.path.name} · {len(payload.labels)} 类 · {payload.height}×{payload.width}{scope}")
-                self._log("模型加载成功。输出必须匹配类别数量和选择的解析协议。")
-            elif kind=="model_error":
-                self.model=None
-                self.model_loading=False
-                self.model_state.set("模型：加载失败；详见日志")
-                self._log("模型加载失败: "+str(payload))
-            elif kind=="predict":
-                tag,result=payload
-                self.inference_running=False
-                if result["task"]=="classification":
-                    summary=" | ".join(f"{r['label']} {r['score']:.1%}" for r in result["top3"])
-                else:
-                    det=result["detections"]
-                    summary="、".join(f"{r['label']} {r['score']:.1%} {r['xyxy']}" for r in det[:10]) or "无检测框"
-                self._log(f"真实模型预测 {tag}：{summary}；耗时 {result['latency_wall_ms']}ms（不含模型加载）")
-            elif kind=="predict_error":
-                self.inference_running=False
-                self._log("预测失败: "+str(payload))
-            elif kind=="gallery_done":
-                self.inference_running=False
-                total,ok,path=payload
-                self._log(f"图集测试结束 {ok}/{total} 张执行成功，CSV={path}（没有真值不计算准确率）")
+        self._check_camera_liveness()
         latest=None
         while True:
             try:latest=self.frames.get_nowait()
             except queue.Empty:break
-        if latest:
+        if latest and self.camera_ready:
             frame,ts=latest
             self.latest_frame=frame
             self.latest_capture_ts=ts
@@ -1087,6 +1205,8 @@ class DesktopApp:
         if self.latest_frame is not None and time.monotonic()-self.last_preview_t>0.065:
             self._draw_preview(self.latest_frame)
             self.last_preview_t=time.monotonic()
+            if self.recognition.source['kind']=='camera':self.presentation.draw_source()
+        self._refresh_presentation()
         self.root.after(45,self._poll)
 
     def _draw_preview(self,frame):
@@ -1243,9 +1363,20 @@ def main():
     import argparse
     parser=argparse.ArgumentParser(description='Local capture and approved experimental models')
     parser.add_argument('--model-catalog',type=Path,help='Optional local model list; does not auto-load or change defaults')
+    parser.add_argument('--window-size',help='Optional window client size WIDTHxHEIGHT; does not change Windows display settings')
     args=parser.parse_args()
+    if args.window_size:
+        import re
+        match=re.fullmatch(r'(\d{3,4})x(\d{3,4})',args.window_size)
+        if not match or not (900<=int(match[1])<=3840 and 580<=int(match[2])<=2160):
+            parser.error('Window size must be 900..3840 x 580..2160')
+    if sys.platform=='win32':
+        import ctypes
+        try:ctypes.windll.shcore.SetProcessDpiAwareness(1)
+        except (OSError,AttributeError):pass
     root=RootClass()
     DesktopApp(root,catalog_path=args.model_catalog)
+    if args.window_size:root.geometry(args.window_size)
     root.mainloop()
 
 
