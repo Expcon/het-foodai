@@ -10,3 +10,6 @@
 /data/processed/selected_dataset_v1.1.0/classes.proposed.json -text whitespace=cr-at-eol
 /data/processed/selected_dataset_v1.1.0/summary.json -text whitespace=cr-at-eol
 /configs/classes.json -text whitespace=cr-at-eol
+
+# Experiment recipes are byte-pinned; checkout must not rewrite their hashes.
+/tools/oven_training/recipes/*.json -text
