@@ -182,7 +182,7 @@ def gradient_evidence(model):
 
 class ObservationRun:
     def __init__(self, out, model, optimizer, loaders, config, entries, *, reference=None, tail_epochs=(24,27,28,29,30), comparison='exact'):
-        if comparison not in {'exact','lr_only'} or (comparison=='lr_only' and reference is None):
+        if comparison not in {'exact','lr_only','record_only'} or (comparison=='lr_only' and reference is None) or (comparison=='record_only' and reference is not None):
             raise ValueError('Observation comparison requires an explicit valid reference mode')
         self.comparison=comparison;self.checked_batches=0
         self.out = output_dir(out); self.out.mkdir(parents=True, exist_ok=False)

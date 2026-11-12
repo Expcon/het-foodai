@@ -33,17 +33,22 @@ def read_rows(path):
     return rows
 
 
-def recipe_config(values=None, *, lr_control=False):
+def recipe_config(values=None, *, lr_control=False, r2_control=False):
     values = {} if values is None else values
-    if not isinstance(values, dict) or set(values)-set(DEFAULT_RECIPE): raise ValueError('Unknown recipe fields')
+    extra={'tail_batch_policy','tail_min_size'} if r2_control else set()
+    if lr_control and r2_control:raise ValueError('R1 single-variable and R2 data/tail experiments are distinct')
+    if not isinstance(values, dict) or set(values)-set(DEFAULT_RECIPE)-extra: raise ValueError('Unknown recipe fields')
     result = {**DEFAULT_RECIPE, **values}
+    if r2_control:
+        if result.get('tail_batch_policy')!='merge_short_tail' or type(result.get('tail_min_size')) is not int or result['tail_min_size']!=8:
+            raise ValueError('R2 requires explicit merge_short_tail / min8')
     if type(result['epochs']) is not int or result['epochs'] < 1: raise ValueError('Epochs must be a positive integer')
     if result['bn_policy'] not in {'update','frozen_stats'}: raise ValueError('Unknown BN statistics policy')
-    if lr_control:
+    if lr_control or r2_control:
         if type(result['lr']) is not float or result['lr'] != .0003 or result['bn_policy'] != 'update':
             raise ValueError('Registered R1 requires lr=0.0003 and normal BN updates')
     for key, value in DEFAULT_RECIPE.items():
-        if key == 'lr' and lr_control: continue
+        if key == 'lr' and (lr_control or r2_control): continue
         if key not in {'epochs','bn_policy'} and (type(result[key]) is not type(value) or result[key] != value):
             raise ValueError('Controlled recipe fixes '+key)
     return result

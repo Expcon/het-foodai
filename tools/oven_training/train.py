@@ -11,7 +11,7 @@ from .model import ROOT,PREPROCESS,class_digest,check_rows,configure_sdk,digest,
 
 
 def fit_exploratory(entries, keys, out, pretrained, device, rows_sha256, provenance=None,
-                    *, recipe=None, validation_entries=None, validation_report=None, observation=None):
+                    *, recipe=None, validation_entries=None, validation_report=None, observation=None,r2_control=False):
     """Shared fixed recipe; caller validates hashes, labels and train-only groups."""
     out=output_dir(out)
     if out.exists():raise ValueError('Use a new run directory; never overwrite a training run')
@@ -21,7 +21,9 @@ def fit_exploratory(entries, keys, out, pretrained, device, rows_sha256, provena
     from .monitor import (FixedImages, IndexedImages, evaluate_fixed, set_training_mode,
                           bn_snapshot, bn_delta, tensor_sha256, model_state_sha256)
     from .export_desk import write_json
-    options=recipe_config(recipe,lr_control=observation is not None and observation.get('comparison')=='lr_only')
+    options=recipe_config(recipe,lr_control=observation is not None and observation.get('comparison')=='lr_only',r2_control=r2_control)
+    if r2_control and (observation is None or observation.get('comparison')!='record_only' or observation.get('reference') is not None):
+        raise ValueError('R2 requires independent record_only observation, not an R0/R1 comparison gate')
     validation_entries=validation_entries or []
     validation_report=validation_report or {'status':'BLOCKED','issues':{'no_qualified_independent_validation':1}}
     if validation_entries and validation_report.get('status')!='READY_FOR_EXPLORATORY_MONITORING':
@@ -56,8 +58,15 @@ def fit_exploratory(entries, keys, out, pretrained, device, rows_sha256, provena
             image,label=self.items[index]
             return self.augment(image),label
     dataset=Images()
-    loader=DataLoader(IndexedImages(dataset),batch_size=32,shuffle=True,num_workers=0,
-                      drop_last=False,generator=torch.Generator().manual_seed(42))
+    if r2_control:
+        from torch.utils.data import RandomSampler
+        from .batching import MergeShortTailBatchSampler
+        generator=torch.Generator().manual_seed(42);indexed=IndexedImages(dataset)
+        loader=DataLoader(indexed,batch_sampler=MergeShortTailBatchSampler(RandomSampler(indexed,generator=generator),32,8),
+                          num_workers=0,generator=generator)
+    else:
+        loader=DataLoader(IndexedImages(dataset),batch_size=32,shuffle=True,num_workers=0,
+                          drop_last=False,generator=torch.Generator().manual_seed(42))
     fixed_loader=DataLoader(FixedImages(dataset.items),batch_size=32,shuffle=False,num_workers=0,
                             generator=torch.Generator().manual_seed(10042))
     val_items=[]
@@ -70,6 +79,9 @@ def fit_exploratory(entries, keys, out, pretrained, device, rows_sha256, provena
     optimizer=torch.optim.AdamW(model.parameters(),lr=options['lr'],weight_decay=options['weight_decay'])
     criterion=torch.nn.CrossEntropyLoss()
     initial=bn_snapshot(model)
+    if r2_control and provenance and provenance.get('reference_initialization_state_sha256') is not None:
+        if model_state_sha256(model)!=provenance['reference_initialization_state_sha256']:
+            raise ValueError('R2 initialization differs from pinned R1 initialization')
     write_json(out/'monitor/initialization.json',dict(model_state_sha256=model_state_sha256(model),
         bn=initial,bn_policy=options['bn_policy'],pretrained_sha256=config['pretrained_sha256'],
         cache='deterministically framed PIL RGB images; augmentation sampled on each access',
@@ -150,6 +162,10 @@ def fit_exploratory(entries, keys, out, pretrained, device, rows_sha256, provena
                         small_batch=bool(batch['size']<32),
                         caution='A small batch has the same fixed-momentum EMA weight as a full batch; causal contribution is unproven.')
             monitored=finish_epoch(epoch,epoch_before,trace,tail)
+            if r2_control:
+                indices=[i for batch in trace for i in batch['indices']]
+                if sorted(indices)!=list(range(len(entries))) or min(batch['size'] for batch in trace)<8:
+                    raise RuntimeError('R2 epoch coverage or tail policy violated')
             val_metrics=monitored['validation'].get('metrics',{})
             row=dict(epoch=epoch,train_loss=loss_sum/total,train_accuracy_augmented=correct/total,samples=total,seconds=time.perf_counter()-epoch_start,
                      train_eval_loss=monitored['train_eval']['loss'],train_eval_top1=monitored['train_eval']['top1'],
