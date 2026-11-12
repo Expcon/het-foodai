@@ -90,10 +90,10 @@
 ## 证据
 
 - [可机读验证记录](integration-evidence/20261020/verification.json)
-- [合成输入 Top-3 网页](integration-evidence/20261020/foodai-integration-synthetic-top3.png)
+- （该历史截图已本机保全；公开版不嵌入个人路径或授权待核实的食材图像。）
 - [损坏输入，无预测](integration-evidence/20261020/foodai-integration-corrupt.png)
 - [缺失模型，按钮禁用](integration-evidence/20261020/foodai-integration-missing-model.png)
-- [预测期间锁定控件](integration-evidence/20261020/foodai-integration-busy.png)
+- （该历史截图已本机保全；公开版不嵌入个人路径或授权待核实的食材图像。）
 
 ## 三条来源分支的实际修改文件
 
