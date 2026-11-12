@@ -212,6 +212,11 @@ class GuiModelStateTests(unittest.TestCase):
         self.app.model_task = Value('首轮烤箱分类（实验·9类）')
         self.app.network_size = Value('224')
         self.app.model_state = Value('已加载')
+        self.app.model_profile = Value(gui.MANUAL_LABEL)
+        from recognition_session import RecognitionSession
+        self.app.recognition = RecognitionSession()
+        self.app.loaded_identity = {'display_name':'SYNTHETIC model','model_sha256':'a'*64,'classes_sha256':'b'*64}
+        self.app.presentation = types.SimpleNamespace(clear_result=lambda:None,refresh=lambda:None,message=lambda *args:None)
         self.app.events = queue.Queue()
         self.app._log = lambda text: None
         DeferredThread.tasks = []
@@ -254,7 +259,8 @@ class GuiModelStateTests(unittest.TestCase):
         DeferredThread.tasks.pop()()
         kind, payload = self.app.events.get_nowait()
         self.assertEqual(kind, 'predict')
-        self.assertEqual(payload[1]['top3'][0]['label'], 'toast')
+        self.assertEqual(payload[2]['top3'][0]['label'], 'toast')
+        self.assertEqual(payload[0].model_identity['model_sha256'],'a'*64)
 
     def test_gallery_snapshots_model_and_never_reports_unlabelled_accuracy(self):
         with tempfile.TemporaryDirectory(prefix='SYNTHETIC-oven-gallery-') as td:
@@ -268,8 +274,8 @@ class GuiModelStateTests(unittest.TestCase):
             DeferredThread.tasks.pop()()
             kind, payload = self.app.events.get_nowait()
             self.assertEqual(kind, 'gallery_done')
-            self.assertEqual(payload[:2], (1,1))
-            with Path(payload[2]).open(encoding='utf-8-sig', newline='') as stream:
+            self.assertEqual(payload[1][:2], (1,1))
+            with Path(payload[1][2]).open(encoding='utf-8-sig', newline='') as stream:
                 rows = list(csv.DictReader(stream))
             self.assertEqual(rows[0]['predicted_label'], 'toast')
             self.assertNotIn('accuracy', json.dumps(rows).lower())
