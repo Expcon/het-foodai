@@ -125,7 +125,19 @@ SKIP 是 Windows 不允许创建测试目录符号链接。软件测试包含明
 
 ## 7. 实际推送与 Draft PR
 
-当前阶段尚未执行推送/PR 创建；测试和安全审查完成后，将用实际远端引用核对及 PR 返回结果更新本节。此处不是已同步声明。
+已实际执行一次原子推送，退出码 0，仅新增两个远端分支；使用 `git ls-remote --heads origin` 逐项确认本地/远端 SHA 相同，原有远端分支均未改变。
+
+| 分支 | 推送结果 | Draft PR / base |
+| --- | --- | --- |
+| feat/model-oven-research-public | 已推送并核验，研究头 0458723 | [#10](https://github.com/Expcon/het-foodai/pull/10)，base = feat/model-oven-second-round |
+| feat/app-oven-integrated-v1.3 | 已推送并核验，包含 v1.3.0、BN 诊断及本报告 | [#11](https://github.com/Expcon/het-foodai/pull/11)，base = feat/model-oven-research-public |
+
+两个新 PR 经 GitHub 再查询均为 OPEN / Draft，未启用自动合并。GitHub 连接器创建 PR 返回 403（集成身份权限不足）；随后用本机既有授权 gh 会话查询仓库权限为 ADMIN，再创建成功，两个 CLI 创建命令均退出 0。没有读取/输出 Token，也没有改权限或重复创建 PR。
+
+发布前实际检查 121 个 outgoing blob 版本及相关提交消息通过；最终状态更新只是本文档，另行检查后快进推送。GitHub 未提供本轮 CI 检查结果，本文的 PASS 指上述本机实跑，不能当作 GitHub CI PASS。
+
+14 个原始未推送提交仍留在原本地分支；公开的是经审查且带 Source-Commit 对应关系的副本，不能说原 SHA 已经上 GitHub。没有把私有原分支再 push 上去。
+
 
 历史 #1–#9 仍未合并；main 仍为 f229bc2。本轮禁止的 force push、main 合并、旧分支/工作树删除、模型覆盖及 Release 均未执行。
 
@@ -143,5 +155,7 @@ SKIP 是 Windows 不允许创建测试目录符号链接。软件测试包含明
 - 专注后续模型机制研究：**feat/model-oven-research-public**，含最新 R2/BN 研究代码及脱敏证据，保持旧展示页面基线，避免顺手改生产推理。
 - 原始完整研究记录：本地 feat/model-oven-r2-bn-diagnosis；原已验收 v1.3.0 源码：本地 feat/app-oven-presentation-v1.3。它们不是“已原样上传”的分支。
 - MVP 历史复现仍用 integration/mvp-v1.0-delivery；不要从仍为 starter 的 main 开始下一轮模型开发。
+
+仍未同步的一次性执行器：原 R2 BN 诊断的 diagnose.py / build_report.py 位于本机 runs 忽略目录，带有本地运行绑定；本轮公开的是可复用 cross_states 等研究模块及聚合证据，不声称原始诊断调度器已参数化或可脱离本机产物直接重放。后续如需 CLI 重放，应在研究基线上单独参数化、脱敏并测试这些执行器。
 
 公开仓库仅交付源码/测试/脱敏报告；真实权重、原始数据、EXE/ZIP、逐图结果和完整本机证据需按现有私下交付说明另行恢复。未恢复真实模型时显示 not_ready 是预期保护，不是可以用模拟预测替代的缺陷。
