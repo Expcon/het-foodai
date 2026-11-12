@@ -4,8 +4,8 @@
 
 ## 集成环境与历史
 
-- 原工作区 `D:\Projects\HeT_FoodAI` 保持 `main`，没有合并或提交到 main。
-- 独立工作区 `C:\Users\31\.codex\worktrees\integration-mvp-v1\HeT_FoodAI`，分支 `integration/mvp-v1` 从本次 fetch 的最新 `origin/main`（`f229bc2`）创建。
+- 原工作区 `<original-repository-root>` 保持 `main`，没有合并或提交到 main。
+- 独立工作区 `<integration-worktree-root>`，分支 `integration/mvp-v1` 从本次 fetch 的最新 `origin/main`（`f229bc2`）创建。
 - 使用原项目 `.venv`；最初缺少 Gradio，按现有 `requirements-demo.txt` 安装项目依赖，没有系统级安装或替换 PyTorch。
 - 依次保留历史合入：训练 `9c9b60a`（合并 `9ae65f4`）、数据 `f9481c2`（合并 `1f76e39`）、Demo `22df321`（合并 `c4443aa`）。**零冲突**，未重写成员历史。
 
@@ -45,7 +45,7 @@
 
 ## 实际测试命令与结果
 
-以下在隔离工作区运行，`$py = 'D:\Projects\HeT_FoodAI\.venv\Scripts\python.exe'`。
+以下在隔离工作区运行，`$py = '<original-repository-root>\.venv\Scripts\python.exe'`。
 
 | 实际命令/检查 | 结果 |
 | --- | --- |
@@ -90,10 +90,10 @@
 ## 证据
 
 - [可机读验证记录](integration-evidence/20261020/verification.json)
-- [合成输入 Top-3 网页](integration-evidence/20261020/foodai-integration-synthetic-top3.png)
+- （该历史截图已本机保全；公开版不嵌入个人路径或授权待核实的食材图像。）
 - [损坏输入，无预测](integration-evidence/20261020/foodai-integration-corrupt.png)
 - [缺失模型，按钮禁用](integration-evidence/20261020/foodai-integration-missing-model.png)
-- [预测期间锁定控件](integration-evidence/20261020/foodai-integration-busy.png)
+- （该历史截图已本机保全；公开版不嵌入个人路径或授权待核实的食材图像。）
 
 ## 三条来源分支的实际修改文件
 

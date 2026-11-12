@@ -1,0 +1,13 @@
+﻿class_id,class_key,images,independent_validation,R1_top1_matches,R1_top3_contains,R1_mean_loss,R2_top1_matches,R2_top3_contains,R2_mean_loss,rescues,regressions
+0,asparagus,0,False,0,0,,0,0,,0,0
+1,bacon,0,False,0,0,,0,0,,0,0
+2,broccoli,0,False,0,0,,0,0,,0,0
+3,chicken_wing,0,False,0,0,,0,0,,0,0
+4,croissant,0,False,0,0,,0,0,,0,0
+5,french_fries,0,False,0,0,,0,0,,0,0
+6,potato,36,False,35,36,,34,36,,0,1
+7,salmon,36,False,29,35,,36,36,,7,0
+8,toast,0,False,0,0,,0,0,,0,0
+9,corn,12,False,9,11,,12,12,,3,0
+10,sausage,36,False,22,29,,22,33,,3,3
+11,steak,0,False,0,0,,0,0,,0,0

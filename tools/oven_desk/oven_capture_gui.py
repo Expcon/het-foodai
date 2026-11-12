@@ -27,6 +27,7 @@ from tkinter import filedialog, messagebox, ttk
 from capture_core import PhotoStore, VideoRecorder, frame_properties, fourcc_to_text, now_local, safe_stem, write_exclusive
 from camera_devices import CameraChoice, list_cameras, compatible_alternate, manual_choice
 from inference_engine import ModelContractError, ModelEngine, read_image_unicode, file_sha256, OVEN_MODES
+from model_catalog import MANUAL_LABEL, read_catalog, resolve_profile
 
 try:
     from tkinterdnd2 import TkinterDnD, DND_FILES
@@ -37,7 +38,7 @@ except ImportError:
     DND_AVAILABLE = False
 
 APP = "HeT OvenCapture Desk"
-VERSION = "1.2.0-experimental"
+VERSION = "1.2.2-r2-experimental"
 OVEN_MODE_LABEL = "首轮烤箱分类（实验·9类）"
 OVEN_ROUND2_MODE_LABEL = "二轮烤箱分类（实验·12类）"
 BACKENDS = {"自动兼容（同设备）": "auto", "DirectShow (dshow)": "dshow", "Media Foundation (msmf)": "msmf"}
@@ -335,7 +336,7 @@ def windows_camera_inventory():
 
 
 class DesktopApp:
-    def __init__(self, root):
+    def __init__(self, root, catalog_path=None):
         self.root = root
         self.root.title(f"{APP} v{VERSION} · 食材图像采集与模型测试")
         self.root.geometry("1370x850")
@@ -353,6 +354,12 @@ class DesktopApp:
         self.style.configure("TNotebook", background="#F4F6FA")
         self.style.configure("TNotebook.Tab", font=("Microsoft YaHei UI", 10), padding=(12,7))
         self.settings = load_settings()
+        app_dir=Path(sys.executable).parent if getattr(sys,'frozen',False) else Path(__file__).parent
+        try:self.model_profiles=read_catalog(catalog_path or app_dir/'experimental_models.json')
+        except ModelContractError as exc:
+            self.model_profiles={}
+            messagebox.showwarning('实验列表不可用',str(exc))
+        self.last_model_profile=MANUAL_LABEL
         self.frames = queue.Queue(maxsize=2)
         self.events = create_events()
         self.commands = queue.Queue()
@@ -407,6 +414,7 @@ class DesktopApp:
         self.camera_status = tk.StringVar(value="摄像头：未连接")
         self.photo_status = tk.StringVar(value="原尺寸取帧 · 图片不裁剪、不覆盖")
         self.model_file = tk.StringVar(value="")
+        self.model_profile = tk.StringVar(value=MANUAL_LABEL)
         self.label_file = tk.StringVar(value="")
         self.model_task = tk.StringVar(value="YOLO 分类 (RGB/255)")
         self.network_size = tk.StringVar(value="224")
@@ -548,6 +556,8 @@ class DesktopApp:
         p=self.model_tab
         ttk.Label(p,text="模型测试（可选）",font=("Microsoft YaHei UI",12,"bold")).pack(anchor="w",pady=(2,9))
         ttk.Label(p,text="支持 ONNX/MNN 的指定输出契约。\nPyTorch .pt 请继续使用原 Gradio 项目。",foreground="#536579",justify="left").pack(anchor="w",pady=(0,9))
+        picker=self._combo(p,'实验模型',self.model_profile,[MANUAL_LABEL,*self.model_profiles])
+        picker.bind('<<ComboboxSelected>>',self.select_model_profile)
         self._file_row(p,"模型文件",self.model_file,[('Model files','*.onnx *.mnn'),('All files','*.*')])
         self._file_row(p,"类别文件",self.label_file,[('Labels','*.txt *.json'),('All files','*.*')])
         self._combo(p,"模型类型",self.model_task,[OVEN_MODE_LABEL,OVEN_ROUND2_MODE_LABEL,"YOLO 分类 (RGB/255)","EfficientNet 分类 (ImageNet)","YOLOv8/11 检测 (原始输出)"])
@@ -791,6 +801,26 @@ class DesktopApp:
                 "EfficientNet 分类 (ImageNet)":"efficientnet_imagenet",
                 "YOLOv8/11 检测 (原始输出)":"yolo_detect"}[self.model_task.get()]
 
+    def select_model_profile(self,event=None):
+        if self.model_loading or self.inference_running:
+            self.model_profile.set(self.last_model_profile)
+            self._log('模型任务进行中，请完成后再切换模型')
+            return
+        label=self.model_profile.get()
+        if label==MANUAL_LABEL:
+            self.last_model_profile=label
+            return
+        self.model=None
+        self.model_state.set('模型：未就绪，请载入并验证所选实验模型')
+        try:
+            profile=resolve_profile(self.model_profiles[label])
+            self.model_file.set(str(profile['model']));self.label_file.set(str(profile['classes']))
+            self.model_task.set(OVEN_ROUND2_MODE_LABEL);self.network_size.set('224')
+            self.last_model_profile=label
+        except (KeyError,OSError,ModelContractError) as exc:
+            self.model_profile.set(self.last_model_profile)
+            self._log('实验模型选择失败：'+str(exc))
+
     def load_model(self):
         if self.model_loading or self.inference_running:
             self._log("模型任务进行中，请完成后再切换模型")
@@ -804,14 +834,23 @@ class DesktopApp:
         try:
             mode=self._model_mode()
             input_size=int(self.network_size.get().strip())
-        except (ValueError, KeyError):
-            messagebox.showwarning("模型", "无效的网络输入尺寸或模式")
+            expected_checkpoint=None
+            selected=getattr(self,'model_profile',None)
+            if selected is not None and selected.get()!=MANUAL_LABEL:
+                profile=resolve_profile(self.model_profiles[selected.get()])
+                expected_checkpoint=profile['checkpoint_sha256']
+                if Path(path).resolve()!=profile['model'].resolve() or Path(labels).resolve()!=profile['classes'].resolve() or mode!='oven_round2' or input_size!=224:
+                    raise ModelContractError('所选实验模型路径/模式已改变；请重新选择，或切回手动选择')
+        except (ValueError, KeyError, OSError, ModelContractError) as exc:
+            messagebox.showwarning("模型", "无效的网络输入尺寸、模式或实验模型："+str(exc))
             return
         self.model_loading=True
         self.model_state.set("模型：正在验证输入输出及加载权重…")
         def task():
             try:
                 engine=ModelEngine(path,labels,mode,input_size)
+                if expected_checkpoint is not None and engine.contract['source_checkpoint_sha256']!=expected_checkpoint:
+                    raise ModelContractError('Loaded checkpoint differs from selected experiment')
                 post_event(self.events,"model_ready",engine)
             except Exception as exc:
                 post_event(self.events,"model_error",f"{type(exc).__name__}: {exc}")
@@ -1201,8 +1240,12 @@ def main():
         parser.add_argument('--out', required=True, help='JSON report (PASS or FAIL); exit code 0 or 1')
         args=parser.parse_args()
         raise SystemExit(model_selfcheck(args.model,args.classes,args.image,args.out,mode=args.mode))
+    import argparse
+    parser=argparse.ArgumentParser(description='Local capture and approved experimental models')
+    parser.add_argument('--model-catalog',type=Path,help='Optional local model list; does not auto-load or change defaults')
+    args=parser.parse_args()
     root=RootClass()
-    DesktopApp(root)
+    DesktopApp(root,catalog_path=args.model_catalog)
     root.mainloop()
 
 

@@ -5,9 +5,35 @@ from pathlib import Path
 import numpy as np
 from tools.oven_training.export_desk import compare_probabilities, make_contract, revoke_mnn, pending_contract
 from tools.oven_training.model import PREPROCESS, class_digest
+from tools.oven_training import export_desk
 
 
 class OvenExportTests(unittest.TestCase):
+    def test_r2_and_diagnostic_roots_are_explicit_readonly_and_confined(self):
+        with tempfile.TemporaryDirectory(prefix='SYNTHETIC-r2-roots-') as td:
+            root=Path(td);old=root/'old';new=root/'new';diag=root/'diag'
+            for path in [old,new,diag]:path.mkdir()
+            resolve=export_desk.resolve_alignment_image
+            self.assertEqual(resolve({'source':'new','relative_path':'old.png'},old,new,diag),old/'old.png')
+            self.assertEqual(resolve({'source':'r2_whole_corn','relative_path':'new.png'},old,new,diag),new/'new.png')
+            self.assertEqual(resolve({'source':'supplement_diagnostic','relative_path':'diag.png'},old,new,diag),diag/'diag.png')
+            for row,r2root,droot in [({'source':'r2_whole_corn','relative_path':'new.png'},None,diag),
+                                   ({'source':'supplement_diagnostic','relative_path':'diag.png'},new,None),
+                                   ({'source':'r2_whole_corn','relative_path':'../escape.png'},new,diag)]:
+                with self.assertRaises(ValueError):resolve(row,old,r2root,droot)
+
+    def test_extra_rows_must_be_exposed_diagnostics_never_sealed_test(self):
+        with tempfile.TemporaryDirectory(prefix='SYNTHETIC-extra-rows-') as td:
+            original=Path(td)/'rows.json';extra=Path(td)/'extra.json'
+            original.write_text(json.dumps([{'image_id':'old','source':'new'}]))
+            record={'image_id':'diag','source':'supplement_diagnostic','route':'diagnostic_only'}
+            extra.write_text(json.dumps([record]))
+            self.assertEqual(len(export_desk.read_alignment_rows(original,extra)),2)
+            for change in [dict(route='sealed_excluded'),dict(source='unknown'),dict(route='qualified_dev'),
+                           dict(new_split='test'),dict(intended_use='final_test'),dict(reserved_final_test=True)]:
+                extra.write_text(json.dumps([{**record,**change}]))
+                with self.assertRaises(ValueError):export_desk.read_alignment_rows(original,extra)
+
     def test_pending_alignment_has_no_loadable_model_authorization(self):
         contract={'format':'het-oven-classifier/v2','models':{'onnx':{'sha256':'a'*64}}}
         pending=pending_contract(contract)

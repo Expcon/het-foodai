@@ -1,0 +1,16 @@
+{
+  "format": "oven-bn-control/v1",
+  "epochs": 30,
+  "batch_size": 32,
+  "seed": 42,
+  "optimizer": "AdamW",
+  "lr": 0.001,
+  "weight_decay": 0.0005,
+  "amp": false,
+  "workers": 0,
+  "drop_last": false,
+  "bn_policy": "update",
+  "bn_affine_trainable": true,
+  "preprocessing": {"size":224,"color":"RGB","resize":"bilinear-contain-center-pad","pad":114,"scale":"1/255","layout":"NCHW"},
+  "augmentation": "horizontal_flip_p0.5;color_jitter_brightness_contrast_saturation_0.1"
+}
