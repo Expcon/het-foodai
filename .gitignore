@@ -50,3 +50,11 @@ local_settings.json
 *.key
 *.pem
 /HeT_FoodAI_Starter_v0.1/
+
+# Local binary deliveries and installation artifacts are never source publications.
+*.exe
+*.zip
+*.7z
+*.tar
+*.tar.gz
+*.whl
