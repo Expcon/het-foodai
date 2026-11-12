@@ -16,6 +16,33 @@ from .model import (ROOT, PREPROCESS, configure_sdk, digest, input_path,
 ATOL = 1e-4
 
 
+def read_alignment_rows(path, diagnostic_path=None):
+    rows=json.loads(Path(path).read_text(encoding='utf-8'))
+    if not isinstance(rows,list) or not rows or any(not isinstance(r,dict) for r in rows):
+        raise ValueError('Complete original alignment rows required')
+    if diagnostic_path is not None:
+        extra=json.loads(Path(diagnostic_path).read_text(encoding='utf-8'))
+        sealed={'test','external_test','final_test','sealed_test','frozen_test'}
+        if not isinstance(extra,list) or not extra or any(not isinstance(r,dict) or r.get('route')!='diagnostic_only'
+            or r.get('source')!='supplement_diagnostic' or r.get('new_split') in sealed
+            or r.get('intended_use') in sealed or r.get('reserved_final_test') is True for r in extra):
+            raise ValueError('Extra rows must be explicitly exposed supplement diagnostics, never sealed test')
+        rows=rows+extra
+    return rows
+
+
+def resolve_alignment_image(row,source_root=None,r2_source_root=None,diagnostic_root=None):
+    from .round2_audit import safe_child
+    if row.get('source') in {'r2_whole_corn','supplement_diagnostic'}:
+        root=r2_source_root if row['source']=='r2_whole_corn' else diagnostic_root
+        if root is None:raise ValueError('Explicit additional source root required')
+        return safe_child(root,row['relative_path'])
+    if source_root is not None:
+        from .round2 import resolve_image
+        return resolve_image(row,source_root)
+    return input_path(row['relative_path'])
+
+
 def write_json(path, obj):
     Path(path).write_text(json.dumps(obj, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
 
@@ -78,12 +105,18 @@ def export_and_align(args):
     import onnxruntime as ort
     import torch
     from PIL import Image
+    from .monitor import model_state_sha256
     torch.set_num_threads(4)
     torch.set_float32_matmul_precision('highest')
     out=output_dir(args.out)
     out.mkdir(parents=True,exist_ok=False)
     configure_sdk(out/'sdk-settings')
     model,meta=load_model(args.checkpoint,'cpu',args.expect_sha256)
+    state_before=model_state_sha256(model)
+    diagnostic_rows=getattr(args,'diagnostic_rows',None);diagnostic_root=getattr(args,'diagnostic_root',None)
+    if (diagnostic_rows is None)!=(diagnostic_root is None):raise ValueError('Diagnostic rows and root must be supplied together')
+    diagnostic_sha=digest(diagnostic_rows) if diagnostic_rows is not None else None
+    rows_sha=digest(args.rows)
     if digest(args.rows)!=meta.get('config',{}).get('rows_sha256'):
         raise ValueError('Alignment requires the complete original rows bound to this checkpoint')
 
@@ -112,14 +145,13 @@ def export_and_align(args):
                                     'class_list_sha256':meta['class_list_sha256'],
                                     'preprocess':json.dumps(PREPROCESS,sort_keys=True)})
     onnx.save(graph,model_path)
-    contract=make_contract(meta,digest(args.checkpoint),digest(model_path),version)
+    contract=make_contract(meta,args.expect_sha256,digest(model_path),version)
     # Class file is published only after all image checks succeed.
     write_json(out/'contract.pending.json',pending_contract(contract))
     options=ort.SessionOptions()
     options.intra_op_num_threads=4
     session=ort.InferenceSession(str(model_path),sess_options=options,providers=['CPUExecutionProvider'])
-    rows=json.loads(args.rows.read_text(encoding='utf-8'))
-    if not rows: raise ValueError('No real image records')
+    rows=read_alignment_rows(args.rows,diagnostic_rows)
     tensors=None if is_round2 else np.lib.format.open_memmap(out/'inputs.npy',mode='w+',dtype=np.float32,shape=(len(rows),3,224,224))
     reference=[]
     records=[]
@@ -127,7 +159,7 @@ def export_and_align(args):
     started=time.perf_counter()
     with torch.inference_mode():
         for i,row in enumerate(rows):
-            path=resolve_image(row,args.source_root) if is_round2 else input_path(row['relative_path'])
+            path=resolve_alignment_image(row,getattr(args,'source_root',None),getattr(args,'r2_source_root',None),diagnostic_root)
             if digest(path)!=row['sha256']:raise ValueError('Original image SHA mismatch')
             with Image.open(path) as image: tensor=pre(image).unsqueeze(0)
             array=tensor.numpy()
@@ -138,6 +170,7 @@ def export_and_align(args):
             record.update(image_id=row['image_id'],sha256=row['sha256'],input_tensor_sha256=hashlib.sha256(array.tobytes()).hexdigest(),reference_probabilities=p.tolist(),actual_probabilities=q.tolist())
             records.append(record)
             reference.append(p)
+            if digest(path)!=row['sha256']:raise ValueError('Original image changed during alignment')
             if (i+1)%50==0: print(f'Compared {i+1}/{len(rows)}',flush=True)
     if tensors is not None:
         tensors.flush()
@@ -145,10 +178,22 @@ def export_and_align(args):
     np.save(out/'pytorch_probabilities.npy',np.asarray(reference),allow_pickle=False)
     versions={k:importlib.metadata.version(k) for k in ['torch','torchvision','ultralytics','onnx','onnxruntime','numpy','Pillow']}
     summary=summarize(records,versions)
+    coverage={}
+    for label,predicate in [('training',lambda r:r.get('new_split')=='train'),
+                            ('new_white_corn',lambda r:r.get('source')=='r2_whole_corn'),
+                            ('exposed_diagnostic',lambda r:r.get('source')=='supplement_diagnostic')]:
+        selected=[record for row,record in zip(rows,records) if predicate(row)]
+        coverage[label]=dict(images=len(selected),top1_agree=sum(r['top1_agree'] for r in selected),
+            ordered_top3_agree=sum(r['top3_agree'] for r in selected),failures=sum(not r['pass'] for r in selected),
+            max_abs_error=max((r['max_abs_error'] for r in selected),default=None))
+    if digest(args.checkpoint)!=args.expect_sha256 or digest(args.rows)!=rows_sha or model_state_sha256(model)!=state_before:
+        raise ValueError('Checkpoint, manifest or model state changed during export')
+    if diagnostic_rows is not None and digest(diagnostic_rows)!=diagnostic_sha:raise ValueError('Diagnostic manifest changed during export')
     summary.update(checkpoint_sha256=contract['source_checkpoint_sha256'],onnx_sha256=digest(model_path),
                    onnx_bytes=model_path.stat().st_size,rows_sha256=digest(args.rows),
                    input_tensors_sha256=None if is_round2 else digest(out/'inputs.npy'),reference_sha256=digest(out/'pytorch_probabilities.npy'),
-                   elapsed_comparison_seconds=time.perf_counter()-started,input_shape=[1,3,224,224],output_shape=[1,len(meta['class_keys'])])
+                   elapsed_comparison_seconds=time.perf_counter()-started,input_shape=[1,3,224,224],output_shape=[1,len(meta['class_keys'])],
+                   diagnostic_rows_sha256=diagnostic_sha,cohort_coverage=coverage,model_state_unchanged=True)
     write_json(out/'onnx_alignment.json',dict(summary=summary,images=records))
     if summary['status']=='PASS': write_json(out/'classes.json',contract)
     print(json.dumps(summary),flush=True)
@@ -207,7 +252,12 @@ def main():
     p.add_argument('--expect-sha256')
     p.add_argument('--rows',type=Path)
     p.add_argument('--source-root',type=Path,help='Round2 external read-only photo root; emits the twelve-class v2 contract')
+    p.add_argument('--r2-source-root',type=Path,help='Additional read-only R2 whole-corn image root')
+    p.add_argument('--diagnostic-rows',type=Path,help='Additional already exposed diagnostic rows; never test')
+    p.add_argument('--diagnostic-root',type=Path)
     args=p.parse_args()
+    if (args.r2_source_root is not None or args.diagnostic_rows is not None) and args.source_root is None:
+        p.error('Additional sources require the twelve-class --source-root export')
     if args.action=='export' and (not args.checkpoint or not args.rows or not args.expect_sha256):
         p.error('export requires --checkpoint, --expect-sha256, --rows')
     return export_and_align(args) if args.action=='export' else convert_mnn(args)

@@ -38,7 +38,7 @@ except ImportError:
     DND_AVAILABLE = False
 
 APP = "HeT OvenCapture Desk"
-VERSION = "1.2.1-r1-experimental"
+VERSION = "1.2.2-r2-experimental"
 OVEN_MODE_LABEL = "首轮烤箱分类（实验·9类）"
 OVEN_ROUND2_MODE_LABEL = "二轮烤箱分类（实验·12类）"
 BACKENDS = {"自动兼容（同设备）": "auto", "DirectShow (dshow)": "dshow", "Media Foundation (msmf)": "msmf"}

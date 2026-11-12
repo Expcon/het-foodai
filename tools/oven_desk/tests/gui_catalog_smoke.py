@@ -1,4 +1,4 @@
-"""Real Tk+ORT v2/R1 selection test; file-fed images, never hardware acceptance."""
+"""Real Tk+ORT explicit catalog sequence; file-fed images, never hardware acceptance."""
 import argparse,csv,json,sys,time
 from pathlib import Path
 from unittest.mock import patch
@@ -25,13 +25,14 @@ def run(args):
     try:
         with patch.object(gui.DesktopApp,'refresh_cameras',lambda self:None),patch.object(gui.DesktopApp,'refresh_serials',lambda self:None):
             root=gui.RootClass();app=gui.DesktopApp(root,catalog_path=args.catalog)
-        root.title('R1 / v2 FILE-FED catalog smoke — NO CAMERA')
+        sequence=getattr(args,'sequence',['v2','R1','v2'])
+        root.title(' / '.join(sequence)+' FILE-FED catalog smoke — NO CAMERA')
         assert app.model is None and app.model_profile.get()==MANUAL_LABEL and app.model_file.get()==''
         report['checks']['startup_does_not_load_or_change_default']=True
         identifiers={entry['id']:label for label,entry in app.model_profiles.items()}
-        assert {'v2','R1'}<=set(identifiers)
+        assert set(sequence)<=set(identifiers)
         frame=read_image_unicode(args.image,'oven_round2')
-        for ident in ['v2','R1','v2']:
+        for ident in sequence:
             label=identifiers[ident];app.model_profile.set(label);app.select_model_profile()
             assert app.model is None and not app.model_loading
             assert '未就绪' in app.model_state.get()
@@ -46,7 +47,7 @@ def run(args):
             assert app.model is held and app.model_profile.get()==label
             wait(root,lambda:not app.inference_running)
             report['models'].append(dict(id=ident,checkpoint_sha256=app.model.contract['source_checkpoint_sha256'],top3=result['top3']))
-        report['checks']['v2_R1_v2_real_load_and_prediction']=True
+        report['checks']['_'.join(sequence)+'_real_load_and_prediction']=True
         report['checks']['busy_switch_refused']=True
         app.latest_frame=None;app.infer_current();assert not app.inference_running
         report['checks']['absent_frame_refused']=True
@@ -67,4 +68,5 @@ def run(args):
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     for name in ['catalog','image','out']:parser.add_argument('--'+name,type=Path,required=True)
+    parser.add_argument('--sequence',nargs='+',default=['v2','R1','v2'])
     raise SystemExit(run(parser.parse_args()))

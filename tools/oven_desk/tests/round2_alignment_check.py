@@ -13,8 +13,7 @@ sys.path.insert(0, str(ROOT/'tools/oven_desk'))
 
 import numpy as np
 from inference_engine import ModelEngine, file_sha256, prepare_input, read_image_unicode
-from tools.oven_training.export_desk import compare_probabilities, summarize
-from tools.oven_training.round2 import resolve_image
+from tools.oven_training.export_desk import compare_probabilities, summarize,read_alignment_rows,resolve_alignment_image
 
 
 def run(args):
@@ -29,13 +28,17 @@ def run(args):
     report = {'summary': {'status': 'FAIL'}, 'images': []}
     try:
         bound = {key: file_sha256(getattr(args, key)) for key in ('model', 'classes', 'alignment', 'rows')}
+        diagnostic_rows=getattr(args,'diagnostic_rows',None)
+        if diagnostic_rows is not None:bound['diagnostic_rows']=file_sha256(diagnostic_rows)
         evidence = json.loads(args.alignment.read_text(encoding='utf-8'))
-        rows = json.loads(args.rows.read_text(encoding='utf-8'))
+        rows = read_alignment_rows(args.rows,diagnostic_rows)
         summary, references = evidence['summary'], evidence['images']
         if (summary['status'] != 'PASS' or summary['onnx_sha256'] != bound['model']
                 or summary['rows_sha256'] != bound['rows'] or not rows
                 or summary['images'] != len(rows) or len(rows) != len(references)):
             raise ValueError('Exporter evidence must PASS and bind this model and complete rows')
+        if diagnostic_rows is not None and summary.get('diagnostic_rows_sha256')!=bound['diagnostic_rows']:
+            raise ValueError('Diagnostic rows differ from exporter evidence')
         engine = ModelEngine(args.model, args.classes, 'oven_round2', 224)
         if engine.contract['source_checkpoint_sha256'] != summary['checkpoint_sha256']:
             raise ValueError('Checkpoint differs between contract and exporter evidence')
@@ -46,7 +49,7 @@ def run(args):
                     or row['sha256'] != reference['sha256'] or reference.get('pass') is not True):
                 raise ValueError(f'Duplicate, reordered or unapproved image evidence: {image_id}')
             seen.add(image_id)
-            path = resolve_image(row, source_root)
+            path = resolve_alignment_image(row,source_root,getattr(args,'r2_source_root',None),getattr(args,'diagnostic_root',None))
             if row['source'] == 'round1' and not path.is_relative_to((ROOT/'data/raw/oven_round1_20261106').resolve()):
                 raise ValueError('Round1 image escapes its original raw directory')
             if file_sha256(path) != row['sha256']:
@@ -92,6 +95,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('model', 'classes', 'alignment', 'rows', 'source-root', 'out'):
         parser.add_argument('--'+name, type=Path, required=True)
+    for name in ('r2-source-root','diagnostic-rows','diagnostic-root'):parser.add_argument('--'+name,type=Path)
     try:
         return run(parser.parse_args())
     except (OSError, ValueError) as exc:

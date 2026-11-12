@@ -50,6 +50,26 @@ class CatalogTests(unittest.TestCase):
         with patch.object(module,'load_oven_contract',return_value={'source_checkpoint_sha256':'b'*64}):
             with self.assertRaises(ModelContractError):module.resolve_profile(entry)
 
+    def strict_entry(self):
+        return {**self.entry,'onnx_sha256':hashlib.sha256(self.model.read_bytes()).hexdigest(),
+            'classes_sha256':hashlib.sha256(self.classes.read_bytes()).hexdigest(),
+            'mode':'oven_round2','input_shape':[1,3,224,224],'output_shape':[1,12],'dtype':'float32'}
+
+    def test_strict_catalog_pins_both_files_and_input_spec_without_breaking_legacy(self):
+        module=self.module();self.write([self.strict_entry()]);entry=module.read_catalog(self.path)['R1 experimental']
+        with patch.object(module,'load_oven_contract',return_value={'source_checkpoint_sha256':'a'*64}):
+            module.resolve_profile(entry)
+            self.classes.write_text('{"SYNTHETIC":"changed"}')
+            with self.assertRaises(ModelContractError):module.resolve_profile(entry)
+        self.write([self.entry]);self.assertIn('R1 experimental',module.read_catalog(self.path))
+
+    def test_partial_or_wrong_shape_catalog_pins_are_rejected(self):
+        module=self.module()
+        for entry in [{**self.entry,'onnx_sha256':'a'*64},{**self.strict_entry(),'input_shape':[1,3,320,320]},
+                      {**self.strict_entry(),'dtype':'float16'},{**self.strict_entry(),'classes_sha256':'bad'}]:
+            self.write([entry])
+            with self.assertRaises(ModelContractError):module.read_catalog(self.path)
+
     def app(self):
         app=gui.DesktopApp.__new__(gui.DesktopApp)
         app.model_profile=Value('R1 experimental');app.last_model_profile=self.module().MANUAL_LABEL

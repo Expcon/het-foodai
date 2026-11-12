@@ -8,7 +8,7 @@ if ($env:OS -ne 'Windows_NT') {
     throw '必须在 Windows 10/11 x64 上打包 Windows EXE。PyInstaller 无法从 Linux 直接交叉生成 Windows EXE。'
 }
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$version = 'v1.2.1-r1-experimental'
+$version = 'v1.2.2-r2-experimental'
 $exeName = 'HeT-OvenCapture-' + $version
 Set-Location -LiteralPath $root
 Write-Host ('Building HeT OvenCapture in: ' + $root) -ForegroundColor Cyan
